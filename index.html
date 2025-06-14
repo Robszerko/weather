@@ -176,7 +176,13 @@
         #rain-visual-icon { font-size: 32px; opacity: 0.8; margin-bottom: 4px; }
         #rain-visual-total { font-size: 18px; font-weight: 700; }
         #rain-visual-total-unit { font-size: 12px; font-weight: 500; opacity: 0.7; margin-left: 2px; }
-        .rain-visual-label { margin-top: 100px; font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); opacity: 0.8; }
+        .rain-visual-label {
+            margin-top: 4px; /* MÓDOSÍTVA */
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--current-text-muted-color);
+            opacity: 0.8;
+        }
 
         .weather-details-grid { margin-top: 0; border-top: 1px solid var(--current-container-border-color); padding-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; transition: border-color 0.6s; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 5px 0; }
@@ -345,12 +351,8 @@
             }
         }
         
-        // VÁLTOZTATÁS: Ezt a függvényt teljesen lecseréljük egy sokkal megbízhatóbbra.
-        // Ez a függvény a tegnapi, mai és holnapi napot vizsgálja, hogy biztosan megtalálja
-        // a releváns hold-eseményeket a jelenlegi időpont körül.
         function getComprehensiveMoonData(lat, lon) {
             const now = new Date();
-            // Ellenőrizzük a tegnapi, mai és holnapi napot, hogy lefedjük az összes lehetőséget.
             const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -359,44 +361,37 @@
             const timesToday = SunCalc.getMoonTimes(today, lat, lon, true);
             const timesTomorrow = SunCalc.getMoonTimes(tomorrow, lat, lon, true);
 
-            // Összegyűjtjük az összes érvényes (nem null) holdkelte és holdnyugta időpontot.
             const allRises = [timesYesterday.rise, timesToday.rise, timesTomorrow.rise].filter(Boolean).map(d => new Date(d));
             const allSets = [timesYesterday.set, timesToday.set, timesTomorrow.set].filter(Boolean).map(d => new Date(d));
 
-            // Megkeressük a legutóbbi eseményeket (a 'most' előtt).
             const lastRise = allRises.filter(r => r < now).sort((a, b) => b - a)[0];
             const lastSet = allSets.filter(s => s < now).sort((a, b) => b - a)[0];
 
-            // Megkeressük a következő eseményeket (a 'most' után).
             const nextRise = allRises.filter(r => r > now).sort((a, b) => a - b)[0];
             const nextSet = allSets.filter(s => s > now).sort((a, b) => a - b)[0];
             
-            // Eldöntjük, hogy a hold fent van-e. Akkor van fent, ha az utolsó esemény egy holdkelte volt.
             let isUp = false;
             if (lastRise && lastSet) {
                 isUp = lastRise > lastSet;
             } else if (lastRise) {
-                isUp = true; // Ha csak holdkelte volt, de holdnyugta még nem, akkor biztosan fent van.
+                isUp = true;
             }
 
-            // Meghatározzuk a vizuális útvonalhoz szükséges időablakot.
-            // Csak akkor van értelme, ha a hold éppen látható.
             let pathRise = null;
             let pathSet = null;
             if (isUp) {
-                pathRise = lastRise;  // Az az esemény, amivel a jelenlegi láthatóság elkezdődött.
-                pathSet = nextSet;    // Az az esemény, amivel véget fog érni.
+                pathRise = lastRise;
+                pathSet = nextSet;
             }
 
             return {
-                isUp: isUp,           // logikai: fent van-e a hold?
-                pathRise: pathRise,   // A vizuális csúszka kezdő időpontja.
-                pathSet: pathSet,     // A vizuális csúszka végpontja.
-                nextRise: nextRise,   // A következő holdkelte, amit szövegesen kiírunk.
-                nextSet: nextSet,     // A következő holdnyugta, amit szövegesen kiírunk.
+                isUp: isUp,
+                pathRise: pathRise,
+                pathSet: pathSet,
+                nextRise: nextRise,
+                nextSet: nextSet,
             };
         }
-        // VÉGE: A függvény cseréje.
 
         async function fetchAdvancedSunCalcData(lat, lon) {
             const now = new Date();
@@ -437,12 +432,10 @@
             const pastMoonPos = SunCalc.getMoonPosition(tenMinutesAgo, lat, lon);
             const moonIllumination = SunCalc.getMoonIllumination(now);
             
-            // VÁLTOZTATÁS: A régi, pontatlan hold idő kalkulációk helyett az új, átfogó függvényt használjuk.
             const comprehensiveMoonData = getComprehensiveMoonData(lat, lon);
             
             let moonTrend = moonPos.altitude > 0 ? (moonPos.altitude > pastMoonPos.altitude ? 'Emelkedik' : 'Süllyed') : null;
             let moonStatus = comprehensiveMoonData.isUp ? 'Égen van' : 'Horizont alatt';
-            // VÉGE
 
             let phaseName = 'N/A'; 
             const phase = moonIllumination.phase; 
@@ -456,8 +449,6 @@
             else if (phase >= 0.78 && phase < 0.97) phaseName = 'Fogyó sarló';
             else if (phase >= 0.97 && phase <= 1) phaseName = 'Újholdhoz közeli';
 
-            // VÁLTOZTATÁS: A visszaadott objektumot a `comprehensiveMoonData` eredményeivel töltjük fel.
-            // Így a megjelenítő kód egyértelmű és pontos adatokat kap.
             return {
                 sunrise: formatTime(sunriseDate),
                 sunset: formatTime(sunsetDate),
@@ -467,17 +458,14 @@
                 
                 sunAltitude: sunPos.altitude * 180 / Math.PI, sunTrend: sunTrend, sunStatus: sunStatus, remainingDaylight: remainingDaylightText,
                 
-                // A kiíráshoz a KÖVETKEZŐ eseményeket használjuk.
                 moonrise: formatTime(comprehensiveMoonData.nextRise), 
                 moonset: formatTime(comprehensiveMoonData.nextSet),
-                // A vizuális csúszkához a JELENLEGI láthatóság adatait használjuk.
                 moonRiseDateForPath: comprehensiveMoonData.pathRise,
                 moonSetDateForPath: comprehensiveMoonData.pathSet,
                 
                 moonAltitude: moonPos.altitude * 180 / Math.PI, moonTrend: moonTrend, moonStatus: moonStatus,
                 phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonDistance: moonPos.distance,
             };
-            // VÉGE
         }
         
         function updatePathVisuals(startTime, endTime, elements) {
@@ -609,7 +597,7 @@
             weatherDisplayEl.innerHTML = `<div class="widget-header"><div class="location-and-station" id="location-and-station-text"></div><div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div></div><div class="station-status-container"><div class="station-selector" id="honved-selector-container"><label for="station-select-honved"><input type="radio" name="station-select" id="station-select-honved" value="HONVED">${STATIONS.HONVED.displayName} <span id="honved-status-text" class="station-status-text"></span></label></div><div class="station-selector" id="nyiregyhazi-ut-selector-container"><label for="station-select-nyiregyhazi-ut"><input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">${STATIONS.NYIREGYHAZI_UT.displayName} <span id="nyiregyhazi-ut-status-text" class="station-status-text"></span></label></div></div><div class="widget-core-data">
             <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i class="fas fa-sun" id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte</div><div class="sun-path-label sunset-label">Napnyugta</div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label">Nap magassága:</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label">Déli napállás:</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label">Nap útja:</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
             <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label">Hold magassága:</span><span id="moon-info-altitude" class="moon-detail-value">--°<span id="moon-info-trend" class="moon-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label">Fázis:</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label">Megvilágítás:</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
-            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div id="rain-visual-total">--</div><div id="rain-visual-total-unit">mm</div></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><circle class="rain-gauge-bg" cx="50" cy="50" r="45"></circle><circle id="rain-gauge-value" class="rain-gauge-value" cx="50" cy="50" r="45"></circle></svg><div class="rain-visual-label">esett ma</div></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
+            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div id="rain-visual-total">--</div><div id="rain-visual-total-unit">mm</div><div class="rain-visual-label">esett ma</div></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><circle class="rain-gauge-bg" cx="50" cy="50" r="45"></circle><circle id="rain-gauge-value" class="rain-gauge-value" cx="50" cy="50" r="45"></circle></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
             <div class="temperature-section"><div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div><div class="current-condition-phrase" id="current-condition-phrase-text"></div><div class="additional-core-info"><div class="additional-info-item is-hidden" id="main-heat-index-item"><span class="additional-info-label">Hőérzet:</span><span class="additional-info-value" id="main-heat-index-value"></span></div><div class="additional-info-item is-hidden" id="main-wind-info-item"><span class="additional-info-label">Szél:</span><span class="additional-info-value"><span id="main-wind-dir-text-value"></span><i class="fas fa-location-arrow" id="main-wind-arrow-icon"></i><span id="main-wind-speed-value"></span></span></div><div class="additional-info-item is-hidden" id="main-wind-gust-info-item"><span class="additional-info-label">Széllökés:</span><span class="additional-info-value" id="main-wind-gust-value"></span></div></div></div></div><div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
             addStationChangeListeners();
             isWeatherDisplayInitialized = true; 
@@ -736,10 +724,8 @@
                 const moonPathElements = { iconEl: el('moon-path-icon'), mainArcEl: el('moon-path-arc-main'), nowMarkerEl: el('moon-path-now-marker') };
                 updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements);
                 
-                // VÁLTOZTATÁS: A JELENLEGI láthatóság idejét írjuk ki a csúszka címkéjébe
                 el('moonrise-time-label').textContent = formatTime(sunCalcData.moonRiseDateForPath);
                 el('moonset-time-label').textContent = formatTime(sunCalcData.moonSetDateForPath);
-                // VÉGE
 
                 el('moon-info-altitude').childNodes[0].nodeValue = formatValue(sunCalcData.moonAltitude, '°', 1) + ' ';
                 el('moon-info-trend').textContent = `(${sunCalcData.moonTrend || sunCalcData.moonStatus})`;
@@ -938,7 +924,6 @@
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { 
                 independentPromises.push(fetchDailyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) { 
                     cachedData.forecastDays = data.forecastDays; 
-                    // This data can be overwritten by the more reliable SunCalc data later
                     Object.assign(cachedData.generalConditions, { 
                         sunriseTimeLocal: data.sunriseTimeLocal, 
                         sunsetTimeLocal: data.sunsetTimeLocal,
@@ -958,7 +943,6 @@
                 );
                 cachedData.sunCalc = sunCalcResult;
                 
-                // Update the main cache with reliable SunCalc times to ensure consistency
                 if (sunCalcResult.sunriseDateForPath) {
                     cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString();
                 }
@@ -1029,7 +1013,7 @@
                 }
                 
                 scheduleHourlyForecastUpdate();
-            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); // Failsafe delay
+            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); 
         }
 
         function initApp() {
