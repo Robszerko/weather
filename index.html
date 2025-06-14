@@ -345,8 +345,12 @@
             }
         }
         
+        // VÁLTOZTATÁS: Ezt a függvényt teljesen lecseréljük egy sokkal megbízhatóbbra.
+        // Ez a függvény a tegnapi, mai és holnapi napot vizsgálja, hogy biztosan megtalálja
+        // a releváns hold-eseményeket a jelenlegi időpont körül.
         function getComprehensiveMoonData(lat, lon) {
             const now = new Date();
+            // Ellenőrizzük a tegnapi, mai és holnapi napot, hogy lefedjük az összes lehetőséget.
             const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
             const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
@@ -355,37 +359,44 @@
             const timesToday = SunCalc.getMoonTimes(today, lat, lon, true);
             const timesTomorrow = SunCalc.getMoonTimes(tomorrow, lat, lon, true);
 
+            // Összegyűjtjük az összes érvényes (nem null) holdkelte és holdnyugta időpontot.
             const allRises = [timesYesterday.rise, timesToday.rise, timesTomorrow.rise].filter(Boolean).map(d => new Date(d));
             const allSets = [timesYesterday.set, timesToday.set, timesTomorrow.set].filter(Boolean).map(d => new Date(d));
 
+            // Megkeressük a legutóbbi eseményeket (a 'most' előtt).
             const lastRise = allRises.filter(r => r < now).sort((a, b) => b - a)[0];
             const lastSet = allSets.filter(s => s < now).sort((a, b) => b - a)[0];
 
+            // Megkeressük a következő eseményeket (a 'most' után).
             const nextRise = allRises.filter(r => r > now).sort((a, b) => a - b)[0];
             const nextSet = allSets.filter(s => s > now).sort((a, b) => a - b)[0];
             
+            // Eldöntjük, hogy a hold fent van-e. Akkor van fent, ha az utolsó esemény egy holdkelte volt.
             let isUp = false;
             if (lastRise && lastSet) {
                 isUp = lastRise > lastSet;
             } else if (lastRise) {
-                isUp = true;
+                isUp = true; // Ha csak holdkelte volt, de holdnyugta még nem, akkor biztosan fent van.
             }
 
+            // Meghatározzuk a vizuális útvonalhoz szükséges időablakot.
+            // Csak akkor van értelme, ha a hold éppen látható.
             let pathRise = null;
             let pathSet = null;
             if (isUp) {
-                pathRise = lastRise;
-                pathSet = nextSet;
+                pathRise = lastRise;  // Az az esemény, amivel a jelenlegi láthatóság elkezdődött.
+                pathSet = nextSet;    // Az az esemény, amivel véget fog érni.
             }
 
             return {
-                isUp: isUp,
-                pathRise: pathRise,
-                pathSet: pathSet,
-                nextRise: nextRise,
-                nextSet: nextSet,
+                isUp: isUp,           // logikai: fent van-e a hold?
+                pathRise: pathRise,   // A vizuális csúszka kezdő időpontja.
+                pathSet: pathSet,     // A vizuális csúszka végpontja.
+                nextRise: nextRise,   // A következő holdkelte, amit szövegesen kiírunk.
+                nextSet: nextSet,     // A következő holdnyugta, amit szövegesen kiírunk.
             };
         }
+        // VÉGE: A függvény cseréje.
 
         async function fetchAdvancedSunCalcData(lat, lon) {
             const now = new Date();
@@ -426,10 +437,12 @@
             const pastMoonPos = SunCalc.getMoonPosition(tenMinutesAgo, lat, lon);
             const moonIllumination = SunCalc.getMoonIllumination(now);
             
+            // VÁLTOZTATÁS: A régi, pontatlan hold idő kalkulációk helyett az új, átfogó függvényt használjuk.
             const comprehensiveMoonData = getComprehensiveMoonData(lat, lon);
             
             let moonTrend = moonPos.altitude > 0 ? (moonPos.altitude > pastMoonPos.altitude ? 'Emelkedik' : 'Süllyed') : null;
             let moonStatus = comprehensiveMoonData.isUp ? 'Égen van' : 'Horizont alatt';
+            // VÉGE
 
             let phaseName = 'N/A'; 
             const phase = moonIllumination.phase; 
@@ -443,6 +456,8 @@
             else if (phase >= 0.78 && phase < 0.97) phaseName = 'Fogyó sarló';
             else if (phase >= 0.97 && phase <= 1) phaseName = 'Újholdhoz közeli';
 
+            // VÁLTOZTATÁS: A visszaadott objektumot a `comprehensiveMoonData` eredményeivel töltjük fel.
+            // Így a megjelenítő kód egyértelmű és pontos adatokat kap.
             return {
                 sunrise: formatTime(sunriseDate),
                 sunset: formatTime(sunsetDate),
@@ -452,14 +467,17 @@
                 
                 sunAltitude: sunPos.altitude * 180 / Math.PI, sunTrend: sunTrend, sunStatus: sunStatus, remainingDaylight: remainingDaylightText,
                 
+                // A kiíráshoz a KÖVETKEZŐ eseményeket használjuk.
                 moonrise: formatTime(comprehensiveMoonData.nextRise), 
                 moonset: formatTime(comprehensiveMoonData.nextSet),
+                // A vizuális csúszkához a JELENLEGI láthatóság adatait használjuk.
                 moonRiseDateForPath: comprehensiveMoonData.pathRise,
                 moonSetDateForPath: comprehensiveMoonData.pathSet,
                 
                 moonAltitude: moonPos.altitude * 180 / Math.PI, moonTrend: moonTrend, moonStatus: moonStatus,
                 phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonDistance: moonPos.distance,
             };
+            // VÉGE
         }
         
         function updatePathVisuals(startTime, endTime, elements) {
@@ -718,8 +736,10 @@
                 const moonPathElements = { iconEl: el('moon-path-icon'), mainArcEl: el('moon-path-arc-main'), nowMarkerEl: el('moon-path-now-marker') };
                 updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements);
                 
+                // VÁLTOZTATÁS: A JELENLEGI láthatóság idejét írjuk ki a csúszka címkéjébe
                 el('moonrise-time-label').textContent = formatTime(sunCalcData.moonRiseDateForPath);
                 el('moonset-time-label').textContent = formatTime(sunCalcData.moonSetDateForPath);
+                // VÉGE
 
                 el('moon-info-altitude').childNodes[0].nodeValue = formatValue(sunCalcData.moonAltitude, '°', 1) + ' ';
                 el('moon-info-trend').textContent = `(${sunCalcData.moonTrend || sunCalcData.moonStatus})`;
@@ -918,6 +938,7 @@
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { 
                 independentPromises.push(fetchDailyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) { 
                     cachedData.forecastDays = data.forecastDays; 
+                    // This data can be overwritten by the more reliable SunCalc data later
                     Object.assign(cachedData.generalConditions, { 
                         sunriseTimeLocal: data.sunriseTimeLocal, 
                         sunsetTimeLocal: data.sunsetTimeLocal,
@@ -937,6 +958,7 @@
                 );
                 cachedData.sunCalc = sunCalcResult;
                 
+                // Update the main cache with reliable SunCalc times to ensure consistency
                 if (sunCalcResult.sunriseDateForPath) {
                     cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString();
                 }
