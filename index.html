@@ -107,7 +107,6 @@
         .info-tooltip-content li { margin-bottom: 2px; }
         .info-tooltip-content p:last-child { margin-bottom: 0; }
 
-        /* ÁLLOMÁSVÁLASZTÓ ELRENDEZÉS JAVÍTÁSA */
         .station-status-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; text-align: center; margin-bottom: 12px; padding-top: 5px; padding-bottom: 10px; border-bottom: 1px solid var(--current-container-border-color); transition: border-color 0.6s; }
         .station-selector { flex: 1; }
         .station-selector label { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--current-text-color); font-weight: 500; transition: color 0.6s; }
@@ -115,8 +114,6 @@
         .station-selector.disabled label { opacity: 0.55; cursor: not-allowed; }
         .station-name { font-size: 12px; font-weight: 600; line-height: 1; }
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; }
-        /* ELRENDEZÉS JAVÍTÁSÁNAK VÉGE */
-
 
         .widget-core-data { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 12px; }
         .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; padding-top: 0; }
@@ -354,19 +351,25 @@
             }
         }
         
-        // JAVÍTOTT, MEGBÍZHATÓ HOLD-ADAT FÜGGVÉNY
+        /**
+         * JAVÍTOTT, MEGBÍZHATÓ HOLD-ADAT FÜGGVÉNY
+         * Ez a függvény megbízhatóan megállapítja, hogy a hold éppen fent van-e,
+         * és ha igen, meghatározza a jelenlegi láthatósági periódusának (ívének)
+         * kezdetét (pathRise) és végét (pathSet).
+         */
         function getComprehensiveMoonData(lat, lon) {
             const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            // A kontextushoz lekérjük a tegnapi, mai és holnapi adatokat is.
             const days = [
-                new Date(today).setDate(today.getDate() - 1), // Tegnap
-                today,                                        // Ma
-                new Date(today).setDate(today.getDate() + 1)  // Holnap
+                new Date(new Date().setDate(now.getDate() - 1)), // Tegnap
+                now,                                             // Ma
+                new Date(new Date().setDate(now.getDate() + 1))  // Holnap
             ];
 
             let events = [];
             days.forEach(day => {
                 const moonTimes = SunCalc.getMoonTimes(day, lat, lon, true);
+                // Csak az érvényes időpontokat adjuk hozzá a listához.
                 if (moonTimes.rise && !isNaN(moonTimes.rise.getTime())) {
                     events.push({ time: moonTimes.rise, type: 'rise' });
                 }
@@ -375,37 +378,50 @@
                 }
             });
 
-            // Események rendezése idő szerint
-            events.sort((a, b) => a.time - b.time);
-
-            // A jelenlegi időpontot megelőző utolsó esemény megkeresése
-            const lastEventIndex = events.findLastIndex(e => e.time < now);
-            
-            let isUp = false, pathRise = null, pathSet = null;
-            if (lastEventIndex !== -1) {
-                const lastEvent = events[lastEventIndex];
-                if (lastEvent.type === 'rise') {
-                    isUp = true;
-                    pathRise = lastEvent.time;
-                    // A következő esemény a listában a holdnyugta lesz
-                    if (lastEventIndex + 1 < events.length && events[lastEventIndex + 1].type === 'set') {
-                        pathSet = events[lastEventIndex + 1].time;
-                    }
-                }
+            // Ha valamilyen okból (pl. poláris régió) nincsenek események,
+            // akkor a jelenlegi pozíció alapján döntünk.
+            if (events.length === 0) {
+                const moonPos = SunCalc.getMoonPosition(now, lat, lon);
+                const isUp = moonPos.altitude > 0;
+                return { isUp: isUp, pathRise: null, pathSet: null, nextRise: null, nextSet: null };
             }
 
-            // A következő holdkelte és holdnyugta megkeresése a szöveges kiíráshoz
+            // Események rendezése időrendbe.
+            events.sort((a, b) => a.time - b.time);
+
+            // Megkeressük az utolsó eseményt, ami a jelenlegi időpont ELŐTT történt.
+            const lastEvent = events.filter(e => e.time < now).pop();
+
+            let isUp = false;
+            let pathRise = null;
+            let pathSet = null;
+
+            if (lastEvent) {
+                // Ha az utolsó esemény egy holdkelte volt, akkor a hold jelenleg FENT VAN.
+                if (lastEvent.type === 'rise') {
+                    isUp = true;
+                    // A vizuális pálya kezdete ez a holdkelte.
+                    pathRise = lastEvent.time;
+                    // A pálya vége a legelső holdnyugta, ami ezen holdkelte UTÁN következik.
+                    pathSet = events.find(e => e.type === 'set' && e.time > pathRise)?.time || null;
+                }
+                // Ha az utolsó esemény holdnyugta volt, akkor a hold NINCS FENT,
+                // és a többi változó (isUp, pathRise, pathSet) az alapértelmezett marad.
+            }
+
+            // A szöveges kiíráshoz megkeressük a KÖVETKEZŐ holdkeltét és holdnyugtát a jövőben.
             const nextRise = events.find(e => e.type === 'rise' && e.time > now)?.time || null;
             const nextSet = events.find(e => e.type === 'set' && e.time > now)?.time || null;
             
             return {
                 isUp: isUp,
-                pathRise: pathRise,
-                pathSet: pathSet,
-                nextRise: nextRise,
-                nextSet: nextSet
+                pathRise: pathRise, // A jelenlegi láthatóság kezdete
+                pathSet: pathSet,   // A jelenlegi láthatóság vége
+                nextRise: nextRise, // A következő kelte (szöveges kiíráshoz)
+                nextSet: nextSet    // A következő nyugta (szöveges kiíráshoz)
             };
         }
+
 
         async function fetchAdvancedSunCalcData(lat, lon) {
             const now = new Date();
@@ -446,6 +462,7 @@
             const pastMoonPos = SunCalc.getMoonPosition(tenMinutesAgo, lat, lon);
             const moonIllumination = SunCalc.getMoonIllumination(now);
             
+            // Itt használjuk a javított, megbízható függvényt.
             const comprehensiveMoonData = getComprehensiveMoonData(lat, lon);
             
             let moonTrend = moonPos.altitude > 0 ? (moonPos.altitude > pastMoonPos.altitude ? 'Emelkedik' : 'Süllyed') : null;
@@ -472,6 +489,8 @@
                 
                 sunAltitude: sunPos.altitude * 180 / Math.PI, sunTrend: sunTrend, sunStatus: sunStatus, remainingDaylight: remainingDaylightText,
                 
+                // A `comprehensiveMoonData` objektumból vesszük az adatokat
+                isUp: comprehensiveMoonData.isUp,
                 moonrise: formatTime(comprehensiveMoonData.nextRise), 
                 moonset: formatTime(comprehensiveMoonData.nextSet),
                 moonRiseDateForPath: comprehensiveMoonData.pathRise,
@@ -732,7 +751,7 @@
             const hasRainedToday = obs.precipTotal > 0.1;
             
             const isDayTime = sunCalcData.sunAltitude > -0.83;
-            const isMoonUp = sunCalcData.isUp;
+            const isMoonUp = sunCalcData.isUp; // Ezt a javított függvény adja
 
             const showRainPanel = isRainingNow || hasRainedToday;
             const showSunPanel = !showRainPanel && isDayTime;
@@ -766,6 +785,7 @@
             } 
             else if (showMoonPanel) {
                 const moonPathElements = { iconEl: el('moon-path-icon'), mainArcEl: el('moon-path-arc-main'), nowMarkerEl: el('moon-path-now-marker') };
+                // Itt használjuk a `pathRise` és `pathSet` értékeket
                 updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements);
                 
                 el('moonrise-time-label').textContent = formatTime(sunCalcData.moonRiseDateForPath);
