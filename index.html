@@ -111,7 +111,13 @@
         .station-selector label { cursor: pointer; display: flex; align-items: center; color: var(--current-text-color); font-weight: 500; transition: color 0.6s; }
         .station-selector input[type="radio"] { margin-right: 6px; accent-color: var(--current-icon-color); }
         .station-selector.disabled label { opacity: 0.55; cursor: not-allowed; }
-        .station-status-text { color: var(--current-text-muted-color); font-weight: 400; margin-left: 3px; transition: color 0.6s; }
+        
+        /* ÚJ CSS SZABÁLYOK KEZDETE */
+        .station-label-content { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+        .station-name { font-size: 12.5px; font-weight: 600; }
+        .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; transition: color 0.6s; }
+        /* ÚJ CSS SZABÁLYOK VÉGE */
+
 
         .widget-core-data { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 12px; }
         .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; padding-top: 0; }
@@ -592,7 +598,37 @@
         
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
-            weatherDisplayEl.innerHTML = `<div class="widget-header"><div class="location-and-station" id="location-and-station-text"></div><div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div></div><div class="station-status-container"><div class="station-selector" id="honved-selector-container"><label for="station-select-honved"><input type="radio" name="station-select" id="station-select-honved" value="HONVED">${STATIONS.HONVED.displayName} <span id="honved-status-text" class="station-status-text"></span></label></div><div class="station-selector" id="kossuth-selector-container"><label for="station-select-kossuth"><input type="radio" name="station-select" id="station-select-kossuth" value="KOSSUTH">${STATIONS.KOSSUTH.displayName} <span id="kossuth-status-text" class="station-status-text"></span></label></div><div class="station-selector" id="nyiregyhazi-ut-selector-container"><label for="station-select-nyiregyhazi-ut"><input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">${STATIONS.NYIREGYHAZI_UT.displayName} <span id="nyiregyhazi-ut-status-text" class="station-status-text"></span></label></div></div><div class="widget-core-data">
+            weatherDisplayEl.innerHTML = `<div class="widget-header"><div class="location-and-station" id="location-and-station-text"></div><div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div></div>
+            <div class="station-status-container">
+                <div class="station-selector" id="honved-selector-container">
+                    <label for="station-select-honved">
+                        <input type="radio" name="station-select" id="station-select-honved" value="HONVED">
+                        <div class="station-label-content">
+                            <span class="station-name">${STATIONS.HONVED.displayName}</span>
+                            <span id="honved-status-text" class="station-status-text"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="station-selector" id="kossuth-selector-container">
+                    <label for="station-select-kossuth">
+                        <input type="radio" name="station-select" id="station-select-kossuth" value="KOSSUTH">
+                        <div class="station-label-content">
+                            <span class="station-name">${STATIONS.KOSSUTH.displayName}</span>
+                            <span id="kossuth-status-text" class="station-status-text"></span>
+                        </div>
+                    </label>
+                </div>
+                <div class="station-selector" id="nyiregyhazi-ut-selector-container">
+                    <label for="station-select-nyiregyhazi-ut">
+                        <input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">
+                        <div class="station-label-content">
+                            <span class="station-name">${STATIONS.NYIREGYHAZI_UT.displayName}</span>
+                            <span id="nyiregyhazi-ut-status-text" class="station-status-text"></span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div class="widget-core-data">
             <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i class="fas fa-sun" id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte</div><div class="sun-path-label sunset-label">Napnyugta</div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label">Nap magassága:</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label">Déli napállás:</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label">Nap útja:</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
             <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label">Hold magassága:</span><span id="moon-info-altitude" class="moon-detail-value">--°<span id="moon-info-trend" class="moon-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label">Fázis:</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label">Megvilágítás:</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
             <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div id="rain-visual-total">--</div><div id="rain-visual-total-unit">mm</div><div class="rain-visual-label">esett ma</div></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><circle class="rain-gauge-bg" cx="50" cy="50" r="45"></circle><circle id="rain-gauge-value" class="rain-gauge-value" cx="50" cy="50" r="45"></circle></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
@@ -637,15 +673,11 @@
 
             cachedData.displayPws = { ...displayStationData.metric, ...displayStationData }; 
             
-            // Preferált csapadék állomás logika:
-            // 1. Ha a NYIREGYHAZI_UT online, azt használjuk.
-            // 2. Ha nem, de a KOSSUTH online és az az aktív, azt használjuk.
-            // 3. Ha egyik sem, de a kiválasztott állomás ad csapadék adatot, azt használjuk.
             let precipStationData = null;
-            if(STATIONS.NYIREGYHAZI_UT.isOnline) {
+            if(STATIONS.KOSSUTH.isOnline && STATIONS.KOSSUTH.provides.includes('precip')) {
+                 precipStationData = STATIONS.KOSSUTH.data;
+            } else if (STATIONS.NYIREGYHAZI_UT.isOnline && STATIONS.NYIREGYHAZI_UT.provides.includes('precip')) {
                 precipStationData = STATIONS.NYIREGYHAZI_UT.data;
-            } else if (STATIONS.KOSSUTH.isOnline) {
-                precipStationData = STATIONS.KOSSUTH.data;
             } else if (activeStationConfig.provides.includes('precip')) {
                 precipStationData = displayStationData;
             }
@@ -920,10 +952,9 @@
             const now = Date.now();
             await Promise.all(Object.keys(STATIONS).map(key => fetchPwsStationData(key).catch(e => null)));
             if (!STATIONS[activeDisplayStationKey].isOnline) {
-                // If the active station goes offline, try to switch to another online one
                 const onlineStations = Object.keys(STATIONS).filter(k => STATIONS[k].isOnline);
                 if(onlineStations.length > 0) {
-                    activeDisplayStationKey = onlineStations[0]; // Switch to the first available online station
+                    activeDisplayStationKey = onlineStations[0];
                 }
             }
 
