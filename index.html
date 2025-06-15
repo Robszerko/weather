@@ -355,19 +355,12 @@
             }
         }
         
-        /**
-         * ÁTEMELT, MEGBÍZHATÓ HOLD-ADAT FÜGGVÉNY
-         * Ez a függvény megbízhatóan megállapítja, hogy a hold éppen fent van-e,
-         * és ha igen, meghatározza a jelenlegi láthatósági periódusának (ívének)
-         * kezdetét (pathRise) és végét (pathSet).
-         */
         function getComprehensiveMoonData(lat, lon) {
             const now = new Date();
-            // A kontextushoz lekérjük a tegnapi, mai és holnapi adatokat is.
             const days = [
-                new Date(new Date().setDate(now.getDate() - 1)), // Tegnap
-                now,                                             // Ma
-                new Date(new Date().setDate(now.getDate() + 1))  // Holnap
+                new Date(new Date().setDate(now.getDate() - 1)),
+                now,
+                new Date(new Date().setDate(now.getDate() + 1))
             ];
 
             let events = [];
@@ -735,32 +728,27 @@
             if (obs.precipRate > 0 && obs.wxPhraseShort) { currentPhrase = obs.wxPhraseShort; }
             el('current-condition-phrase-text').textContent = currentPhrase;
             
-            // Panelek referenciái
             const rainInfoSection = el('rain-info-section'); 
             const sunInfoSection = el('sun-info-section');
             const moonInfoSection = el('moon-info-section');
             const gridMoonriseItem = el('grid-moonrise-item'); 
             const gridMoonsetItem = el('grid-moonset-item');
 
-            // Állapotváltozók
             const isDayTime = sunCalcData.sunAltitude > -0.83;
             const isMoonUp = sunCalcData.isUp;
 
-            // Alapértelmezett láthatóság
             let showRainPanel = false, showSunPanel = false, showMoonPanel = false;
 
-            // Hierarchikus döntési logika
             if (hasRainBeenDetectedToday) {
                 showRainPanel = true;
             } else if (isDayTime) {
                 showSunPanel = true;
             } else if (isMoonUp) {
                 showMoonPanel = true;
-            } else { // Alaphelyzet: egyik sem fent, de nem esett -> eső panel 0 értékkel
+            } else { 
                 showRainPanel = true;
             }
             
-            // Láthatóság beállítása
             rainInfoSection.classList.toggle('is-hidden', !showRainPanel);
             sunInfoSection.classList.toggle('is-hidden', !showSunPanel);
             moonInfoSection.classList.toggle('is-hidden', !showMoonPanel);
@@ -768,7 +756,6 @@
             gridMoonsetItem.classList.toggle('is-hidden', showMoonPanel);
 
 
-            // Panelek feltöltése adatokkal
             if (showSunPanel) {
                 const sunriseDate = sunCalcData.sunriseDateForPath;
                 const sunsetDate = sunCalcData.sunsetDateForPath;
@@ -826,7 +813,6 @@
                 }
             }
             
-            // Részletes adatok feltöltése
             el('main-heat-index-item').classList.toggle('is-hidden', obs.heatIndex == null);
             updateAnimatedValue(el('main-heat-index-value'), formatValue(obs.heatIndex, '°C', 1));
             
