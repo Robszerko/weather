@@ -680,10 +680,12 @@
             cachedData.displayPws = { ...displayStationData.metric, ...displayStationData }; 
             
             let precipStationData = null;
-            if(STATIONS.KOSSUTH.isOnline && STATIONS.KOSSUTH.provides.includes('precip')) {
-                 precipStationData = STATIONS.KOSSUTH.data;
-            } else if (STATIONS.NYIREGYHAZI_UT.isOnline && STATIONS.NYIREGYHAZI_UT.provides.includes('precip')) {
+            
+            // EZ A JAVÍTOTT SZABÁLY: Először a Nyíregyházi utat ellenőrzi csapadékra.
+            if (STATIONS.NYIREGYHAZI_UT.isOnline && STATIONS.NYIREGYHAZI_UT.provides.includes('precip')) {
                 precipStationData = STATIONS.NYIREGYHAZI_UT.data;
+            } else if (STATIONS.KOSSUTH.isOnline && STATIONS.KOSSUTH.provides.includes('precip')) {
+                 precipStationData = STATIONS.KOSSUTH.data;
             } else if (activeStationConfig.provides.includes('precip')) {
                 precipStationData = displayStationData;
             }
