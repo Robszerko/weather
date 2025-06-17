@@ -129,7 +129,7 @@
         
         .additional-core-info { margin-top: 16px; width: 100%; }
         .secondary-info-bar { display: flex; justify-content: center; align-items: stretch; gap: 20px; width: auto; max-width: 400px; margin: 0 auto; padding: 8px 16px; background-color: rgba(0,0,0,0.18); border-radius: 999px; border: 1px solid var(--current-container-border-color); transition: all 0.6s; }
-        .info-bar-item { display: flex; align-items: center; gap: 8px; color: var(--current-text-color); font-size: 15px; font-weight: 600; }
+        .info-bar-item { display: flex; align-items: center; gap: 8px; color: var(--current-text-color); font-size: 15px; font-weight: 600; cursor: help; }
         .info-bar-item i { font-size: 1.1em; color: var(--current-icon-color); opacity: 0.8; }
         #main-wind-dir-arrow { transition: transform 0.7s; }
         
@@ -198,6 +198,7 @@
         #night-sky-visual-icon { font-size: 48px; margin-bottom: 8px; color: var(--current-text-muted-color); transition: color 0.6s; }
         #planet-info #night-sky-visual-icon.fa-ring { color: #E3D4A8; text-shadow: 0 0 10px #E3D4A8; }
         #planet-info #night-sky-visual-icon.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; }
+        #planet-info #night-sky-visual-icon.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; }
         #constellation-svg-container { width: 100px; height: 80px; }
         #constellation-svg-container svg { width: 100%; height: 100%; }
         #constellation-svg-container .star { fill: var(--text-secondary-night); }
@@ -241,8 +242,8 @@
         .forecast-part-details { font-size: 11.5px; color: var(--current-text-muted-color); line-height: 1.5; text-align: left; }
         .forecast-part-details p { margin: 2px 0; }
 
-        .detail-item, .additional-info-item { perspective: 600px; }
-        .detail-item .value { perspective: 400px; }
+        .detail-item, .info-bar-item { perspective: 600px; }
+        .detail-item .value, .info-bar-item span { perspective: 400px; }
 
         #temperature-value, #main-heat-index-value, #main-wind-speed-value, #main-wind-gust-value, #dewpoint-value, #humidity-value, #pressure-value, #visibility-value, #solar-radiation-value, #uv-index-value {
             display: inline-block;
@@ -742,9 +743,9 @@
                 </div>
                 <div class="additional-core-info">
                      <div class="secondary-info-bar">
-                        <div class="info-bar-item is-hidden" id="heat-index-item"><i class="fas fa-temperature-three-quarters"></i><span id="main-heat-index-value"></span></div>
-                        <div class="info-bar-item is-hidden" id="wind-speed-item"><i class="fas fa-wind"></i><span id="main-wind-speed-value"></span></div>
-                        <div class="info-bar-item is-hidden" id="wind-gust-item"><i class="fas fa-hurricane"></i><span id="main-wind-gust-value"></span></div>
+                        <div class="info-bar-item is-hidden" id="heat-index-item" title="Hőérzet"><i class="fas fa-temperature-three-quarters"></i><span id="main-heat-index-value"></span></div>
+                        <div class="info-bar-item is-hidden" id="wind-speed-item" title="Szél"><i class="fas fa-wind"></i><span id="main-wind-speed-value"></span></div>
+                        <div class="info-bar-item is-hidden" id="wind-gust-item" title="Széllökés"><i class="fas fa-hurricane"></i><span id="main-wind-gust-value"></span></div>
                      </div>
                 </div>
             </div>
