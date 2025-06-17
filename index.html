@@ -90,17 +90,29 @@
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
         
         .widget-header { text-align: center; margin-bottom: 10px; border-bottom: 1px solid var(--current-container-border-color); padding-bottom: 12px; transition: border-color 0.6s; }
-        .location-and-station {
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 3px;
+        
+        .header-container {
+            display: inline-block;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 8px 24px;
+            border-radius: 12px;
+            margin-bottom: 4px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+            transition: all 0.6s;
+        }
+        .location-title {
+            font-size: 22px;
+            font-weight: 800;
             color: var(--current-text-color);
-            line-height: 1.25;
-            transition: color 0.6s;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            letter-spacing: -0.2px;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
+        }
+        .station-subtitle {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--current-text-muted-color);
+            line-height: 1.2;
+            margin-top: 2px;
         }
         
         .timestamp-container { display: flex; justify-content: center; align-items: center; gap: 8px; }
@@ -146,18 +158,19 @@
         
         .rain-visual.is-discreet { 
             transform: scale(0.9); 
-            opacity: 0.9; 
+            opacity: 0.95; 
             width: 110px; height: 110px; 
             flex-shrink: 0;
             background: rgba(10, 25, 50, 0.2);
             border-radius: 50%;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
         }
         .rain-visual.is-discreet .rain-visual-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 26px; margin-bottom: 2px; }
-        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 20px; font-weight: 800; line-height: 1; }
+        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 20px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
         .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; font-weight: 500; }
-        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 4px; font-size: 11px; font-weight: 600; opacity: 0.8; }
+        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
 
 
         .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
@@ -645,7 +658,16 @@
         
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
-            weatherDisplayEl.innerHTML = `<div class="widget-header"><div class="location-and-station" id="location-and-station-text"></div><div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div></div>
+            weatherDisplayEl.innerHTML = `<div class="widget-header">
+                <div class="header-container">
+                    <div class="location-title" id="location-title-text">Nyíregyháza</div>
+                    <div class="station-subtitle" id="station-subtitle-text">Állomás kiválasztása...</div>
+                </div>
+                <div class="timestamp-container">
+                    <span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span>
+                    <div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div>
+                </div>
+            </div>
             <div class="station-status-container">
                 <div class="station-selector" id="honved-selector-container">
                     <label for="station-select-honved">
@@ -773,7 +795,7 @@
             }
 
             // --- Fejléc és alapvető adatok ---
-            el('location-and-station-text').textContent = `Nyíregyháza ${STATIONS[activeDisplayStationKey].name.replace("Nyíregyháza ", "")}`;
+            el('station-subtitle-text').textContent = STATIONS[activeDisplayStationKey].name.replace("Nyíregyháza ", "");
             updateAnimatedValue(el('timestamp-text'), `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
             updateAnimatedValue(el('temperature-value'), formatValue(obs.temp, '', 1, '--'));
             el('temperature-container').style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
