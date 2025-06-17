@@ -167,9 +167,9 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         .rain-visual.is-discreet .rain-visual-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 26px; margin-bottom: 2px; opacity: 0.9; }
-        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 20px; font-weight: 800; line-height: 1; color: #FFFFFF; }
-        .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; font-weight: 500; color: #FFFFFF; margin-left: 3px; }
+        .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 26px; margin-bottom: 2px; color: var(--current-text-muted-color); opacity: 0.9; }
+        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 20px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
+        .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; font-weight: 500; color: var(--current-text-color); margin-left: 4px; }
         .rain-visual.is-discreet .rain-visual-label { 
             display: block; 
             margin-top: 4px; 
@@ -178,7 +178,12 @@
             color: var(--current-text-muted-color);
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
             opacity: 0.9;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.1;
         }
+
 
         .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
         .additional-info-item { display: flex; justify-content: center; align-items: center; font-size: 14px; color: var(--current-text-muted-color); width: 100%; line-height: 1.4; min-height: 22px; transition: color 0.6s; }
