@@ -131,15 +131,26 @@
         .rain-info-section, .sun-info-section, .moon-info-section { order: 1; width: 100%; max-width: 100%; }
         
         .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; }
-        .temperature { font-size: 58px; font-weight: 700; line-height: 1; background-color: var(--current-temp-bg-color); padding: 8px 12px; border-radius: 8px; display: inline-flex; align-items: baseline; box-shadow: 0 2px 4px rgba(0,0,0,0.15); perspective: 800px; transition: background-color 0.6s; }
+        .temperature {
+            font-size: 58px; font-weight: 700; line-height: 1;
+            background-color: var(--current-temp-bg-color);
+            padding: 8px 24px 8px 14px;
+            border-radius: 12px 35px 35px 12px;
+            display: inline-flex; align-items: baseline;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            perspective: 800px;
+            transition: all 0.6s;
+            transform: translateX(-10px);
+        }
         #temperature-value { display: inline-block; transform-style: preserve-3d; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         .temperature-symbol { font-size: 0.55em; vertical-align: super; margin-left: 2px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         
-        .rain-visual.is-discreet { transform: scale(0.9); opacity: 0.9; width: 100px; height: 100px; flex-shrink: 0; }
-        .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 24px; margin-bottom: 1px; }
-        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 16px; }
-        .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 11px; }
-        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 2px; font-size: 10px; }
+        .rain-visual.is-discreet { transform: scale(0.9); opacity: 0.9; width: 110px; height: 110px; flex-shrink: 0; }
+        .rain-visual.is-discreet .rain-visual-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 26px; margin-bottom: 2px; }
+        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 18px; font-weight: 700; }
+        .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; }
+        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 3px; font-size: 11px; opacity: 0.8; }
 
 
         .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
@@ -661,8 +672,7 @@
                     <div id="discreet-rain-gauge" class="rain-visual is-discreet is-hidden">
                         <div class="rain-visual-center">
                             <i id="discreet-rain-visual-icon" class="fas fa-cloud-showers-heavy"></i>
-                            <div id="discreet-rain-visual-total">--</div>
-                            <div id="discreet-rain-visual-total-unit">mm</div>
+                            <div><span id="discreet-rain-visual-total">--</span><span id="discreet-rain-visual-total-unit">mm</span></div>
                             <div class="rain-visual-label">esett ma</div>
                         </div>
                         <svg class="rain-gauge-svg" viewBox="0 0 100 100">
