@@ -142,7 +142,7 @@
         .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
         .rain-info-section, .sun-info-section, .moon-info-section { order: 1; width: 100%; max-width: 100%; }
         
-        .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; }
+        .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
         .temperature {
             font-size: 58px; font-weight: 700; line-height: 1;
             background-color: var(--current-temp-bg-color);
@@ -170,7 +170,15 @@
         .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 26px; margin-bottom: 2px; }
         .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 20px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
         .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; font-weight: 500; margin-left: 3px; }
-        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 4px; font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
+        .rain-visual.is-discreet .rain-visual-label { 
+            display: block; 
+            margin-top: 4px; 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: var(--current-text-muted-color);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            opacity: 0.9;
+        }
 
 
         .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
@@ -826,7 +834,7 @@
                 discreetRainGauge.classList.add('is-hidden');
 
                 // Nagy eső panel adatainak frissítése
-                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total').firstChild });
+                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total').querySelector('#rain-visual-total') });
                 el('rain-currently-raining-value').textContent = "Igen";
                 el('rain-intensity-value').textContent = formatValue(obs.precipRate, ' mm/h', 2);
                 el('rain-expected-today-value').textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
