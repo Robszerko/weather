@@ -184,7 +184,6 @@
             line-height: 1.1;
         }
 
-
         .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
         .additional-info-item { display: flex; justify-content: center; align-items: center; font-size: 14px; color: var(--current-text-muted-color); width: 100%; line-height: 1.4; min-height: 22px; transition: color 0.6s; }
         .additional-info-item .additional-info-label { font-weight: 600; margin-right: 6px; }
@@ -988,7 +987,7 @@
                         </div>
                         <div class="hourly-detail-row">
                             <i class="fas fa-wind"></i>
-                            <span>Szél: ${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, ' km/h', 0)}</span>
+                            <span>Szél: ${degreesToCompass(hour.windDirection)} ${formatValue(hour.windSpeed, ' km/h', 0)}</span>
                         </div>
                         <div class="hourly-detail-row">
                             <i class="fas fa-hand-holding-water"></i>
