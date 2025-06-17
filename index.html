@@ -163,30 +163,30 @@
         .moon-path-now-marker { background-color: #A0B0C0; }
 
         .rain-visual { width: 130px; height: 120px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; }
-        .rain-info-section .rain-visual { clip-path: url(#raindrop-clip-main); }
-        .is-discreet .rain-visual-body { clip-path: url(#raindrop-clip-discreet); }
-        
+        #main-rain-visual { clip-path: url(#raindrop-clip-main); }
+        .rain-visual.is-discreet { width: 110px; height: 110px; clip-path: url(#raindrop-clip-discreet); transform: scale(0.9); opacity: 0.95; }
+
         .rain-gauge-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .rain-gauge-bg, .rain-gauge-value { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
+        .rain-gauge-bg, .rain-gauge-value { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; transform: scale(0.85) translate(8px, 8px); }
         .rain-gauge-bg { stroke: var(--current-text-muted-color); opacity: 0.2; }
         .rain-gauge-value { stroke: var(--accent-interactive-night); transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         
         .rain-visual-center { position: absolute; text-align: center; color: var(--current-text-color); }
-        .rain-visual:not(.is-discreet) .rain-visual-center { transform: translateY(5px); }
-        .rain-visual.is-discreet .rain-visual-center { transform: translateY(0px); }
+        #main-rain-visual .rain-visual-center { transform: translateY(5px); }
+        .rain-visual.is-discreet .rain-visual-center { transform: translateY(0px) scale(0.9); }
         
-        #rain-visual-icon { font-size: 28px; opacity: 0.8; margin-bottom: 2px; }
+        #rain-visual-icon, #discreet-rain-visual-icon { font-size: 28px; opacity: 0.8; margin-bottom: 2px; }
         #rain-visual-total, #discreet-rain-visual-total { font-size: 17px; font-weight: 700; }
         #rain-visual-total-unit, #discreet-rain-visual-total-unit { font-size: 11px; font-weight: 500; opacity: 0.7; margin-left: 2px; }
         .rain-visual-label { margin-top: 3px; font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); opacity: 0.8; }
         
         @keyframes streak-animation {
-            0% { transform: translateY(-20px); opacity: 0; }
-            2% { transform: translateY(90px); opacity: 0.7; }
-            3% { opacity: 0; }
+            0% { transform: translateY(-110%); opacity: 0; }
+            10% { transform: translateY(110%); opacity: 0.7; }
+            11% { opacity: 0; }
             100% { opacity: 0; }
         }
-        .rain-streak { display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 35px; background: linear-gradient(to bottom, rgba(173, 216, 230, 0), rgba(135, 206, 250, 0.8)); border-radius: 2px; }
+        .rain-streak { display: none; position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 4px; height: 100%; background: linear-gradient(to bottom, rgba(173, 216, 230, 0), rgba(135, 206, 250, 0.8) 50%, rgba(173, 216, 230, 0)); border-radius: 2px; }
         .rain-visual.is-raining-actively .rain-streak { display: block; animation: streak-animation 60s linear infinite; }
 
         .weather-details-grid { margin-top: 0; border-top: 1px solid var(--current-container-border-color); padding-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; transition: border-color 0.6s; }
@@ -542,7 +542,7 @@
             const percentage = Math.min(1, (precipRate || 0) / MAX_INTENSITY);
         
             const length = gaugeValueEl.getTotalLength();
-            if (length === 0) { // Path not ready yet, retry shortly
+            if (length === 0) { 
                 setTimeout(() => updatePrecipitationVisuals(precipRate, precipTotal, elements), 50);
                 return;
             }
@@ -621,8 +621,9 @@
         
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
-            const raindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
+            const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             const discreetRaindropPath = `M50,85 C25,85 20,55 50,15 C80,55 75,85 50,85`;
+            
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -659,23 +660,20 @@
             <div class="widget-core-data">
             <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i class="fas fa-sun" id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte</div><div class="sun-path-label sunset-label">Napnyugta</div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label">Nap magassága:</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label">Déli napállás:</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label">Nap útja:</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
             <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="sun-detail-label">Hold magassága:</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label">Fázis:</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label">Megvilágítás:</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
-            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${raindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${raindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${raindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
+            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
             <div class="temperature-section">
                 <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
                     <div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div>
                     <div id="discreet-rain-gauge" class="rain-visual is-discreet is-hidden">
-                        <div class="rain-visual-body">
-                             <div class="rain-visual-center">
-                                <i id="discreet-rain-visual-icon" class="fas fa-tint"></i>
-                                <div><span id="discreet-rain-visual-total">--</span><span id="discreet-rain-visual-total-unit">mm</span></div>
-                                <div class="rain-visual-label">esett ma</div>
-                            </div>
-                            <svg class="rain-gauge-svg" viewBox="0 0 100 100">
-                                <defs><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs>
-                                <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
-                                <path id="discreet-rain-gauge-value" class="rain-gauge-value" d="${discreetRaindropPath}"></path>
-                            </svg>
+                        <div class="rain-visual-center">
+                            <i id="discreet-rain-visual-icon" class="fas fa-tint"></i>
+                            <div><span id="discreet-rain-visual-total">--</span><span id="discreet-rain-visual-total-unit">mm</span></div>
+                            <div class="rain-visual-label">esett ma</div>
                         </div>
+                        <svg class="rain-gauge-svg" viewBox="0 0 100 100">
+                            <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
+                            <path id="discreet-rain-gauge-value" class="rain-gauge-value" d="${discreetRaindropPath}"></path>
+                        </svg>
                     </div>
                 </div>
                 <div class="additional-core-info"><div class="additional-info-item is-hidden" id="main-heat-index-item"><span class="additional-info-label">Hőérzet:</span><span class="additional-info-value" id="main-heat-index-value"></span></div><div class="additional-info-item is-hidden" id="main-wind-info-item"><span class="additional-info-label">Szél:</span><span class="additional-info-value"><span id="main-wind-dir-text-value"></span><i class="fas fa-location-arrow" id="main-wind-arrow-icon"></i><span id="main-wind-speed-value"></span></span></div><div class="additional-info-item is-hidden" id="main-wind-gust-info-item"><span class="additional-info-label">Széllökés:</span><span class="additional-info-value" id="main-wind-gust-value"></span></div></div>
@@ -793,7 +791,7 @@
                 moonInfoSection.classList.add('is-hidden');
                 discreetRainGauge.classList.add('is-hidden');
                 
-                if (mainRainVisual) mainRainVisual.classList.add('is-raining-actively');
+                mainRainVisual.classList.add('is-raining-actively');
 
                 updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total') });
                 el('rain-currently-raining-value').textContent = "Igen";
@@ -809,7 +807,7 @@
 
             } else {
                 rainInfoSection.classList.add('is-hidden');
-                if (mainRainVisual) mainRainVisual.classList.remove('is-raining-actively');
+                mainRainVisual.classList.remove('is-raining-actively');
 
                 if (hasRainBeenDetectedToday) {
                     discreetRainGauge.classList.remove('is-hidden');
