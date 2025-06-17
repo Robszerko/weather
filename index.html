@@ -186,8 +186,8 @@
 
         #discreet-rain-gauge { width: 120px; height: 120px; }
         #discreet-rain-gauge .rain-gauge-svg { transform: scale(1.1) translate(5px, 5px); }
-        #discreet-rain-gauge .rain-gauge-bg { stroke-opacity: 0.15; }
-        #discreet-rain-gauge.has-rained-today .rain-gauge-bg { stroke: var(--accent-interactive-night); stroke-opacity: 0.6; }
+        #discreet-rain-gauge .rain-gauge-bg { fill: var(--current-text-muted-color); stroke: none; opacity: 0.15; transition: fill 0.5s ease, opacity 0.5s ease; }
+        #discreet-rain-gauge.has-rained-today .rain-gauge-bg { fill: var(--accent-interactive-night); opacity: 0.5; }
         #discreet-rain-gauge .rain-gauge-value { display: none; }
         #discreet-rain-gauge .rain-visual-center { gap: 2px; }
         #discreet-rain-visual-value { font-size: 18px; font-weight: 700; color: var(--current-text-color); }
@@ -792,6 +792,7 @@
             // --- MEGJELENÍTÉSI LOGIKA ---
 
             if (isRainingNow) {
+                // ESIK AZ ESŐ: Fő eső panel látszik, a többi rejtve
                 rainInfoSection.classList.remove('is-hidden');
                 sunInfoSection.classList.add('is-hidden');
                 moonInfoSection.classList.add('is-hidden');
@@ -812,13 +813,16 @@
                 }
 
             } else {
+                // NEM ESIK AZ ESŐ: Fő eső panel rejtve, a többi látszik, ha kell
                 rainInfoSection.classList.add('is-hidden');
                 mainRainVisual.classList.remove('is-raining-actively');
 
+                // A hőmérséklet melletti csepp kezelése
                 discreetRainGauge.classList.remove('is-hidden');
                 discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
                 el('discreet-rain-visual-value').childNodes[0].nodeValue = formatValue(obs.precipTotal || 0, '', 2);
                 
+                // Nap/Hold panelek kezelése
                 if (isDayTime) {
                     showSunPanel = true;
                     sunInfoSection.classList.remove('is-hidden');
@@ -1000,7 +1004,7 @@
                         <div class="forecast-part-details">
                             <p>${day.nightPart.phrase || NO_DATA_STRING}</p>
                             <p>Csapadék: ${formatValue(day.nightPart.precipChance, '%', 0)}</p>
-                            <p>Szél: ${degreesToCompass(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</p>
+                            <p>Szél: ${degreesToCompass(day.nightPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</p>
                         </div>
                     </div>`; 
                 }
