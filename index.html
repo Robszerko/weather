@@ -86,7 +86,7 @@
 
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
 
-        .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 560px; box-sizing: border-box; margin: 0; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); transition: all 0.6s ease-in-out; }
+        .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 640px; box-sizing: border-box; margin: 0; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); transition: all 0.6s ease-in-out; }
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
         
         .widget-header { text-align: center; margin-bottom: 10px; border-bottom: 1px solid var(--current-container-border-color); padding-bottom: 12px; transition: border-color 0.6s; }
@@ -249,9 +249,9 @@
         .pressure-trend-icon { margin-left: 4px; font-weight: 700; }
         .uv-description-text { margin-left: 4px; font-size: 0.88em; font-style: italic; }
 
-        .forecast-title { width: 100%; max-width: 560px; font-size: 16px; font-weight: 700; color: var(--current-text-color); margin-top: 24px; margin-bottom: 12px; text-align: center; transition: color 0.6s; }
+        .forecast-title { width: 100%; max-width: 640px; font-size: 16px; font-weight: 700; color: var(--current-text-color); margin-top: 24px; margin-bottom: 12px; text-align: center; transition: color 0.6s; }
         
-        .hourly-forecast-container { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 8px; padding: 4px; box-sizing: border-box; }
+        .hourly-forecast-container { width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 8px; padding: 4px; box-sizing: border-box; }
         .hourly-forecast-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
         .hourly-primary-info { display: flex; align-items: center; gap: 16px; flex-grow: 1; }
         .hourly-time { font-size: 13px; font-weight: 700; min-width: 45px; text-align: left; }
@@ -263,7 +263,7 @@
         .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
         
-        .forecast-container { width: 100%; max-width: 560px; padding-bottom: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .forecast-container { width: 100%; max-width: 640px; padding-bottom: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .forecast-day-card { display: flex; flex-direction: column; padding: 12px; border-radius: 14px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 3px 10px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
         .forecast-header { text-align: center; margin-bottom: 8px; }
         .forecast-day-name { font-size: 14px; font-weight: 700; }
