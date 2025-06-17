@@ -130,27 +130,34 @@
         .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
         .rain-info-section, .sun-info-section, .moon-info-section { order: 1; width: 100%; max-width: 100%; }
         
-        .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; }
         .temperature {
             font-size: 58px; font-weight: 700; line-height: 1;
             background-color: var(--current-temp-bg-color);
-            padding: 8px 24px 8px 14px;
+            padding: 10px 24px 10px 18px;
             border-radius: 12px 35px 35px 12px;
             display: inline-flex; align-items: baseline;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.15);
             perspective: 800px;
             transition: all 0.6s;
-            transform: translateX(-10px);
         }
         #temperature-value { display: inline-block; transform-style: preserve-3d; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         .temperature-symbol { font-size: 0.55em; vertical-align: super; margin-left: 2px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         
-        .rain-visual.is-discreet { transform: scale(0.9); opacity: 0.9; width: 110px; height: 110px; flex-shrink: 0; }
+        .rain-visual.is-discreet { 
+            transform: scale(0.9); 
+            opacity: 0.9; 
+            width: 110px; height: 110px; 
+            flex-shrink: 0;
+            background: rgba(10, 25, 50, 0.2);
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
         .rain-visual.is-discreet .rain-visual-center { display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .rain-visual.is-discreet #discreet-rain-visual-icon { font-size: 26px; margin-bottom: 2px; }
-        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 18px; font-weight: 700; }
-        .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; }
-        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 3px; font-size: 11px; opacity: 0.8; }
+        .rain-visual.is-discreet #discreet-rain-visual-total { font-size: 20px; font-weight: 800; line-height: 1; }
+        .rain-visual.is-discreet #discreet-rain-visual-total-unit { font-size: 12px; font-weight: 500; }
+        .rain-visual.is-discreet .rain-visual-label { display: block; margin-top: 4px; font-size: 11px; font-weight: 600; opacity: 0.8; }
 
 
         .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
@@ -815,7 +822,7 @@
 
                 if (hasRainBeenDetectedToday) {
                     discreetRainGauge.classList.remove('is-hidden');
-                    updatePrecipitationVisuals(0, obs.precipTotal, { gaugeValueEl: el('discreet-rain-gauge-value'), totalValueEl: el('discreet-rain-visual-total') });
+                    updatePrecipitationVisuals(0, obs.precipTotal, { gaugeValueEl: el('discreet-rain-gauge-value'), totalValueEl: el('discreet-rain-visual-total').firstChild });
                 } else {
                     discreetRainGauge.classList.add('is-hidden');
                 }
