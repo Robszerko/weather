@@ -196,7 +196,7 @@
         }
         /* === VIZUÁLIS ELEMEK MELLETTI SZÖVEGEK VÉGE === */
 
-        .sun-trend-text, .moon-trend-text { font-size: 0.8em; font-weight: 500; opacity: 0.7; margin-left: 4px; }
+        .sun-trend-text, .moon-trend-text { font-size: 0.8em; font-weight: 500; opacity: 0.7; margin-left: 6px; }
         .path-refresh-btn { font-size: 0.8em; margin-left: 8px; cursor: pointer; opacity: 0.6; transition: opacity 0.3s, color 0.3s, transform 0.3s; }
         .path-refresh-btn:hover { opacity: 1; color: var(--current-icon-color); }
         .path-refresh-btn.is-refreshing { transform: rotate(360deg); transition: transform 0.8s; }
@@ -441,6 +441,9 @@
         
         function getComprehensiveMoonData(lat, lon) {
             const now = new Date();
+            const moonPos = SunCalc.getMoonPosition(now, lat, lon);
+            const isActuallyUp = moonPos.altitude > 0;
+
             const days = [
                 new Date(new Date().setDate(now.getDate() - 1)),
                 now,
@@ -459,23 +462,20 @@
             });
 
             if (events.length === 0) {
-                const moonPos = SunCalc.getMoonPosition(now, lat, lon);
-                const isUp = moonPos.altitude > 0;
-                return { isUp: isUp, pathRise: null, pathSet: null, nextRise: null, nextSet: null };
+                return { isUp: isActuallyUp, pathRise: null, pathSet: null, nextRise: null, nextSet: null };
             }
 
             events.sort((a, b) => a.time - b.time);
 
-            const lastEvent = events.filter(e => e.time < now).pop();
-
-            let isUp = false;
             let pathRise = null;
             let pathSet = null;
 
-            if (lastEvent) {
-                if (lastEvent.type === 'rise') {
-                    isUp = true;
-                    pathRise = lastEvent.time;
+            if (isActuallyUp) {
+                // If the moon is up, find the last rise time. This is our path's start.
+                const lastRiseEvent = events.filter(e => e.type === 'rise' && e.time < now).pop();
+                if (lastRiseEvent) {
+                    pathRise = lastRiseEvent.time;
+                    // The path's end is the first set time after this rise.
                     pathSet = events.find(e => e.type === 'set' && e.time > pathRise)?.time || null;
                 }
             }
@@ -484,7 +484,7 @@
             const nextSet = events.find(e => e.type === 'set' && e.time > now)?.time || null;
             
             return {
-                isUp: isUp,
+                isUp: isActuallyUp, // Use the direct altitude check for the `isUp` status
                 pathRise: pathRise,
                 pathSet: pathSet,
                 nextRise: nextRise,
