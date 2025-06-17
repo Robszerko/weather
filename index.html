@@ -127,11 +127,11 @@
         #temperature-value { display: inline-block; transform-style: preserve-3d; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         .temperature-symbol { font-size: 0.55em; vertical-align: super; margin-left: 2px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         
-        .additional-core-info { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-top: 12px; width: 100%; }
-        .additional-info-item { display: flex; justify-content: center; align-items: center; font-size: 14px; color: var(--current-text-muted-color); width: 100%; line-height: 1.4; min-height: 22px; transition: color 0.6s; }
-        .additional-info-item .additional-info-label { font-weight: 600; margin-right: 6px; }
-        .additional-info-item .additional-info-value { font-weight: 700; color: var(--current-text-color); display: flex; align-items: center; transition: color 0.6s; }
-        #main-wind-arrow-icon { display: inline-block; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); margin: 0 5px; }
+        .additional-core-info { margin-top: 16px; width: 100%; }
+        .secondary-info-bar { display: flex; justify-content: center; align-items: stretch; gap: 20px; width: auto; max-width: 400px; margin: 0 auto; padding: 8px 16px; background-color: rgba(0,0,0,0.18); border-radius: 999px; border: 1px solid var(--current-container-border-color); transition: all 0.6s; }
+        .info-bar-item { display: flex; align-items: center; gap: 8px; color: var(--current-text-color); font-size: 15px; font-weight: 600; }
+        .info-bar-item i { font-size: 1.1em; color: var(--current-icon-color); opacity: 0.8; }
+        #main-wind-dir-arrow { transition: transform 0.7s; }
         
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 65px; padding-top: 10px; min-height: 110px; }
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details { text-align: left; display: flex; flex-direction: column; gap: 5px; font-size: 12px; flex-shrink: 1; }
@@ -186,7 +186,7 @@
 
         #discreet-rain-gauge { width: 120px; height: 120px; }
         #discreet-rain-gauge .rain-gauge-svg { transform: scale(1.1) translate(5px, 5px); }
-        #discreet-rain-gauge .rain-gauge-bg { fill: none; stroke-opacity: 0.3; transition: stroke 0.5s ease, stroke-opacity 0.5s ease; }
+        #discreet-rain-gauge .rain-gauge-bg { stroke: var(--current-text-muted-color); fill: none; stroke-opacity: 0.3; transition: stroke 0.5s ease, stroke-opacity 0.5s ease; }
         #discreet-rain-gauge.has-rained-today .rain-gauge-bg { stroke: var(--accent-interactive-night); stroke-opacity: 0.8; }
         #discreet-rain-gauge .rain-gauge-value { display: none; }
         #discreet-rain-gauge .rain-visual-center { transform: translateX(3px); gap: 2px; }
@@ -509,16 +509,20 @@
         
         function getNightSkyInfo(date) {
             const hour = date.getHours();
+            
             // 2025 Nyár (hozzávetőleges adatok)
             // Szaturnusz: ~23:30-kor kel, hajnalig látható.
             // Jupiter: ~01:30-kor kel, reggelig látható.
             // Mars: ~02:00-kor kel, reggelig látható.
             
-            if (hour >= 23 || hour < 4) {
+            if (hour >= 23 || hour < 1) {
                 return { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Látható éjjel', rise: '23:30', set: '08:10' };
             }
-            if (hour >= 2 && hour < 4) { // Hajnali órák
+             if (hour >= 1 && hour < 2) {
                 return { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Látható hajnalban', rise: '01:30', set: '11:00' };
+            }
+            if (hour >= 2 && hour < 4) {
+                 return { type: 'planet', name: 'Mars', icon: 'fas fa-circle', status: 'Látható hajnalban', rise: '02:00', set: '12:30' };
             }
             
             // Ha nincs bolygó, csillagkép
@@ -736,7 +740,13 @@
                         </svg>
                     </div>
                 </div>
-                <div class="additional-core-info"><div class="additional-info-item is-hidden" id="main-heat-index-item"><span class="additional-info-label">Hőérzet:</span><span class="additional-info-value" id="main-heat-index-value"></span></div><div class="additional-info-item is-hidden" id="main-wind-info-item"><span class="additional-info-label">Szél:</span><span class="additional-info-value"><span id="main-wind-dir-text-value"></span><i class="fas fa-location-arrow" id="main-wind-arrow-icon"></i><span id="main-wind-speed-value"></span></span></div><div class="additional-info-item is-hidden" id="main-wind-gust-info-item"><span class="additional-info-label">Széllökés:</span><span class="additional-info-value" id="main-wind-gust-value"></span></div></div>
+                <div class="additional-core-info">
+                     <div class="secondary-info-bar">
+                        <div class="info-bar-item is-hidden" id="heat-index-item"><i class="fas fa-temperature-three-quarters"></i><span id="main-heat-index-value"></span></div>
+                        <div class="info-bar-item is-hidden" id="wind-speed-item"><i class="fas fa-wind"></i><span id="main-wind-speed-value"></span></div>
+                        <div class="info-bar-item is-hidden" id="wind-gust-item"><i class="fas fa-hurricane"></i><span id="main-wind-gust-value"></span></div>
+                     </div>
+                </div>
             </div>
             </div><div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
             addStationChangeListeners();
@@ -942,20 +952,34 @@
             gridMoonriseItem.classList.toggle('is-hidden', showMoonPanel);
             gridMoonsetItem.classList.toggle('is-hidden', showMoonPanel);
 
-            // --- Alsó rész adatai (mindig frissülnek) ---
-            el('main-heat-index-item').classList.toggle('is-hidden', obs.heatIndex == null);
-            updateAnimatedValue(el('main-heat-index-value'), formatValue(obs.heatIndex, '°C', 1));
-            
-            const hasWind = obs.winddir != null || obs.windSpeed >= 0;
-            el('main-wind-info-item').classList.toggle('is-hidden', !hasWind);
-            if (hasWind) { 
-                el('main-wind-arrow-icon').style.transform = `rotate(${obs.winddir || 0}deg)`; 
-                el('main-wind-dir-text-value').textContent = degreesToCompass(obs.winddir); 
-                updateAnimatedValue(el('main-wind-speed-value'), formatValue(obs.windSpeed, ' km/h', 1));
+            // --- Alsó rész adatai ---
+            // Hőérzet
+            const heatIndexItem = el('heat-index-item');
+            if (obs.heatIndex != null) {
+                heatIndexItem.classList.remove('is-hidden');
+                el('main-heat-index-value').textContent = formatValue(obs.heatIndex, '°C', 1);
+            } else {
+                heatIndexItem.classList.add('is-hidden');
             }
-            el('main-wind-gust-info-item').classList.toggle('is-hidden', !(obs.windGust > 0));
-            updateAnimatedValue(el('main-wind-gust-value'), formatValue(obs.windGust, ' km/h', 1));
 
+            // Szél
+            const windSpeedItem = el('wind-speed-item');
+            if (obs.windSpeed != null && obs.windSpeed >= 0) {
+                 windSpeedItem.classList.remove('is-hidden');
+                 el('main-wind-speed-value').textContent = formatValue(obs.windSpeed, ' km/h', 1);
+            } else {
+                 windSpeedItem.classList.add('is-hidden');
+            }
+
+            // Széllökés
+            const windGustItem = el('wind-gust-item');
+             if (obs.windGust > 0) {
+                 windGustItem.classList.remove('is-hidden');
+                 el('main-wind-gust-value').textContent = formatValue(obs.windGust, ' km/h', 1);
+            } else {
+                 windGustItem.classList.add('is-hidden');
+            }
+            
             updateAnimatedValue(el('dewpoint-value'), formatValue(obs.dewpt, '°C')); 
             updateAnimatedValue(el('humidity-value'), formatValue(obs.humidity, '%', 0));
             updateAnimatedValue(el('pressure-value'), formatValue(general.pressureAltimeter || obs.pressure, ' hPa'));
