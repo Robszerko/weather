@@ -219,8 +219,7 @@
         .hourly-secondary-details { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 11px; color: var(--current-text-muted-color); flex-shrink: 0; }
         .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
-        .hourly-detail-row .detail-separator { display: inline-block; width: 1px; height: 10px; background-color: var(--current-container-border-color); margin: 0 4px; }
-
+        
         .forecast-container { width: 100%; max-width: 560px; padding-bottom: 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
         .forecast-day-card { display: flex; flex-direction: column; padding: 12px; border-radius: 14px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 3px 10px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
         .forecast-header { text-align: center; margin-bottom: 8px; }
@@ -754,7 +753,7 @@
                 hasRainBeenDetectedToday = true;
             }
 
-            // --- Fejléc és alapvető adatok (mindig frissülnek) ---
+            // --- Fejléc és alapvető adatok ---
             el('location-and-station-text').textContent = `Nyíregyháza ${STATIONS[activeDisplayStationKey].name.replace("Nyíregyháza ", "")}`;
             updateAnimatedValue(el('timestamp-text'), `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
             updateAnimatedValue(el('temperature-value'), formatValue(obs.temp, '', 1, '--'));
@@ -779,13 +778,12 @@
             // --- MEGJELENÍTÉSI LOGIKA ---
 
             if (isRainingNow) {
-                // 1. ESET: Most esik az eső
+                // 1. ESET: Most esik az eső -> Nagy eső panel, minden más rejtve
                 rainInfoSection.classList.remove('is-hidden');
                 sunInfoSection.classList.add('is-hidden');
                 moonInfoSection.classList.add('is-hidden');
                 discreetRainGauge.classList.add('is-hidden');
 
-                // Nagy eső panel adatainak frissítése
                 updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total') });
                 el('rain-currently-raining-value').textContent = "Igen";
                 el('rain-intensity-value').textContent = formatValue(obs.precipRate, ' mm/h', 2);
@@ -799,10 +797,9 @@
                 }
 
             } else {
-                // 2. ESET: Most NEM esik az eső
+                // 2. ESET: Most NEM esik az eső -> Nap/Hold panel látszik
                 rainInfoSection.classList.add('is-hidden');
 
-                // Diszkrét esőmérő megjelenítése, ha ma már esett
                 if (hasRainBeenDetectedToday) {
                     discreetRainGauge.classList.remove('is-hidden');
                     updatePrecipitationVisuals(0, obs.precipTotal, { gaugeValueEl: el('discreet-rain-gauge-value'), totalValueEl: el('discreet-rain-visual-total') });
@@ -810,23 +807,17 @@
                     discreetRainGauge.classList.add('is-hidden');
                 }
 
-                // Nap/Hold panel megjelenítése
                 if (isDayTime) {
                     showSunPanel = true;
                     sunInfoSection.classList.remove('is-hidden');
                     moonInfoSection.classList.add('is-hidden');
-                } else { // éjjel van
+                } else {
                     sunInfoSection.classList.add('is-hidden');
-                    if (isMoonUp) {
-                        showMoonPanel = true;
-                        moonInfoSection.classList.remove('is-hidden');
-                    } else {
-                        moonInfoSection.classList.add('is-hidden');
-                    }
+                    showMoonPanel = isMoonUp;
+                    moonInfoSection.classList.toggle('is-hidden', !isMoonUp);
                 }
             }
             
-            // --- Panelek tartalmának frissítése (ha láthatóak) ---
             if (showSunPanel) {
                 const sunPathElements = { iconEl: el('sun-path-icon'), mainArcEl: el('sun-path-arc-main'), nowMarkerEl: el('sun-path-now-marker') };
                 updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements);
@@ -948,7 +939,8 @@
                         <div class="hourly-detail-row">
                             <i class="fas fa-hand-holding-water"></i>
                             <span>Pára: ${formatValue(hour.humidity, '%', 0)}</span>
-                            <span class="detail-separator"></span>
+                        </div>
+                         <div class="hourly-detail-row">
                             <i class="fas fa-sun"></i>
                             <span>UV: ${formatValue(hour.uvIndex, '', 0, '0')}</span>
                         </div>
