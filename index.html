@@ -186,10 +186,10 @@
 
         #discreet-rain-gauge { width: 120px; height: 120px; }
         #discreet-rain-gauge .rain-gauge-svg { transform: scale(1.1) translate(5px, 5px); }
-        #discreet-rain-gauge .rain-gauge-bg { fill: var(--current-text-muted-color); stroke: none; opacity: 0.15; transition: fill 0.5s ease, opacity 0.5s ease; }
-        #discreet-rain-gauge.has-rained-today .rain-gauge-bg { fill: var(--accent-interactive-night); opacity: 0.5; }
+        #discreet-rain-gauge .rain-gauge-bg { stroke: var(--current-text-muted-color); fill: none; stroke-opacity: 0.3; transition: stroke 0.5s ease, stroke-opacity 0.5s ease; }
+        #discreet-rain-gauge.has-rained-today .rain-gauge-bg { stroke: var(--accent-interactive-night); stroke-opacity: 0.8; }
         #discreet-rain-gauge .rain-gauge-value { display: none; }
-        #discreet-rain-gauge .rain-visual-center { gap: 2px; }
+        #discreet-rain-gauge .rain-visual-center { transform: translateX(3px); gap: 2px; }
         #discreet-rain-visual-value { font-size: 18px; font-weight: 700; color: var(--current-text-color); }
         #discreet-rain-visual-value-unit { font-size: 0.6em; opacity: 0.8; margin-left: 3px; }
         #discreet-rain-visual-label { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
