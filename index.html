@@ -30,7 +30,7 @@
             --cold: #6366F1;
             --current-temp-bg-color: var(--mild);
 
-            /* 12 FÁZISÚ CIKLUS DEFINÍCIÓJA */
+            /* === ÚJ, 12 FÁZISÚ CIKLUS DEFINÍCIÓJA === */
             --sky-color-top-night: #0B1120;
             --sky-color-bottom-night: #020617;
             --sky-color-top-early-dawn: #020617;
@@ -71,7 +71,9 @@
 
         body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; position: relative; overflow-x: hidden; transition: background-color 1.5s ease-in-out; }
         
+        /* === ÚJ, RÉSZLETES TÉMA DEFINÍCIÓK === */
         body[data-theme="day"] { --current-sky-color-top: var(--sky-color-top-day); --current-sky-color-bottom: var(--sky-color-bottom-day); --current-text-color: var(--text-primary-day); --current-text-muted-color: var(--text-secondary-day); --current-icon-color: var(--accent-interactive-day); --current-widget-bg: var(--bg-widget-day); --current-widget-border: var(--border-widget-day); --current-container-border-color: rgba(203, 213, 225, 0.55); }
+        body[data-theme="night"] { --current-sky-color-top: var(--sky-color-top-night); --current-sky-color-bottom: var(--sky-color-bottom-night); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: var(--accent-interactive-night); --current-widget-bg: var(--bg-widget-night); --current-widget-border: var(--border-widget-night); --current-container-border-color: var(--border-widget-night); }
         body[data-theme="dawn"] { --current-sky-color-top: var(--sky-color-top-dawn); --current-sky-color-bottom: var(--sky-color-bottom-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f59e0b; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(245, 158, 11, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); }
         body[data-theme="dusk"] { --current-sky-color-top: var(--sky-color-top-dusk); --current-sky-color-bottom: var(--sky-color-bottom-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f472b6; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(236, 72, 153, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); }
         
@@ -83,6 +85,7 @@
         body[data-theme="sunset"] { --current-sky-color-top: var(--sky-color-top-sunset); --current-sky-color-bottom: var(--sky-color-bottom-sunset); --current-text-color: #fef2f2; --current-text-muted-color: #fecaca; --current-icon-color: #ef4444; --current-widget-bg: linear-gradient(160deg, rgba(127, 29, 29, 0.9) 0%, rgba(76, 29, 29, 0.92) 100%); --current-widget-border: rgba(239, 68, 68, 0.25); --current-container-border-color: rgba(159, 18, 57, 0.4); }
         body[data-theme="blue_hour_dusk"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dusk); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #a78bfa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(167, 139, 250, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); }
         body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: #d1d5db; --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); }
+        /* === TÉMA DEFINÍCIÓK VÉGE === */
 
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
 
@@ -136,7 +139,7 @@
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 30px; padding-top: 10px; min-height: 110px; }
         
-        /* === ÚJ, ÁTTERVEZETT STÍLUSOK A VIZUÁLIS ELEMEK MELLETTI SZÖVEGEKHEZ === */
+        /* === EGYSÉGES, ÁTTERVEZETT STÍLUSOK A VIZUÁLIS ELEMEK MELLETTI SZÖVEGEKHEZ === */
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
             text-align: left;
             display: flex;
@@ -252,9 +255,10 @@
         #discreet-rain-visual-value-unit { font-size: 0.6em; opacity: 0.8; margin-left: 3px; }
         #discreet-rain-visual-label { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
 
-        /* Night Sky Panel Styles */
-        .night-sky-visual { text-align: center; }
+        /* === ÚJ ÉJSZAKAI ÉGBOLT PANEL === */
+        .night-sky-visual { text-align: center; flex-shrink: 0; width: 130px; }
         .night-sky-visual i { font-size: 48px; margin-bottom: 8px; color: var(--current-text-muted-color); transition: color 0.6s; }
+        /* Bolygó specifikus színek és effektek */
         #planet-info .night-sky-visual i.fa-ring { color: #E3D4A8; text-shadow: 0 0 10px #E3D4A8; }
         #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; }
         #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; }
@@ -264,6 +268,7 @@
         #constellation-svg-container .star { fill: var(--text-secondary-night); }
         #constellation-svg-container .star.bright { fill: #ffffff; }
         #constellation-svg-container .const-line { stroke: var(--text-secondary-night); stroke-width: 1px; opacity: 0.5; }
+        /* === PANEL VÉGE === */
 
         .weather-details-grid { margin-top: 0; border-top: 1px solid var(--current-container-border-color); padding-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; transition: border-color 0.6s; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 5px 0; }
@@ -388,6 +393,7 @@
                         throw new Error("Invalid sunrise/sunset date");
                     }
                     
+                    // === ÚJ, 12 FÁZISÚ IDŐKERETEK ===
                     const EARLY_DAWN_DURATION = 30 * 60 * 1000;
                     const BLUE_HOUR_DAWN_DURATION = 30 * 60 * 1000;
                     const DAWN_DURATION = 25 * 60 * 1000;
@@ -403,12 +409,14 @@
                     const sunriseMs = sunriseDate.getTime();
                     const sunsetMs = sunsetDate.getTime();
 
+                    // Hajnali fázisok kiszámítása
                     const earlyDawnStart = sunriseMs - DAWN_DURATION - BLUE_HOUR_DAWN_DURATION - EARLY_DAWN_DURATION;
                     const blueHourDawnStart = sunriseMs - DAWN_DURATION - BLUE_HOUR_DAWN_DURATION;
                     const dawnStart = sunriseMs - DAWN_DURATION;
                     const sunriseEnd = sunriseMs + SUNRISE_EVENT_DURATION;
                     const goldenHourRiseEnd = sunriseEnd + GOLDEN_HOUR_RISE_DURATION;
                     
+                    // Esti fázisok kiszámítása
                     const goldenHourSetStart = sunsetMs - GOLDEN_HOUR_SET_DURATION;
                     const sunsetEnd = sunsetMs + SUNSET_EVENT_DURATION;
                     const duskEnd = sunsetEnd + DUSK_DURATION;
@@ -571,22 +579,19 @@
         function getNightSkyInfo(date) {
             const hour = date.getHours();
             
-            // 2025 Nyár (hozzávetőleges adatok)
-            // Szaturnusz: ~23:30-kor kel, hajnalig látható.
-            // Jupiter: ~01:30-kor kel, reggelig látható.
-            // Mars: ~02:00-kor kel, reggelig látható.
-            
+            // Hozzávetőleges adatok (érdemes lenne API-ból vagy pontosabb számítással frissíteni)
+            // Itt a példa kedvéért statikus értékeket használunk.
             if (hour >= 23 || hour < 1) {
-                return { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Látható éjjel', rise: '23:30', set: '08:10' };
+                return { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Látható éjjel', rise: '~23:30', set: '~08:10' };
             }
              if (hour >= 1 && hour < 2) {
-                return { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Látható hajnalban', rise: '01:30', set: '11:00' };
+                return { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Látható hajnalban', rise: '~01:30', set: '~11:00' };
             }
             if (hour >= 2 && hour < 4) {
-                 return { type: 'planet', name: 'Mars', icon: 'fas fa-circle', status: 'Látható hajnalban', rise: '02:00', set: '12:30' };
+                 return { type: 'planet', name: 'Mars', icon: 'fas fa-circle', status: 'Látható hajnalban', rise: '~02:00', set: '~12:30' };
             }
             
-            // Ha nincs bolygó, csillagkép
+            // Ha nincs bolygó, egy csillagképet mutatunk
             return {
                 type: 'constellation',
                 name: 'Hattyú (Északi Kereszt)',
@@ -773,7 +778,7 @@
             <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
             <div class="night-sky-info-section is-hidden" id="night-sky-info-section">
                 <div id="planet-info" class="is-hidden"><div class="night-sky-visual"><i id="night-sky-visual-icon" class=""></i></div><div class="night-sky-text-details"><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-satellite"></i>Objektum</span><span class="night-sky-detail-value" id="night-sky-object-name"></span></div><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-eye"></i>Állapot</span><span class="night-sky-detail-value" id="night-sky-object-status"></span></div><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-arrow-up"></i>Felkel</span><span class="night-sky-detail-value" id="night-sky-object-rise"></span></div><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-arrow-down"></i>Lenyugszik</span><span class="night-sky-detail-value" id="night-sky-object-set"></span></div></div></div>
-                <div id="constellation-info" class="is-hidden"><div id="constellation-svg-container"></div><div class="night-sky-text-details"><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span><span class="night-sky-detail-value" id="constellation-name"></span></div></div></div>
+                <div id="constellation-info" class="is-hidden"><div class="night-sky-visual"><div id="constellation-svg-container"></div></div><div class="night-sky-text-details"><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span><span class="night-sky-detail-value" id="constellation-name"></span></div></div></div>
             </div>
             <div class="temperature-section">
                 <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
