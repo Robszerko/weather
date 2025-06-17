@@ -136,7 +136,6 @@
         
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 24px; padding-top: 10px; min-height: 110px; }
         
-        /* New Info Card Grid */
         .info-card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; width: 100%; max-width: 400px; }
         .info-card { background-color: rgba(0,0,0,0.1); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; text-align: left; transition: all 0.6s; }
         .info-card-header { display: flex; align-items: center; gap: 8px; }
@@ -952,8 +951,6 @@
                     el('night-sky-visual-icon').className = `fas ${nightSkyData.icon}`;
                     el('night-sky-object-name').textContent = nightSkyData.name;
                     el('night-sky-object-status').textContent = nightSkyData.status;
-                    el('night-sky-object-rise').textContent = nightSkyData.rise;
-                    el('night-sky-object-set').textContent = nightSkyData.set;
                 } else {
                     planetPanel.classList.add('is-hidden');
                     constellationPanel.classList.remove('is-hidden');
