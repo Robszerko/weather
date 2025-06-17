@@ -133,7 +133,7 @@
         .info-bar-label { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
         .info-bar-value { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
         #main-wind-dir-arrow { transition: transform 0.7s; }
-        
+
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 65px; padding-top: 10px; min-height: 110px; }
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details { text-align: left; display: flex; flex-direction: column; gap: 5px; font-size: 12px; flex-shrink: 1; }
         .sun-detail-item, .moon-detail-item, .rain-detail-item, .night-sky-detail-item { display: flex; flex-direction: column; }
@@ -745,7 +745,7 @@
                 <div class="additional-core-info">
                      <div class="secondary-info-bar">
                         <div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value"></span></div></div>
-                        <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value"><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text"></span><span id="main-wind-speed-value"></span></div></div>
+                        <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text"></span><span id="main-wind-speed-value"></span></div></div>
                         <div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value"></span></div></div>
                      </div>
                 </div>
@@ -970,6 +970,7 @@
                  windSpeedItem.classList.remove('is-hidden');
                  el('main-wind-dir-arrow').style.transform = `rotate(${obs.winddir || 0}deg)`;
                  el('main-wind-dir-text').textContent = degreesToCompassAbbreviated(obs.winddir);
+                 el('main-wind-value-container').title = degreesToCompass(obs.winddir);
                  el('main-wind-speed-value').textContent = formatValue(obs.windSpeed, ' km/h', 1);
             } else {
                  windSpeedItem.classList.add('is-hidden');
