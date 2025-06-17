@@ -231,10 +231,12 @@
 
         .rain-visual { width: 130px; height: 120px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; }
         .rain-gauge-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-        .rain-gauge-bg, .rain-gauge-value { fill: none; stroke-width: 10; stroke-linecap: round; }
+        .rain-gauge-bg, .rain-gauge-value { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; }
         .rain-gauge-bg { stroke: var(--current-text-muted-color); opacity: 0.2; }
         .rain-gauge-value { stroke: var(--accent-interactive-night); transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         .rain-visual-center { position: absolute; text-align: center; color: var(--current-text-color); }
+        .rain-visual:not(.is-discreet) .rain-visual-center { transform: translateY(10px); }
+        .rain-visual.is-discreet .rain-visual-center { transform: translateY(6px); }
         #rain-visual-icon { font-size: 28px; opacity: 0.8; margin-bottom: 2px; }
         #rain-visual-total { font-size: 17px; font-weight: 700; }
         #rain-visual-total-unit { font-size: 11px; font-weight: 500; opacity: 0.7; margin-left: 2px; }
@@ -588,17 +590,20 @@
         function updatePrecipitationVisuals(precipRate, precipTotal, elements) {
             const { gaugeValueEl, totalValueEl } = elements;
             if (!gaugeValueEl || !totalValueEl) return;
-            
+        
             const MAX_INTENSITY = 10;
             const percentage = Math.min(1, (precipRate || 0) / MAX_INTENSITY);
-            
-            const radius = gaugeValueEl.r.baseVal.value;
-            const circumference = 2 * Math.PI * radius;
-            
-            const offset = circumference * (1 - percentage);
-            gaugeValueEl.style.strokeDasharray = circumference;
+        
+            const length = gaugeValueEl.getTotalLength();
+            if (length === 0) { // Path not ready yet, retry shortly
+                setTimeout(() => updatePrecipitationVisuals(precipRate, precipTotal, elements), 50);
+                return;
+            }
+        
+            const offset = length * (1 - percentage);
+            gaugeValueEl.style.strokeDasharray = length;
             gaugeValueEl.style.strokeDashoffset = offset;
-            
+        
             totalValueEl.textContent = formatValue(precipTotal, '', 2);
         }
 
@@ -669,6 +674,7 @@
         
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
+            const raindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -705,7 +711,7 @@
             <div class="widget-core-data">
             <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i class="fas fa-sun" id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte</div><div class="sun-path-label sunset-label">Napnyugta</div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label">Nap magassága:</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label">Déli napállás:</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label">Nap útja:</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
             <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="sun-detail-label">Hold magassága:</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label">Fázis:</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label">Megvilágítás:</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
-            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><circle class="rain-gauge-bg" cx="50" cy="50" r="45"></circle><circle id="rain-gauge-value" class="rain-gauge-value" cx="50" cy="50" r="45"></circle></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
+            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><path class="rain-gauge-bg" d="${raindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${raindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label">Most esik:</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Intenzitás:</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label">Előrejelzett:</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label">Következő:</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
             <div class="temperature-section">
                 <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
                     <div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div>
@@ -716,8 +722,8 @@
                             <div class="rain-visual-label">esett ma eddig</div>
                         </div>
                         <svg class="rain-gauge-svg" viewBox="0 0 100 100">
-                            <circle class="rain-gauge-bg" cx="50" cy="50" r="45"></circle>
-                            <circle id="discreet-rain-gauge-value" class="rain-gauge-value" cx="50" cy="50" r="45"></circle>
+                            <path class="rain-gauge-bg" d="${raindropPath}"></path>
+                            <path id="discreet-rain-gauge-value" class="rain-gauge-value" d="${raindropPath}"></path>
                         </svg>
                     </div>
                 </div>
@@ -837,7 +843,7 @@
                 discreetRainGauge.classList.add('is-hidden');
 
                 // Nagy eső panel adatainak frissítése
-                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total').querySelector('#rain-visual-total') });
+                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total') });
                 el('rain-currently-raining-value').textContent = "Igen";
                 el('rain-intensity-value').textContent = formatValue(obs.precipRate, ' mm/h', 2);
                 el('rain-expected-today-value').textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
