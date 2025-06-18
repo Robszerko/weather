@@ -136,12 +136,12 @@
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 30px; padding-top: 10px; min-height: 110px; }
         
-        /* === ÚJ, ÁTTERVEZETT STÍLUSOK A VIZUÁLIS ELEMEK MELLETTI SZÖVEGEKHEZ === */
+        /* === JAVÍTOTT, LETISZTULT STÍLUSOK A VIZUÁLIS ELEMEK MELLETTI SZÖVEGEKHEZ === */
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
             text-align: left;
             display: flex;
             flex-direction: column;
-            gap: 2px; /* A sorok közötti rés csökkentve, hogy egységesebb blokkot alkossanak */
+            gap: 4px; /* Tiszta, szellős rés a sorok között */
             font-size: 12px;
             flex-grow: 1;
             min-width: 190px;
@@ -151,18 +151,16 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            padding: 10px 8px; /* Növelt belső margó a jobb szellőzésért és olvashatóságért */
-            border-bottom: 1px solid var(--current-container-border-color);
+            padding: 8px 10px; /* Kiegyensúlyozott belső margó */
+            border-radius: 8px; /* Lekerekített sarkok a modern kinézetért */
+            border-bottom: none; /* NINCS MÁR ELVÁLASZTÓ VONAL */
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.08); /* Finom háttér a sorok kiemeléséhez */
         }
-        .sun-detail-item:last-child, .moon-detail-item:last-child, .rain-detail-item:last-child, .night-sky-detail-item:last-child {
-            border-bottom: none;
-        }
+        
         .sun-detail-item:hover, .moon-detail-item:hover, .rain-detail-item:hover, .night-sky-detail-item:hover {
-            background-color: rgba(255, 255, 255, 0.04);
-            transform: scale(1.03);
-            border-bottom-color: transparent;
+            background-color: rgba(255, 255, 255, 0.07); /* Kicsit világosabb háttér hover esetén */
+            transform: translateY(-2px) scale(1.02);
         }
 
         .sun-detail-label, .moon-detail-label, .rain-detail-label, .night-sky-detail-label {
@@ -1335,4 +1333,3 @@
     </script>
 </body>
 </html>
-```
