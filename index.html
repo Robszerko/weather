@@ -119,7 +119,7 @@
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; }
 
         .widget-core-data { display: flex; flex-direction: column; align-items: center; gap: 20px; margin-bottom: 12px; }
-        .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; margin-top: 12px; }
+        .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; margin-top: 12px; width: 100%;}
         .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section { order: 1; width: 100%; max-width: 100%; }
         
         .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; min-height: 120px;}
@@ -133,6 +133,29 @@
         .info-bar-label { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
         .info-bar-value { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
         #main-wind-dir-arrow { transition: transform 0.7s; }
+
+        /* ÚJ: Csapadék előrejelző sáv */
+        .precipitation-forecast-info {
+            text-align: center;
+            font-size: 13px;
+            color: var(--current-text-muted-color);
+            padding: 8px 12px;
+            margin-top: 12px; /* Tér a felette lévő elemtől */
+            margin-bottom: 0px; /* Tér az alatta lévő rácstól (ha van) */
+            border-radius: 8px;
+            background-color: rgba(0,0,0,0.08); /* Enyhe háttér a kiemeléshez */
+            border: 1px solid var(--current-container-border-color);
+            transition: all 0.6s;
+            width: 100%;
+            max-width: 450px; /* Illeszkedjen a secondary-info-bar-hoz */
+            box-sizing: border-box;
+        }
+        .precipitation-forecast-info strong {
+            color: var(--current-text-color);
+            font-weight: 600;
+        }
+        /* ÚJ VÉGE */
+
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 30px; padding-top: 10px; min-height: 110px; }
         
@@ -246,9 +269,27 @@
         #discreet-rain-gauge.has-rained-today .rain-gauge-bg { stroke: var(--accent-interactive-night); stroke-opacity: 0.8; }
         #discreet-rain-gauge .rain-gauge-value { display: none; }
         #discreet-rain-gauge .rain-visual-center { transform: translateX(3px); gap: 2px; }
-        #discreet-rain-visual-value { font-size: 18px; font-weight: 700; color: var(--current-text-color); }
-        #discreet-rain-visual-value-unit { font-size: 0.6em; opacity: 0.8; margin-left: 3px; }
-        #discreet-rain-visual-label { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
+        
+        /* MÓDOSÍTOTT: Kisebb esőcseppnél a kiírás finomhangolása */
+        #discreet-rain-visual-value { 
+            font-size: 20px; /* Kissé növelve */
+            font-weight: 700; 
+            color: var(--current-text-color); 
+        }
+        #discreet-rain-visual-value-unit { 
+            font-size: 0.6em; 
+            opacity: 0.8; 
+            margin-left: 3px; 
+            font-weight: 500; /* Enyhe vastagítás */
+        }
+        #discreet-rain-visual-label { 
+            font-size: 9px; /* Kissé csökkentve */
+            font-weight: 500; 
+            color: var(--current-text-muted-color); 
+            line-height: 1; /* Tömörítés */
+        }
+        /* MÓDOSÍTÁS VÉGE */
+
 
         /* Night Sky Panel Styles */
         .night-sky-visual { text-align: center; }
@@ -263,7 +304,7 @@
         #constellation-svg-container .star.bright { fill: #ffffff; }
         #constellation-svg-container .const-line { stroke: var(--text-secondary-night); stroke-width: 1px; opacity: 0.5; }
 
-        .weather-details-grid { margin-top: 0; border-top: 1px solid var(--current-container-border-color); padding-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; transition: border-color 0.6s; }
+        .weather-details-grid { margin-top: 14px; border-top: 1px solid var(--current-container-border-color); padding-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px 16px; transition: border-color 0.6s; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 5px 0; }
         .detail-item .label { font-weight: 600; color: var(--current-text-color); margin-right: 6px; display: flex; align-items: center; transition: color 0.6s; }
         .detail-item .label i { margin-right: 7px; width: 14px; font-size: 0.95em; text-align: center; opacity: 0.8; color: var(--current-icon-color); transition: color 0.6s; }
@@ -336,7 +377,8 @@
         const REFRESH_INTERVAL_WIND = 15 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 5 * 60 * 1000;
         const REFRESH_INTERVAL_OPEN_METEO_RAIN = 60 * 60 * 1000;
-        const REFRESH_INTERVAL_FORECAST = 6 * 60 * 60 * 1000;
+        const REFRESH_INTERVAL_FORECAST = 6 * 60 * 60 * 1000; // Napi előrejelzéshez
+        // Az órás előrejelzés frissítési logikáját a scheduleHourlyForecastUpdate kezeli
         const SKY_COLOR_UPDATE_INTERVAL = 1 * 60 * 1000;
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
@@ -353,7 +395,7 @@
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null }, 
             expectedRainToday_gauge: null,
             forecastDays: [],
-            hourlyForecast: [],
+            hourlyForecast: [], // Ezt frissíti a scheduleHourlyForecastUpdate
             sunCalc: null
         };
         let isWeatherDisplayInitialized = false;
@@ -364,7 +406,7 @@
 
         let weatherDisplayEl, forecastContainerEl, forecastTitleEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
         const NO_DATA_STRING = 'N/A';
-        const PRECIP_THRESHOLD = 30;
+        const PRECIP_THRESHOLD = 30; // Csapadék esély küszöb %-ban
 
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
@@ -469,11 +511,9 @@
             let pathSet = null;
 
             if (isActuallyUp) {
-                // If the moon is up, find the last rise time. This is our path's start.
                 const lastRiseEvent = events.filter(e => e.type === 'rise' && e.time < now).pop();
                 if (lastRiseEvent) {
                     pathRise = lastRiseEvent.time;
-                    // The path's end is the first set time after this rise.
                     pathSet = events.find(e => e.type === 'set' && e.time > pathRise)?.time || null;
                 }
             }
@@ -482,7 +522,7 @@
             const nextSet = events.find(e => e.type === 'set' && e.time > now)?.time || null;
             
             return {
-                isUp: isActuallyUp, // Use the direct altitude check for the `isUp` status
+                isUp: isActuallyUp, 
                 pathRise: pathRise,
                 pathSet: pathSet,
                 nextRise: nextRise,
@@ -569,11 +609,6 @@
         function getNightSkyInfo(date) {
             const hour = date.getHours();
             
-            // 2025 Nyár (hozzávetőleges adatok)
-            // Szaturnusz: ~23:30-kor kel, hajnalig látható.
-            // Jupiter: ~01:30-kor kel, reggelig látható.
-            // Mars: ~02:00-kor kel, reggelig látható.
-            
             if (hour >= 23 || hour < 1) {
                 return { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Látható éjjel', rise: '23:30', set: '08:10' };
             }
@@ -584,18 +619,17 @@
                  return { type: 'planet', name: 'Mars', icon: 'fas fa-circle', status: 'Látható hajnalban', rise: '02:00', set: '12:30' };
             }
             
-            // Ha nincs bolygó, csillagkép
             return {
                 type: 'constellation',
                 name: 'Hattyú (Északi Kereszt)',
                 svg: `<svg viewBox="0 0 100 80">
                         <line class="const-line" x1="50" y1="5" x2="50" y2="75"/>
                         <line class="const-line" x1="20" y1="45" x2="80" y2="45"/>
-                        <circle class="star bright" cx="50" cy="5" r="3"></circle> <!-- Deneb -->
-                        <circle class="star" cx="50" cy="75" r="2.5"></circle> <!-- Albireo -->
-                        <circle class="star" cx="20" cy="45" r="2"></circle> <!-- Gienah -->
-                        <circle class="star" cx="80" cy="45" r="2"></circle> <!-- Fawaris -->
-                        <circle class="star" cx="50" cy="45" r="2.5"></circle> <!-- Sadr -->
+                        <circle class="star bright" cx="50" cy="5" r="3"></circle> 
+                        <circle class="star" cx="50" cy="75" r="2.5"></circle> 
+                        <circle class="star" cx="20" cy="45" r="2"></circle> 
+                        <circle class="star" cx="80" cy="45" r="2"></circle> 
+                        <circle class="star" cx="50" cy="45" r="2.5"></circle> 
                     </svg>`
             };
         }
@@ -646,7 +680,7 @@
             const { gaugeValueEl, totalValueEl } = elements;
             if (!gaugeValueEl || !totalValueEl) return;
         
-            const MAX_INTENSITY = 10;
+            const MAX_INTENSITY = 10; // mm/h
             const percentage = Math.min(1, (precipRate || 0) / MAX_INTENSITY);
         
             const length = gaugeValueEl.getTotalLength();
@@ -676,7 +710,8 @@
             } catch (error) {
                 stationConfig.isOnline = false;
                 updateStationStatusUI(stationKey, 'offline');
-                throw error;
+                console.warn(`PWS adatlekérési hiba (${stationConfig.id}): ${error.message}`);
+                throw error; // Továbbra is dobjuk a hibát, hogy a Promise.all kezelhesse
             }
         }
 
@@ -687,7 +722,8 @@
             try {
                 const response = await fetch(url); if (!response.ok) throw new Error(`Napi előrejelzés API Hiba: ${response.status}`); const data = await response.json(); if (!data || !data.dayOfWeek) { throw new Error('Hiányos napi előrejelzési adatok.'); } lastApiCallTimes.forecast = Date.now();
                 const forecastDays = []; 
-                for(let i = 0; i <= 7; i++) {
+                for(let i = 0; i <= 7; i++) { // Max 8 nap (0-7)
+                    if (!data.dayOfWeek?.[i]) break; // Ha elfogynak az adatok
                     const dayData = {
                         dayName: data.dayOfWeek?.[i], date: data.validTimeLocal?.[i], tempMax: data.temperatureMax?.[i], tempMin: data.temperatureMin?.[i],
                         dayPart: data.daypart?.[0] ? { phrase: data.daypart[0].wxPhraseLong?.[i*2], precipChance: data.daypart[0].precipChance?.[i*2], windSpeed: data.daypart[0].windSpeed?.[i*2], windDir: data.daypart[0].windDirection?.[i*2], uvIndex: data.daypart[0].uvIndex?.[i*2], uvDescription: data.daypart[0].uvDescription?.[i*2] } : null,
@@ -705,9 +741,22 @@
         async function fetchHourlyForecastData(lat, lon) {
             const url = `https://api.weather.com/v3/wx/forecast/hourly/2day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
-                const response = await fetch(url); if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`); const data = await response.json(); if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); } lastApiCallTimes.hourlyForecast = Date.now();
-                const hourlyForecasts = []; const now = new Date(); const startIndex = data.validTimeLocal.findIndex(timeStr => new Date(timeStr) > now);
-                if (startIndex === -1) return [];
+                const response = await fetch(url); if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`); const data = await response.json(); if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); } 
+                lastApiCallTimes.hourlyForecast = Date.now(); // Utolsó sikeres hívás ideje
+                
+                const hourlyForecasts = []; const now = new Date(); 
+                // Keressük meg az első olyan indexet, ami a jelenlegi időpont UTÁN van, vagy a legközelebbi múltbeli, ha nincs jövőbeli.
+                let startIndex = data.validTimeLocal.findIndex(timeStr => new Date(timeStr) > now);
+                if (startIndex === -1) { // Ha mind múltbeli, az utolsótól kezdjük (nem ideális, de jobb mint semmi)
+                    startIndex = data.validTimeLocal.length > 0 ? data.validTimeLocal.length -1 : 0;
+                } else if (startIndex > 0) { // Ha van jövőbeli, de az első nem az, akkor az előzőt is vegyük figyelembe, ha közel van
+                     const prevTime = new Date(data.validTimeLocal[startIndex-1]);
+                     if (now.getTime() - prevTime.getTime() < 30 * 60 * 1000) { // Ha az előző kevesebb mint 30 perce volt
+                        startIndex--;
+                     }
+                }
+
+
                 for (let i = startIndex; i < startIndex + 12 && i < data.validTimeLocal.length; i++) { 
                     hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], uvIndex: data.uvIndex[i], wxPhraseShort: data.wxPhraseShort[i] }); 
                 } 
@@ -719,6 +768,9 @@
             if (!hourlyData || hourlyData.length === 0) return null;
             const stormKeywords = ['vihar', 'zivatar']; const rainKeywords = ['eső', 'zápor']; const snowKeywords = ['hó', 'havazás', 'hózápor'];
             for (const hour of hourlyData) {
+                // Csak a jövőbeli eseményeket vegyük figyelembe
+                if (new Date(hour.time) < new Date()) continue;
+
                 if (hour.precipChance >= PRECIP_THRESHOLD) {
                     const phrase = (hour.wxPhraseShort || '').toLowerCase(); let type = 'Csapadék';
                     if (stormKeywords.some(keyword => phrase.includes(keyword))) { type = 'Vihar'; } else if (rainKeywords.some(keyword => phrase.includes(keyword))) { type = 'Eső'; } else if (snowKeywords.some(keyword => phrase.includes(keyword))) { type = 'Hó'; }
@@ -728,7 +780,7 @@
         }
         
         function initializeWeatherDisplayDOM() {
-            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
+            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             const discreetRaindropPath = `M50,85 C25,85 20,55 50,15 C80,55 75,85 50,85`;
             
@@ -793,6 +845,10 @@
                         <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text"></span><span id="main-wind-speed-value"></span></div></div>
                         <div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value"></span></div></div>
                      </div>
+                </div>
+                <!-- ÚJ: Csapadék előrejelző sáv -->
+                <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar">
+                    <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
                 </div>
             </div>
             </div><div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
@@ -864,6 +920,28 @@
                 }
             }
         }
+
+        // ÚJ: Külön függvény a csapadék előrejelző sáv frissítésére
+        function renderPrecipitationForecastInfo() {
+            const forecastBar = document.getElementById('precipitation-forecast-bar');
+            const forecastTextEl = document.getElementById('next-precipitation-info-text');
+            if (!forecastBar || !forecastTextEl) return;
+
+            const nextEvent = findNextPrecipitationEvent(cachedData.hourlyForecast);
+
+            if (nextEvent) {
+                forecastTextEl.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
+                forecastBar.classList.remove('is-hidden');
+            } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
+                // Ha van órás adat, de nincs benne csapadék esemény a küszöb felett
+                forecastTextEl.textContent = "A következő 12 órában nem várható jelentős csapadék.";
+                forecastBar.classList.remove('is-hidden');
+            } else {
+                // Ha még nincs órás adat (pl. API hívás sikertelen volt, vagy még nem futott le)
+                forecastTextEl.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
+                forecastBar.classList.add('is-hidden'); // Ilyenkor inkább rejtve marad
+            }
+        }
         
         function renderWeatherData() {
             const obs = cachedData.displayPws; 
@@ -873,17 +951,15 @@
 
             const el = (id) => document.getElementById(id);
             
-            if (obs.precipTotal > 0.1) {
+            if (obs.precipTotal > 0.1) { // 0.1 mm-nél nagyobb, hogy a nagyon pici értékek ne számítsanak
                 hasRainBeenDetectedToday = true;
             }
 
-            // --- Fejléc és alapvető adatok ---
             el('station-subtitle-text').textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             updateAnimatedValue(el('timestamp-text'), `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
             updateAnimatedValue(el('temperature-value'), formatValue(obs.temp, '', 1, '--'));
             el('temperature-container').style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
 
-            // --- Elemek referenciái ---
             const rainInfoSection = el('rain-info-section'); 
             const mainRainVisual = el('main-rain-visual');
             const sunInfoSection = el('sun-info-section');
@@ -895,18 +971,14 @@
             const gridMoonriseItem = el('grid-moonrise-item'); 
             const gridMoonsetItem = el('grid-moonset-item');
 
-            // --- Feltételek ---
             const isRainingNow = obs.precipRate > 0;
-            const isDayTime = sunCalcData.sunAltitude > -0.83;
+            const isDayTime = sunCalcData.sunAltitude > -0.83; // Nap horizont felett (beleértve a szürkületet)
             const isMoonUp = sunCalcData.isUp;
             
             let showSunPanel = false;
             let showMoonPanel = false;
             let showNightSkyPanel = false;
 
-            // --- MEGJELENÍTÉSI LOGIKA ---
-            
-            // Panelek alaphelyzetbe állítása
             rainInfoSection.classList.add('is-hidden');
             sunInfoSection.classList.add('is-hidden');
             moonInfoSection.classList.add('is-hidden');
@@ -915,27 +987,29 @@
             mainRainVisual.classList.remove('is-raining-actively');
 
             if (isRainingNow) {
-                // ESIK AZ ESŐ: Fő eső panel látszik
                 rainInfoSection.classList.remove('is-hidden');
                 mainRainVisual.classList.add('is-raining-actively');
-
                 updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total') });
                 el('rain-currently-raining-value').textContent = "Igen";
                 el('rain-intensity-value').textContent = formatValue(obs.precipRate, ' mm/h', 2);
                 el('rain-expected-today-value').textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
-                const nextEvent = findNextPrecipitationEvent(cachedData.hourlyForecast);
-                if (nextEvent && el('next-precip-item')) { 
-                    el('next-precip-value').textContent = `${nextEvent.type} ~${formatTime(nextEvent.time)} (${formatValue(nextEvent.chance, '%', 0)})`; 
-                    el('next-precip-item').classList.remove('is-hidden'); 
-                } else if (el('next-precip-item')) { 
-                    el('next-precip-item').classList.add('is-hidden'); 
+                
+                const nextEventInRainSection = findNextPrecipitationEvent(cachedData.hourlyForecast);
+                const nextPrecipItemEl = el('next-precip-item');
+                if (nextEventInRainSection && nextPrecipItemEl) { 
+                    el('next-precip-value').textContent = `${nextEventInRainSection.type} ~${formatTime(nextEventInRainSection.time)} (${formatValue(nextEventInRainSection.chance, '%', 0)})`; 
+                    nextPrecipItemEl.classList.remove('is-hidden'); 
+                } else if (nextPrecipItemEl) { 
+                    nextPrecipItemEl.classList.add('is-hidden'); 
                 }
 
             } else {
-                // NEM ESIK AZ ESŐ:
                 discreetRainGauge.classList.remove('is-hidden');
                 discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
-                el('discreet-rain-visual-value').childNodes[0].nodeValue = formatValue(obs.precipTotal || 0, '', 1);
+                // Az érték formázása 1 tizedesjegyre, vagy '--' ha nincs adat
+                const discreetRainValue = obs.precipTotal !== null && typeof obs.precipTotal !== 'undefined' ? formatValue(obs.precipTotal, '', 1) : '--';
+                el('discreet-rain-visual-value').childNodes[0].nodeValue = discreetRainValue;
+
 
                 if (isDayTime) {
                     showSunPanel = true;
@@ -1000,8 +1074,6 @@
             gridMoonriseItem.classList.toggle('is-hidden', showMoonPanel);
             gridMoonsetItem.classList.toggle('is-hidden', showMoonPanel);
 
-            // --- Alsó rész adatai ---
-            // Hőérzet
             const heatIndexItem = el('heat-index-item');
             if (obs.heatIndex != null) {
                 heatIndexItem.classList.remove('is-hidden');
@@ -1010,7 +1082,6 @@
                 heatIndexItem.classList.add('is-hidden');
             }
 
-            // Szél
             const windSpeedItem = el('wind-speed-item');
             if (obs.windSpeed != null && obs.windSpeed >= 0) {
                  windSpeedItem.classList.remove('is-hidden');
@@ -1022,7 +1093,6 @@
                  windSpeedItem.classList.add('is-hidden');
             }
 
-            // Széllökés
             const windGustItem = el('wind-gust-item');
              if (obs.windGust > 0) {
                  windGustItem.classList.remove('is-hidden');
@@ -1046,6 +1116,9 @@
             el('details-sunset-value').textContent = sunCalcData.sunset;
             el('moonrise-value').textContent = sunCalcData.moonrise || '--'; 
             el('moonset-value').textContent = sunCalcData.moonset || '--';
+
+            // ÚJ: Infó sáv frissítése
+            renderPrecipitationForecastInfo();
         }
 
         function getTemperatureColorVar(temp) { if (temp === null) return 'var(--mild)'; if (temp >= 35) return 'var(--hot)'; if (temp >= 25) return 'var(--warm)'; if (temp >= 10) return 'var(--mild)'; if (temp >= 0) return 'var(--cool)'; return 'var(--cold)'; }
@@ -1058,23 +1131,7 @@
         function mapIconCodeToHungarianText(iconCode, dayOrNight) {
             const isDay = dayOrNight === 'D';
             const textMap = {
-                32: 'Napos', 36: 'Napos',
-                31: 'Tiszta ég', 33: 'Tiszta ég',
-                34: isDay ? 'Részben napos' : 'Részben felhős',
-                29: isDay ? 'Részben napos' : 'Részben felhős',
-                30: isDay ? 'Részben napos' : 'Részben felhős',
-                27: 'Felhős', 28: 'Felhős',
-                26: 'Borult',
-                11: 'Zápor', 12: 'Zápor', 40: 'Zápor',
-                39: isDay ? 'Zápor' : 'Éjjeli zápor',
-                45: isDay ? 'Zápor' : 'Éjjeli zápor',
-                3: 'Zivatar', 4: 'Zivatar', 37: 'Zivatar', 38: 'Zivatar', 47: 'Zivatar',
-                5: 'Havas eső', 6: 'Ónos eső', 7: 'Havas eső', 8: 'Ónos eső', 10: 'Ónos eső', 18: 'Havas eső',
-                13: 'Hózápor', 14: 'Hózápor', 15: 'Hófúvás', 16: 'Havazás',
-                41: 'Havazás', 42: 'Havazás', 43: 'Hófúvás', 46: 'Hózápor',
-                9: 'Eső',
-                19: 'Párás', 20: 'Ködös', 21: 'Párás', 22: 'Füstös',
-                23: 'Szeles', 24: 'Szeles'
+                32: 'Napos', 36: 'Napos', 31: 'Tiszta ég', 33: 'Tiszta ég', 34: isDay ? 'Részben napos' : 'Részben felhős', 29: isDay ? 'Részben napos' : 'Részben felhős', 30: isDay ? 'Részben napos' : 'Részben felhős', 27: 'Felhős', 28: 'Felhős', 26: 'Borult', 11: 'Zápor', 12: 'Zápor', 40: 'Zápor', 39: isDay ? 'Zápor' : 'Éjjeli zápor', 45: isDay ? 'Zápor' : 'Éjjeli zápor', 3: 'Zivatar', 4: 'Zivatar', 37: 'Zivatar', 38: 'Zivatar', 47: 'Zivatar', 5: 'Havas eső', 6: 'Ónos eső', 7: 'Havas eső', 8: 'Ónos eső', 10: 'Ónos eső', 18: 'Havas eső', 13: 'Hózápor', 14: 'Hózápor', 15: 'Hófúvás', 16: 'Havazás', 41: 'Havazás', 42: 'Havazás', 43: 'Hófúvás', 46: 'Hózápor', 9: 'Eső', 19: 'Párás', 20: 'Ködös', 21: 'Párás', 22: 'Füstös', 23: 'Szeles', 24: 'Szeles'
             };
             return textMap[iconCode] || 'Ismeretlen';
         }
@@ -1170,7 +1227,11 @@
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
-            await Promise.all(Object.keys(STATIONS).map(key => fetchPwsStationData(key).catch(e => null)));
+            // PWS állomások adatainak lekérése párhuzamosan
+            // Csak akkor dob hibát a Promise.all, ha MINDegyik PWS lekérés hibás.
+            // A hibákat egyedileg kezeljük a fetchPwsStationData-n belül.
+            await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
+            
             if (!STATIONS[activeDisplayStationKey].isOnline) {
                 const onlineStations = Object.keys(STATIONS).filter(k => STATIONS[k].isOnline);
                 if(onlineStations.length > 0) {
@@ -1181,33 +1242,37 @@
             const independentPromises = [];
 
             if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { 
-                independentPromises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => console.warn(e))); 
+                independentPromises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => console.warn("Ált. kondíciók lekérési hiba:", e.message))); 
             }
             if (isInitialLoad || now - lastApiCallTimes.openMeteoRain > REFRESH_INTERVAL_OPEN_METEO_RAIN) { 
-                independentPromises.push(fetchOpenMeteoExpectedRain_gauge(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.expectedRainToday_gauge = data; }).catch(e => console.warn(e))); 
+                independentPromises.push(fetchOpenMeteoExpectedRain_gauge(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.expectedRainToday_gauge = data; }).catch(e => console.warn("OpenMeteo csapadék lekérési hiba:", e.message))); 
             }
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { 
                 independentPromises.push(fetchDailyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) { 
                     cachedData.forecastDays = data.forecastDays; 
+                    // Napkelte/nyugta adatokat is frissítjük az általános kondíciókban, ha itt újabb van
                     Object.assign(cachedData.generalConditions, { 
-                        sunriseTimeLocal: data.sunriseTimeLocal, 
-                        sunsetTimeLocal: data.sunsetTimeLocal,
+                        sunriseTimeLocal: data.sunriseTimeLocal || cachedData.generalConditions.sunriseTimeLocal, 
+                        sunsetTimeLocal: data.sunsetTimeLocal || cachedData.generalConditions.sunsetTimeLocal,
                     }); 
-                } }).catch(e => console.warn(e))); 
+                } }).catch(e => console.warn("Napi előrejelzés lekérési hiba:", e.message))); 
             }
-            if (isInitialLoad) {
-                 independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) cachedData.hourlyForecast = data; }).catch(e => console.warn(e)));
+            // Az órás előrejelzést a scheduleHourlyForecastUpdate kezeli, nem itt hívjuk alapból,
+            // kivéve az első betöltéskor, hogy legyen adatunk.
+            if (isInitialLoad && cachedData.hourlyForecast.length === 0) {
+                 independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { 
+                    if (data) cachedData.hourlyForecast = data; 
+                    renderHourlyForecastData(); // Azonnali renderelés az első betöltésnél
+                 }).catch(e => console.warn("Kezdeti órás előrejelzés lekérési hiba:", e.message)));
             }
 
-            await Promise.all(independentPromises);
+            await Promise.allSettled(independentPromises);
 
             try {
-                const sunCalcResult = await fetchAdvancedSunCalcData(
-                    NYIREGYHAZA_COORDS.lat, 
-                    NYIREGYHAZA_COORDS.lon
-                );
+                const sunCalcResult = await fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
                 cachedData.sunCalc = sunCalcResult;
                 
+                // Frissítjük a napkelte/nyugta időket, ha a SunCalc pontosabb (helyi számítás)
                 if (sunCalcResult.sunriseDateForPath) {
                     cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString();
                 }
@@ -1220,10 +1285,13 @@
 
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             const anyStationOnline = Object.values(STATIONS).some(s => s.isOnline);
-            if (anyStationOnline) { 
+            if (anyStationOnline && STATIONS[activeDisplayStationKey].data) { // Ellenőrizzük, hogy az aktív állomásnak van-e adata
                 compileAndRenderDisplayData(); 
-            } else if (!isWeatherDisplayInitialized) { 
-                document.getElementById('weather-display').innerHTML = `<div class="loading">⚠️ Egyik mérőállomás sem elérhető.</div>`; 
+            } else if (!isWeatherDisplayInitialized && !anyStationOnline) { 
+                document.getElementById('weather-display').innerHTML = `<div class="loading" style="padding: 20px; text-align: center; color: var(--current-text-color);">⚠️ Egyik mérőállomás sem elérhető. Kérjük, próbálja később.</div>`; 
+            } else if (anyStationOnline && !STATIONS[activeDisplayStationKey].data) {
+                // Ha van online állomás, de az aktívnak pont nincs adata (ritka eset), akkor nem renderelünk, várunk a következő ciklusra
+                console.warn(`Az aktív állomás (${activeDisplayStationKey}) online, de nincs megjeleníthető adata.`);
             }
         }
 
@@ -1232,19 +1300,22 @@
             if (!STATIONS[stationKey] || !STATIONS[stationKey].isOnline) return;
 
             try {
-                await fetchPwsStationData(stationKey);
+                await fetchPwsStationData(stationKey); // Ez frissíti a STATIONS[stationKey].data-t
                 const newPwsData = STATIONS[stationKey].data;
 
-                if (newPwsData && cachedData.displayPws) {
+                if (newPwsData && cachedData.displayPws) { // cachedData.displayPws is létezzen
                     cachedData.displayPws.winddir = newPwsData.winddir;
                     cachedData.displayPws.windSpeed = newPwsData.metric.windSpeed;
                     cachedData.displayPws.windGust = newPwsData.metric.windGust;
                     cachedData.displayPws.obsTimeLocal = newPwsData.obsTimeLocal; 
 
+                    // Csak a releváns részeket rendereljük újra, nem az egészet
+                    // De egyszerűbb most az egészet, a renderWeatherData optimalizált az animációkra
                     renderWeatherData();
                 }
             } catch (error) {
-                console.warn(`Gyorsított szél-adat lekérés sikertelen: ${error.message}`);
+                // A hiba már naplózva van a fetchPwsStationData-ban
+                // console.warn(`Gyorsított szél-adat lekérés sikertelen (${stationKey}): ${error.message}`);
             }
         }
 
@@ -1254,17 +1325,30 @@
             const currentSeconds = now.getSeconds();
 
             let targetMinute;
-            if (currentMinutes < 20) {
+            // Célpercek: 0, 20, 40 (ezek környékén szoktak frissülni az órás adatok)
+            if (currentMinutes < 18) { // 00-17 között -> cél a 20. perc
                 targetMinute = 20;
-            } else if (currentMinutes < 40) {
+            } else if (currentMinutes < 38) { // 18-37 között -> cél a 40. perc
                 targetMinute = 40;
-            } else {
+            } else { // 38-59 között -> cél a következő óra 0. perce (azaz 60)
                 targetMinute = 60; 
             }
 
-            const minutesToWait = targetMinute - currentMinutes - 1;
+            // Hozzáadunk egy kis random késleltetést (0-2 perc), hogy ne egyszerre terheljük az API-t
+            const randomDelayMinutes = Math.floor(Math.random() * 3); // 0, 1, vagy 2 perc
+            targetMinute += randomDelayMinutes;
+            if (targetMinute >= 60) targetMinute -=60; // Túlcsordulás kezelése (bár a 60-as célperc miatt ez nem igazán kellene)
+
+
+            let minutesToWait = targetMinute - currentMinutes;
+            if (minutesToWait < 0) { // Ha már túl vagyunk a célpercen ebben az órában
+                minutesToWait += (targetMinute <= currentMinutes && targetMinute < 20 ? 20 : (targetMinute <= currentMinutes && targetMinute < 40 ? 40 : 60 )) ; // Következő ciklusra vár (kb 20 perc)
+            }
+             minutesToWait -=1; // Levonunk egy percet a másodpercek miatt
             const secondsToWait = 60 - currentSeconds;
             const delayInMs = (minutesToWait * 60 + secondsToWait) * 1000;
+            
+            console.log(`Következő órás előrejelzés frissítés ütemezve kb. ${Math.round(delayInMs / 60000)} perc múlva.`);
 
             setTimeout(async () => {
                 console.log(`Időzített órás előrejelzés frissítése: ${new Date().toLocaleTimeString()}`);
@@ -1272,14 +1356,15 @@
                     const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
                     if (data) {
                         cachedData.hourlyForecast = data;
-                        renderHourlyForecastData();
+                        renderHourlyForecastData(); // Frissíti a teljes órás listát
+                        renderPrecipitationForecastInfo(); // Frissíti az új infó sávot is
                     }
                 } catch (e) {
                     console.warn("Az időzített órás előrejelzés frissítése sikertelen:", e);
                 }
                 
-                scheduleHourlyForecastUpdate();
-            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); 
+                scheduleHourlyForecastUpdate(); // Újraütemezés
+            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); // Minimum 20 perc késleltetés, ha valamiért 0 lenne
         }
 
         function initApp() {
@@ -1293,37 +1378,44 @@
             
             fetchAllDataAndUpdateDisplay(true).finally(() => {
                 
-                const SAFETY_DELAY = 16000;
+                const SAFETY_DELAY = 1000; // Csökkentett késleltetés, mivel a kezdeti fetch már lefutott
                 
-                console.log(`Protopage biztonsági késleltetés: várakozás ${SAFETY_DELAY / 1000} másodpercet a folyamatos frissítések indítása előtt.`);
-
                 setTimeout(() => {
-                    console.log("A biztonsági késleltetés lejárt. Az időzített frissítések elindulnak.");
+                    console.log("Az időzített frissítések elindulnak.");
                     
-                    scheduleHourlyForecastUpdate();
+                    scheduleHourlyForecastUpdate(); // Elindítja az órás előrejelzés ütemezett frissítését
                     
+                    // Fő adatfrissítési ciklus (PWS, általános kondíciók stb.)
                     setInterval(() => fetchAllDataAndUpdateDisplay(false), REFRESH_INTERVAL_PWS);
                     
+                    // Gyorsított széladat frissítés
                     setInterval(fetchAndRefreshWindData, REFRESH_INTERVAL_WIND);
                     
+                    // Téma és égbolt szín frissítése
                     setInterval(() => {
                         if (cachedData.generalConditions.sunriseTimeLocal && cachedData.generalConditions.sunsetTimeLocal) {
                             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal)
                         }
                     }, SKY_COLOR_UPDATE_INTERVAL);
 
-                    // Időzítő az éjféli visszaállításhoz
+                    // Éjféli visszaállítás ellenőrzése
                     setInterval(() => {
                         const newDay = new Date().getDate();
                         if (newDay !== currentDay) {
                             console.log("Éjfél, a nap újraindult! A csapadékjelző visszaállítva.");
                             currentDay = newDay;
                             hasRainBeenDetectedToday = false;
-                            if (cachedData.displayPws) {
-                                renderWeatherData();
-                            }
+                            // OpenMeteo napi csapadékösszegét is újra kellene kérni ilyenkor
+                            fetchOpenMeteoExpectedRain_gauge(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
+                                .then(data => { cachedData.expectedRainToday_gauge = data; })
+                                .catch(e => console.warn("Éjféli OpenMeteo csapadék lekérési hiba:", e.message))
+                                .finally(() => {
+                                    if (cachedData.displayPws) { // Csak akkor renderelünk, ha van mit
+                                        renderWeatherData();
+                                    }
+                                });
                         }
-                    }, 30000);
+                    }, 30 * 1000); // 30 másodpercenként ellenőrizzük
 
                 }, SAFETY_DELAY);
             });
