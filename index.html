@@ -134,55 +134,56 @@
         .info-bar-value { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
         #main-wind-dir-arrow { transition: transform 0.7s; }
 
-        /* ÚJ: Csapadék előrejelző sáv */
         .precipitation-forecast-info {
             text-align: center;
             font-size: 13px;
             color: var(--current-text-muted-color);
             padding: 8px 12px;
-            margin-top: 12px; /* Tér a felette lévő elemtől */
-            margin-bottom: 0px; /* Tér az alatta lévő rácstól (ha van) */
+            margin-top: 12px; 
+            margin-bottom: 0px; 
             border-radius: 8px;
-            background-color: rgba(0,0,0,0.08); /* Enyhe háttér a kiemeléshez */
+            background-color: rgba(0,0,0,0.08); 
             border: 1px solid var(--current-container-border-color);
             transition: all 0.6s;
             width: 100%;
-            max-width: 450px; /* Illeszkedjen a secondary-info-bar-hoz */
+            max-width: 450px; 
             box-sizing: border-box;
         }
         .precipitation-forecast-info strong {
             color: var(--current-text-color);
             font-weight: 600;
         }
-        /* ÚJ VÉGE */
-
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 30px; padding-top: 10px; min-height: 110px; }
         
-        /* === JAVÍTOTT, LETISZTULT STÍLUSOK A VIZUÁLIS ELEMEK MELLETTI SZÖVEGEKHEZ === */
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
             text-align: left;
             display: flex;
             flex-direction: column;
-            gap: 4px; /* Tiszta, szellős rés a sorok között */
+            gap: 4px; 
             font-size: 12px;
             flex-grow: 1;
-            min-width: 190px;
+            min-width: 190px; /* Alapértelmezett */
         }
+        /* ISS panelhez szélesebb text-details kellhet */
+        #iss-info .night-sky-text-details {
+            min-width: 250px; /* Szélesebb, hogy az útvonal elférjen */
+        }
+
 
         .sun-detail-item, .moon-detail-item, .rain-detail-item, .night-sky-detail-item {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            padding: 8px 10px; /* Kiegyensúlyozott belső margó */
-            border-radius: 8px; /* Lekerekített sarkok a modern kinézetért */
-            border-bottom: none; /* NINCS MÁR ELVÁLASZTÓ VONAL */
+            padding: 8px 10px; 
+            border-radius: 8px; 
+            border-bottom: none; 
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            background-color: rgba(0, 0, 0, 0.08); /* Finom háttér a sorok kiemeléséhez */
+            background-color: rgba(0, 0, 0, 0.08); 
         }
         
         .sun-detail-item:hover, .moon-detail-item:hover, .rain-detail-item:hover, .night-sky-detail-item:hover {
-            background-color: rgba(255, 255, 255, 0.07); /* Kicsit világosabb háttér hover esetén */
+            background-color: rgba(255, 255, 255, 0.07); 
             transform: translateY(-2px) scale(1.02);
         }
 
@@ -196,6 +197,7 @@
             text-transform: uppercase;
             letter-spacing: 0.4px;
             transition: color 0.6s;
+            flex-shrink: 0; /* Ne zsugorodjon a label */
         }
 
         .sun-detail-label i, .moon-detail-label i, .rain-detail-label i, .night-sky-detail-label i {
@@ -214,8 +216,19 @@
             transition: color 0.6s;
             display: flex;
             align-items: center;
+            text-align: right; /* Értékek jobbra igazítása */
+            flex-grow: 1; /* Töltse ki a maradék helyet */
+            justify-content: flex-end; /* Tartalom jobbra */
         }
-        /* === VIZUÁLIS ELEMEK MELLETTI SZÖVEGEK VÉGE === */
+        /* Kifejezetten a hosszabb szövegekhez, mint az ISS útvonal vagy bolygó részletek */
+        .night-sky-detail-value.long-text {
+            font-size: 11px;
+            white-space: normal; /* Lehetővé teszi a tördelést */
+            line-height: 1.3;
+            text-align: left; /* Hosszú szöveg inkább balra igazítva */
+            justify-content: flex-start;
+        }
+
 
         .sun-trend-text, .moon-trend-text { font-size: 0.8em; font-weight: 500; opacity: 0.7; margin-left: 6px; }
         .path-refresh-btn { font-size: 0.8em; margin-left: 8px; cursor: pointer; opacity: 0.6; transition: opacity 0.3s, color 0.3s, transform 0.3s; }
@@ -270,9 +283,8 @@
         #discreet-rain-gauge .rain-gauge-value { display: none; }
         #discreet-rain-gauge .rain-visual-center { transform: translateX(3px); gap: 2px; }
         
-        /* MÓDOSÍTOTT: Kisebb esőcseppnél a kiírás finomhangolása */
         #discreet-rain-visual-value { 
-            font-size: 20px; /* Kissé növelve */
+            font-size: 20px; 
             font-weight: 700; 
             color: var(--current-text-color); 
         }
@@ -280,23 +292,22 @@
             font-size: 0.6em; 
             opacity: 0.8; 
             margin-left: 3px; 
-            font-weight: 500; /* Enyhe vastagítás */
+            font-weight: 500; 
         }
         #discreet-rain-visual-label { 
-            font-size: 9px; /* Kissé csökkentve */
+            font-size: 9px; 
             font-weight: 500; 
             color: var(--current-text-muted-color); 
-            line-height: 1; /* Tömörítés */
+            line-height: 1; 
         }
-        /* MÓDOSÍTÁS VÉGE */
-
 
         /* Night Sky Panel Styles */
         .night-sky-visual { text-align: center; }
         .night-sky-visual i { font-size: 48px; margin-bottom: 8px; color: var(--current-text-muted-color); transition: color 0.6s; }
         #planet-info .night-sky-visual i.fa-ring { color: #E3D4A8; text-shadow: 0 0 10px #E3D4A8; }
-        #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; }
-        #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; }
+        #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; } /* Mars */
+        #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; } /* Jupiter */
+        #iss-info .night-sky-visual i.fa-satellite { color: #B0B0B0; text-shadow: 0 0 8px #FFFFFF;} /* ISS */
         
         #constellation-svg-container { width: 100px; height: 80px; margin: 0 auto; }
         #constellation-svg-container svg { width: 100%; height: 100%; }
@@ -377,10 +388,16 @@
         const REFRESH_INTERVAL_WIND = 15 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 5 * 60 * 1000;
         const REFRESH_INTERVAL_OPEN_METEO_RAIN = 60 * 60 * 1000;
-        const REFRESH_INTERVAL_FORECAST = 6 * 60 * 60 * 1000; // Napi előrejelzéshez
-        // Az órás előrejelzés frissítési logikáját a scheduleHourlyForecastUpdate kezeli
+        const REFRESH_INTERVAL_FORECAST = 6 * 60 * 60 * 1000; 
         const SKY_COLOR_UPDATE_INTERVAL = 1 * 60 * 1000;
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
+
+        // ISS Követés és N2YO API beállítások
+        const ENABLE_ISS_TRACKING = true; 
+        const N2YO_API_KEY = '589P8Q-SDRYX8-L842ZD-5Z9L'; // FELHASZNÁLÓ ÁLTAL MEGADOTT KULCS (az utolsó karaktert pótoltam, mert 5Z9 volt)
+        const OBSERVER_ALTITUDE = 120; // Nyíregyháza becsült tengerszint feletti magassága méterben
+        const ISS_NORAD_ID = 25544; 
+        const REFRESH_INTERVAL_ISS = 2 * 60 * 60 * 1000; // ISS adatokat 2 óránként frissítjük
 
         const STATIONS = { 
             HONVED: { id: 'INYREG37', name: 'Nyíregyháza Honvéd utcai állomás', displayName: 'Honvéd u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null }, 
@@ -389,24 +406,25 @@
         };
         let activeDisplayStationKey = 'HONVED'; 
         
-        let lastApiCallTimes = { generalConditions: 0, openMeteoRain: 0, forecast: 0, hourlyForecast: 0 };
+        let lastApiCallTimes = { generalConditions: 0, openMeteoRain: 0, forecast: 0, hourlyForecast: 0, issPasses: 0 };
         let cachedData = { 
             displayPws: null, 
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null }, 
             expectedRainToday_gauge: null,
             forecastDays: [],
-            hourlyForecast: [], // Ezt frissíti a scheduleHourlyForecastUpdate
-            sunCalc: null
+            hourlyForecast: [],
+            sunCalc: null,
+            issPasses: [], // ISS áthaladások tárolására
+            nightSkyObject: null // Az aktuális éjszakai égbolt objektum (bolygó/csillagkép) tárolására
         };
         let isWeatherDisplayInitialized = false;
 
-        // VÁLTOZÓK A NAPI LOGIKÁHOZ
         let hasRainBeenDetectedToday = false;
         let currentDay = new Date().getDate();
 
         let weatherDisplayEl, forecastContainerEl, forecastTitleEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
         const NO_DATA_STRING = 'N/A';
-        const PRECIP_THRESHOLD = 30; // Csapadék esély küszöb %-ban
+        const PRECIP_THRESHOLD = 30;
 
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
@@ -603,36 +621,141 @@
                 
                 moonAltitude: moonPos.altitude * 180 / Math.PI, moonTrend: moonTrend, moonStatus: moonStatus,
                 phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonDistance: moonPos.distance,
+                astronomicalTwilightStart: sunTimesToday.night, 
+                astronomicalTwilightEnd: sunTimesToday.nightEnd,
             };
         }
         
-        function getNightSkyInfo(date) {
+        // MÓDOSÍTOTT: getNightSkyInfo - aktuálisabb, de API nélküli bolygó/csillagkép infó
+        function getNightSkyInfo(date, sunCalcData) { // sunCalcData átadása szükséges a csill. sötétséghez
+            const month = date.getMonth() + 1; // 1-12
             const hour = date.getHours();
+            let primaryObject = null;
+            let secondaryInfo = null; // Ezt egyelőre nem használjuk aktívan a renderelésben
+
+            // Közelítő bolygó láthatóságok. Finomításra szorulhatnak!
+            // Merkúr: Általában napkelte előtt vagy napnyugta után, nehéz észlelni.
+            // Vénusz: Nagyon fényes, szintén napkelte előtt (Hajnalcsillag) vagy napnyugta után (Esthajnalcsillag).
+            // Mars: Vöröses, fényessége változó.
+            // Jupiter: Nagyon fényes, lassan mozog a csillagképek között.
+            // Szaturnusz: Sárgás, halványabb a Jupiternél, szintén lassú.
+
+            if (month >= 5 && month <= 9) { // Késő tavasz, nyár, kora ősz
+                if (hour >= 22 || hour <= 1) { 
+                    primaryObject = { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Késő este DDK-D felé keresd', details: 'Gyűrűi távcsővel láthatók. Sárgás fényű.' };
+                } else if (hour >= 1 && hour <= 4) { 
+                    primaryObject = { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Hajnalban KDK-DK égbolton ragyog', details: 'Az égbolt egyik legfényesebb objektuma.'};
+                }
+                if (!primaryObject && (hour >= 21 && hour <= 3)) { // Ha nincs bolygó, de sötét van
+                     secondaryInfo = { type: 'constellation', name: 'Nyári Háromszög', details: 'A Vega (Lant), Deneb (Hattyú) és Altair (Sas) csillagok alkotják, magasan látható.' };
+                }
+            } else if (month >= 10 && month <= 12) { // Késő ősz, tél eleje
+                 if (hour >= 19 && hour <= 23) {
+                    primaryObject = { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Este feltűnően látszik K-DK irányban', details: 'Fényes, uralkodó jelenség az esti égen.' };
+                } else if (hour >= 21 && hour <= 2) { // Lehet átfedés, vagy az egyik korábban nyugszik
+                    if (!primaryObject) primaryObject = { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Este, éjfél körül DNY felé keresd', details: 'Halványabb a Jupiternél.' };
+                }
+                 if (!primaryObject && (hour >= 20 || hour <= 2)) {
+                    secondaryInfo = { type: 'constellation', name: 'Pegazus és Androméda', details: 'Keressük a Pegazus nagy négyszögét és az Androméda-galaxist (fényszennyezésmentes helyen).' };
+                 }
+            } else if (month >= 1 && month <= 4) { // Tél vége, kora tavasz
+                if (hour >= 19 && hour <= 22) { 
+                     // primaryObject = { type: 'planet', name: 'Mars', icon: 'fas fa-circle', status: 'Este magasan DNY-NY felé látható', details: 'Vöröses színű, keresd az Orion közelében (évtől függően).' };
+                } else if (hour >= 4 && hour <= 6) { 
+                     primaryObject = { type: 'planet', name: 'Vénusz', icon: 'far fa-circle', status: 'Hajnalcsillagként ragyog K-DK-en', details: 'Rendkívül fényes, nem lehet eltéveszteni.'}; // far fa-circle a Vénuszhoz
+                }
+                 if (!primaryObject && (hour >= 20 || hour <= 5)) {
+                    secondaryInfo = { type: 'constellation', name: 'Orion', details: 'A téli égbolt meghatározó csillagképe, az Orion-köddel és fényes csillagaival (Betelgeuse, Rigel).' };
+                 }
+            }
+
+            // Alapértelmezett, ha más nincs
+            if (!primaryObject) {
+                 primaryObject = {
+                    type: 'constellation',
+                    name: 'Hattyú (Cygnus)',
+                    svg: `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`,
+                    details: 'Az Északi Keresztként is ismert, nyáron magasan látható.'
+                };
+            }
             
-            if (hour >= 23 || hour < 1) {
-                return { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Látható éjjel', rise: '23:30', set: '08:10' };
+            // Csillagászati sötétség infó hozzáadása, ha a SunCalc adatok elérhetők
+            if (sunCalcData && sunCalcData.astronomicalTwilightStart && sunCalcData.astronomicalTwilightEnd) {
+                 const nowMs = date.getTime();
+                 // A SunCalc 'night' a csillagászati szürkület végét (sötétség kezdetét), 'nightEnd' a csillagászati hajnal kezdetét (sötétség végét) jelöli.
+                 const astroNightStartObj = new Date(sunCalcData.astronomicalTwilightStart);
+                 const astroNightEndObj = new Date(sunCalcData.astronomicalTwilightEnd);
+                 
+                 // Ellenőrizzük, hogy a dátumok érvényesek-e
+                 if (!isNaN(astroNightStartObj.getTime()) && !isNaN(astroNightEndObj.getTime())) {
+                    if (nowMs > astroNightStartObj.getTime() || nowMs < astroNightEndObj.getTime()) { 
+                        primaryObject.astroDarkness = `Csill. sötét: ${formatTime(astroNightStartObj)} - ${formatTime(astroNightEndObj)}`;
+                    }
+                 }
             }
-             if (hour >= 1 && hour < 2) {
-                return { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Látható hajnalban', rise: '01:30', set: '11:00' };
-            }
-            if (hour >= 2 && hour < 4) {
-                 return { type: 'planet', name: 'Mars', icon: 'fas fa-circle', status: 'Látható hajnalban', rise: '02:00', set: '12:30' };
-            }
-            
-            return {
-                type: 'constellation',
-                name: 'Hattyú (Északi Kereszt)',
-                svg: `<svg viewBox="0 0 100 80">
-                        <line class="const-line" x1="50" y1="5" x2="50" y2="75"/>
-                        <line class="const-line" x1="20" y1="45" x2="80" y2="45"/>
-                        <circle class="star bright" cx="50" cy="5" r="3"></circle> 
-                        <circle class="star" cx="50" cy="75" r="2.5"></circle> 
-                        <circle class="star" cx="20" cy="45" r="2"></circle> 
-                        <circle class="star" cx="80" cy="45" r="2"></circle> 
-                        <circle class="star" cx="50" cy="45" r="2.5"></circle> 
-                    </svg>`
-            };
+            return { primary: primaryObject, secondary: secondaryInfo };
         }
+
+        // ÚJ: ISS áthaladások lekérése (N2YO API)
+        async function fetchIssPasses(apiKey, lat, lon, alt, noradId, days = 3, minElevation = 15) {
+            if (!ENABLE_ISS_TRACKING || apiKey === 'YOUR_N2YO_API_KEY' || !apiKey) {
+                console.warn("ISS követés nincs engedélyezve vagy API kulcs hiányzik/érvénytelen.");
+                cachedData.issPasses = []; // Töröljük a régi adatokat, ha vannak
+                return [];
+            }
+            
+            const url = `https://api.n2yo.com/rest/v1/satellite/visualpasses/${noradId}/${lat}/${lon}/${alt}/${days}/${minElevation}/&apiKey=${apiKey}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    if (response.status === 401) {
+                         console.error(`ISS API Hiba: Helytelen API kulcs vagy jogosultsági probléma (status: ${response.status}). Ellenőrizd a kulcsot!`);
+                         // Itt akár az ENABLE_ISS_TRACKING-et is false-ra állíthatnánk, hogy ne próbálkozzon többet rossz kulccsal.
+                    } else {
+                        console.error(`ISS API Hiba: ${response.status} - ${response.statusText}`);
+                    }
+                    throw new Error(`ISS API Hiba: ${response.status}`);
+                }
+                const data = await response.json();
+                
+                if (data && data.info && data.info.passescount > 0 && data.passes) {
+                    const now = new Date().getTime() / 1000; 
+                    const validPasses = data.passes
+                        .filter(pass => pass.startUTC > now && pass.maxEl >= minElevation) 
+                        .map(pass => ({
+                            startAz: pass.startAz,
+                            startAzCompass: pass.startAzCompass,
+                            startEl: pass.startEl,
+                            startUTC: new Date(pass.startUTC * 1000), 
+                            maxAz: pass.maxAz,
+                            maxAzCompass: pass.maxAzCompass,
+                            maxEl: pass.maxEl,
+                            maxUTC: new Date(pass.maxUTC * 1000),
+                            endAz: pass.endAz,
+                            endAzCompass: pass.endAzCompass,
+                            endEl: pass.endEl,
+                            endUTC: new Date(pass.endUTC * 1000),
+                            mag: pass.mag, 
+                            duration: pass.duration 
+                        }))
+                        .sort((a, b) => a.startUTC - b.startUTC);
+                    
+                    console.log(`Sikeres ISS áthaladás lekérés: ${validPasses.length} db érvényes áthaladás található.`);
+                    return validPasses;
+                } else if (data && data.info && data.info.passescount === 0) {
+                    console.log("Nincs várható ISS áthaladás a következő napokban a megadott kritériumokkal.");
+                    return [];
+                }
+                console.warn("Hiányos vagy váratlan ISS API válasz:", data);
+                return [];
+            } catch (error) {
+                // A hiba már naplózva lett, itt csak továbbdobjuk vagy üres tömböt adunk vissza
+                cachedData.issPasses = []; // Hiba esetén töröljük
+                return []; 
+            }
+        }
+
 
         function updatePathVisuals(startTime, endTime, elements) {
             const { iconEl, mainArcEl, nowMarkerEl } = elements;
@@ -680,7 +803,7 @@
             const { gaugeValueEl, totalValueEl } = elements;
             if (!gaugeValueEl || !totalValueEl) return;
         
-            const MAX_INTENSITY = 10; // mm/h
+            const MAX_INTENSITY = 10;
             const percentage = Math.min(1, (precipRate || 0) / MAX_INTENSITY);
         
             const length = gaugeValueEl.getTotalLength();
@@ -711,7 +834,7 @@
                 stationConfig.isOnline = false;
                 updateStationStatusUI(stationKey, 'offline');
                 console.warn(`PWS adatlekérési hiba (${stationConfig.id}): ${error.message}`);
-                throw error; // Továbbra is dobjuk a hibát, hogy a Promise.all kezelhesse
+                throw error;
             }
         }
 
@@ -722,8 +845,8 @@
             try {
                 const response = await fetch(url); if (!response.ok) throw new Error(`Napi előrejelzés API Hiba: ${response.status}`); const data = await response.json(); if (!data || !data.dayOfWeek) { throw new Error('Hiányos napi előrejelzési adatok.'); } lastApiCallTimes.forecast = Date.now();
                 const forecastDays = []; 
-                for(let i = 0; i <= 7; i++) { // Max 8 nap (0-7)
-                    if (!data.dayOfWeek?.[i]) break; // Ha elfogynak az adatok
+                for(let i = 0; i <= 7; i++) { 
+                    if (!data.dayOfWeek?.[i]) break; 
                     const dayData = {
                         dayName: data.dayOfWeek?.[i], date: data.validTimeLocal?.[i], tempMax: data.temperatureMax?.[i], tempMin: data.temperatureMin?.[i],
                         dayPart: data.daypart?.[0] ? { phrase: data.daypart[0].wxPhraseLong?.[i*2], precipChance: data.daypart[0].precipChance?.[i*2], windSpeed: data.daypart[0].windSpeed?.[i*2], windDir: data.daypart[0].windDirection?.[i*2], uvIndex: data.daypart[0].uvIndex?.[i*2], uvDescription: data.daypart[0].uvDescription?.[i*2] } : null,
@@ -742,20 +865,18 @@
             const url = `https://api.weather.com/v3/wx/forecast/hourly/2day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
                 const response = await fetch(url); if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`); const data = await response.json(); if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); } 
-                lastApiCallTimes.hourlyForecast = Date.now(); // Utolsó sikeres hívás ideje
+                lastApiCallTimes.hourlyForecast = Date.now(); 
                 
                 const hourlyForecasts = []; const now = new Date(); 
-                // Keressük meg az első olyan indexet, ami a jelenlegi időpont UTÁN van, vagy a legközelebbi múltbeli, ha nincs jövőbeli.
                 let startIndex = data.validTimeLocal.findIndex(timeStr => new Date(timeStr) > now);
-                if (startIndex === -1) { // Ha mind múltbeli, az utolsótól kezdjük (nem ideális, de jobb mint semmi)
+                if (startIndex === -1) { 
                     startIndex = data.validTimeLocal.length > 0 ? data.validTimeLocal.length -1 : 0;
-                } else if (startIndex > 0) { // Ha van jövőbeli, de az első nem az, akkor az előzőt is vegyük figyelembe, ha közel van
+                } else if (startIndex > 0) { 
                      const prevTime = new Date(data.validTimeLocal[startIndex-1]);
-                     if (now.getTime() - prevTime.getTime() < 30 * 60 * 1000) { // Ha az előző kevesebb mint 30 perce volt
+                     if (now.getTime() - prevTime.getTime() < 30 * 60 * 1000) { 
                         startIndex--;
                      }
                 }
-
 
                 for (let i = startIndex; i < startIndex + 12 && i < data.validTimeLocal.length; i++) { 
                     hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], uvIndex: data.uvIndex[i], wxPhraseShort: data.wxPhraseShort[i] }); 
@@ -768,7 +889,6 @@
             if (!hourlyData || hourlyData.length === 0) return null;
             const stormKeywords = ['vihar', 'zivatar']; const rainKeywords = ['eső', 'zápor']; const snowKeywords = ['hó', 'havazás', 'hózápor'];
             for (const hour of hourlyData) {
-                // Csak a jövőbeli eseményeket vegyük figyelembe
                 if (new Date(hour.time) < new Date()) continue;
 
                 if (hour.precipChance >= PRECIP_THRESHOLD) {
@@ -780,7 +900,7 @@
         }
         
         function initializeWeatherDisplayDOM() {
-            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
+            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             const discreetRaindropPath = `M50,85 C25,85 20,55 50,15 C80,55 75,85 50,85`;
             
@@ -821,10 +941,82 @@
             <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i class="fas fa-sun" id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
             <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="moon-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
             <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
+            
             <div class="night-sky-info-section is-hidden" id="night-sky-info-section">
-                <div id="planet-info" class="is-hidden"><div class="night-sky-visual"><i id="night-sky-visual-icon" class=""></i></div><div class="night-sky-text-details"><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-satellite"></i>Objektum</span><span class="night-sky-detail-value" id="night-sky-object-name"></span></div><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-eye"></i>Állapot</span><span class="night-sky-detail-value" id="night-sky-object-status"></span></div><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-arrow-up"></i>Felkel</span><span class="night-sky-detail-value" id="night-sky-object-rise"></span></div><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-arrow-down"></i>Lenyugszik</span><span class="night-sky-detail-value" id="night-sky-object-set"></span></div></div></div>
-                <div id="constellation-info" class="is-hidden"><div id="constellation-svg-container"></div><div class="night-sky-text-details"><div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span><span class="night-sky-detail-value" id="constellation-name"></span></div></div></div>
+                <!-- ISS Áthaladások Panel -->
+                <div id="iss-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
+                    <div class="night-sky-visual"><i id="iss-visual-icon" class="fas fa-satellite"></i></div>
+                    <div class="night-sky-text-details">
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-rocket"></i>Objektum</span>
+                            <span class="night-sky-detail-value">Nemzetközi Űrállomás</span>
+                        </div>
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-stopwatch"></i>Következő</span>
+                            <span class="night-sky-detail-value" id="iss-next-pass-time">--:--</span>
+                        </div>
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-sort-amount-up-alt"></i>Max. magasság</span>
+                            <span class="night-sky-detail-value" id="iss-max-elevation">--°</span>
+                        </div>
+                         <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="far fa-lightbulb"></i>Fényesség</span>
+                            <span class="night-sky-detail-value" id="iss-brightness">-- mag</span>
+                        </div>
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-hourglass-half"></i>Láthatóság</span>
+                            <span class="night-sky-detail-value" id="iss-duration">-- perc</span>
+                        </div>
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-route"></i>Útvonal</span>
+                            <span class="night-sky-detail-value long-text" id="iss-path-details">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bolygó Panel (módosítva) -->
+                <div id="planet-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
+                    <div class="night-sky-visual"><i id="night-sky-visual-icon" class=""></i></div>
+                    <div class="night-sky-text-details">
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-satellite-dish"></i>Objektum</span>
+                            <span class="night-sky-detail-value" id="night-sky-object-name"></span>
+                        </div>
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-eye"></i>Hol keresd</span>
+                            <span class="night-sky-detail-value long-text" id="night-sky-object-status"></span>
+                        </div>
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-info-circle"></i>Részletek</span>
+                            <span class="night-sky-detail-value long-text" id="night-sky-object-details"></span>
+                        </div>
+                         <div class="night-sky-detail-item is-hidden" id="night-sky-astro-darkness-item-planet">
+                            <span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span>
+                            <span class="night-sky-detail-value long-text" id="night-sky-astro-darkness-planet"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Csillagkép Panel (módosítva) -->
+                <div id="constellation-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
+                    <div id="constellation-svg-container" style="flex-shrink: 0;"></div>
+                    <div class="night-sky-text-details">
+                        <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span>
+                            <span class="night-sky-detail-value" id="constellation-name"></span>
+                        </div>
+                         <div class="night-sky-detail-item">
+                            <span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span>
+                            <span class="night-sky-detail-value long-text" id="constellation-details"></span>
+                        </div>
+                         <div class="night-sky-detail-item is-hidden" id="constellation-astro-darkness-item-const">
+                            <span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span>
+                            <span class="night-sky-detail-value long-text" id="constellation-astro-darkness-const"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
+
             <div class="temperature-section">
                 <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
                     <div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div>
@@ -846,7 +1038,6 @@
                         <div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value"></span></div></div>
                      </div>
                 </div>
-                <!-- ÚJ: Csapadék előrejelző sáv -->
                 <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar">
                     <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
                 </div>
@@ -888,7 +1079,11 @@
         function compileAndRenderDisplayData() {
             const activeStationConfig = STATIONS[activeDisplayStationKey];
             const displayStationData = activeStationConfig.data;
-            if (!displayStationData) return;
+            if (!displayStationData) {
+                console.warn("Nincs megjeleníthető adat az aktív állomáshoz.");
+                // Itt lehetne egy üzenetet kiírni a felhasználónak, ha az aktív állomás elveszti az adatot
+                return;
+            }
 
             cachedData.displayPws = { ...displayStationData.metric, ...displayStationData }; 
             
@@ -920,8 +1115,7 @@
                 }
             }
         }
-
-        // ÚJ: Külön függvény a csapadék előrejelző sáv frissítésére
+        
         function renderPrecipitationForecastInfo() {
             const forecastBar = document.getElementById('precipitation-forecast-bar');
             const forecastTextEl = document.getElementById('next-precipitation-info-text');
@@ -933,25 +1127,23 @@
                 forecastTextEl.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
                 forecastBar.classList.remove('is-hidden');
             } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
-                // Ha van órás adat, de nincs benne csapadék esemény a küszöb felett
                 forecastTextEl.textContent = "A következő 12 órában nem várható jelentős csapadék.";
                 forecastBar.classList.remove('is-hidden');
             } else {
-                // Ha még nincs órás adat (pl. API hívás sikertelen volt, vagy még nem futott le)
                 forecastTextEl.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
-                forecastBar.classList.add('is-hidden'); // Ilyenkor inkább rejtve marad
+                forecastBar.classList.add('is-hidden'); 
             }
         }
         
         function renderWeatherData() {
             const obs = cachedData.displayPws; 
             const general = cachedData.generalConditions; 
-            const sunCalcData = cachedData.sunCalc;
+            const sunCalcData = cachedData.sunCalc; 
             if (!obs || !general || !sunCalcData) return;
 
             const el = (id) => document.getElementById(id);
             
-            if (obs.precipTotal > 0.1) { // 0.1 mm-nél nagyobb, hogy a nagyon pici értékek ne számítsanak
+            if (obs.precipTotal > 0.1) { 
                 hasRainBeenDetectedToday = true;
             }
 
@@ -964,7 +1156,7 @@
             const mainRainVisual = el('main-rain-visual');
             const sunInfoSection = el('sun-info-section');
             const moonInfoSection = el('moon-info-section');
-            const nightSkyInfoSection = el('night-sky-info-section');
+            const nightSkyInfoSectionEl = el('night-sky-info-section');
             const discreetRainGauge = el('discreet-rain-gauge');
             const gridSunriseItem = el('grid-sunrise-item');
             const gridSunsetItem = el('grid-sunset-item');
@@ -972,7 +1164,7 @@
             const gridMoonsetItem = el('grid-moonset-item');
 
             const isRainingNow = obs.precipRate > 0;
-            const isDayTime = sunCalcData.sunAltitude > -0.83; // Nap horizont felett (beleértve a szürkületet)
+            const isDayTime = sunCalcData.sunAltitude > -0.83; 
             const isMoonUp = sunCalcData.isUp;
             
             let showSunPanel = false;
@@ -982,9 +1174,19 @@
             rainInfoSection.classList.add('is-hidden');
             sunInfoSection.classList.add('is-hidden');
             moonInfoSection.classList.add('is-hidden');
-            nightSkyInfoSection.classList.add('is-hidden');
+            nightSkyInfoSectionEl.classList.add('is-hidden');
             discreetRainGauge.classList.add('is-hidden');
             mainRainVisual.classList.remove('is-raining-actively');
+
+            // Éjszakai panel elemeinek referenciái
+            const issPanel = el('iss-info');
+            const planetPanel = el('planet-info');
+            const constellationPanel = el('constellation-info');
+
+            if (issPanel) issPanel.classList.add('is-hidden');
+            if (planetPanel) planetPanel.classList.add('is-hidden');
+            if (constellationPanel) constellationPanel.classList.add('is-hidden');
+
 
             if (isRainingNow) {
                 rainInfoSection.classList.remove('is-hidden');
@@ -1006,20 +1208,18 @@
             } else {
                 discreetRainGauge.classList.remove('is-hidden');
                 discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
-                // Az érték formázása 1 tizedesjegyre, vagy '--' ha nincs adat
                 const discreetRainValue = obs.precipTotal !== null && typeof obs.precipTotal !== 'undefined' ? formatValue(obs.precipTotal, '', 1) : '--';
                 el('discreet-rain-visual-value').childNodes[0].nodeValue = discreetRainValue;
-
 
                 if (isDayTime) {
                     showSunPanel = true;
                     sunInfoSection.classList.remove('is-hidden');
-                } else if (isMoonUp) {
+                } else if (isMoonUp) { // Ha a Hold fent van, elsődlegesen azt mutatjuk éjjel
                     showMoonPanel = true;
                     moonInfoSection.classList.remove('is-hidden');
-                } else {
+                } else { // Ha se Nap, se Hold nincs fent, akkor jön az éjszakai égbolt panel
                     showNightSkyPanel = true;
-                    nightSkyInfoSection.classList.remove('is-hidden');
+                    nightSkyInfoSectionEl.classList.remove('is-hidden');
                 }
             }
             
@@ -1048,24 +1248,69 @@
             }
 
             if(showNightSkyPanel) {
-                const nightSkyData = getNightSkyInfo(new Date());
-                const planetPanel = el('planet-info');
-                const constellationPanel = el('constellation-info');
+                let nightContentRendered = false;
 
-                planetPanel.classList.add('is-hidden');
-                constellationPanel.classList.add('is-hidden');
+                // 1. ISS Áthaladások
+                if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0 && issPanel) {
+                    const nextPass = cachedData.issPasses[0]; 
+                    if (nextPass.startUTC > new Date()) { // Csak ha a következő áthaladás még a jövőben van
+                        el('iss-visual-icon').className = 'fas fa-satellite'; // Maradjon
+                        el('iss-next-pass-time').textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
+                        el('iss-max-elevation').textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
+                        el('iss-duration').textContent = `${Math.round(nextPass.duration / 60)} perc`;
+                        el('iss-brightness').textContent = `${formatValue(nextPass.mag, ' mag')}`;
+                        el('iss-path-details').textContent = `Indul: ${nextPass.startAzCompass} (${formatValue(nextPass.startEl, '°',0)}), Max: ${nextPass.maxAzCompass} (${formatValue(nextPass.maxEl, '°',0)}), Vége: ${nextPass.endAzCompass} (${formatValue(nextPass.endEl, '°',0)})`;
+                        
+                        issPanel.classList.remove('is-hidden');
+                        nightContentRendered = true;
+                    }
+                }
 
-                if(nightSkyData.type === 'planet') {
-                    planetPanel.classList.remove('is-hidden');
-                    el('night-sky-visual-icon').className = `${nightSkyData.icon}`;
-                    el('night-sky-object-name').textContent = nightSkyData.name;
-                    el('night-sky-object-status').textContent = nightSkyData.status;
-                    el('night-sky-object-rise').textContent = nightSkyData.rise;
-                    el('night-sky-object-set').textContent = nightSkyData.set;
-                } else {
-                    constellationPanel.classList.remove('is-hidden');
-                    el('constellation-svg-container').innerHTML = nightSkyData.svg;
-                    el('constellation-name').textContent = nightSkyData.name;
+                // 2. Bolygó vagy Csillagkép (ha az ISS nem látszik, vagy másodlagos infóként)
+                const nightSkyData = cachedData.nightSkyObject; 
+                if (nightSkyData && nightSkyData.primary && !nightContentRendered) { // Csak akkor, ha ISS nem lett renderelve
+                    const primary = nightSkyData.primary;
+                    if (primary.type === 'planet' && planetPanel) {
+                        planetPanel.classList.remove('is-hidden');
+                        el('night-sky-visual-icon').className = primary.icon; // Az ikon a planet-info-n belül van
+                        el('night-sky-object-name').textContent = primary.name;
+                        el('night-sky-object-status').textContent = primary.status;
+                        el('night-sky-object-details').textContent = primary.details || '';
+                        
+                        const astroDarknessElPlanet = el('night-sky-astro-darkness-planet');
+                        const astroDarknessItemElPlanet = el('night-sky-astro-darkness-item-planet');
+                        if(primary.astroDarkness && astroDarknessElPlanet && astroDarknessItemElPlanet) {
+                            astroDarknessElPlanet.textContent = primary.astroDarkness;
+                            astroDarknessItemElPlanet.classList.remove('is-hidden');
+                        } else if (astroDarknessItemElPlanet) {
+                             astroDarknessItemElPlanet.classList.add('is-hidden');
+                        }
+                        nightContentRendered = true;
+
+                    } else if (primary.type === 'constellation' && constellationPanel) { 
+                        constellationPanel.classList.remove('is-hidden');
+                        el('constellation-svg-container').innerHTML = primary.svg || '';
+                        el('constellation-name').textContent = primary.name;
+                        el('constellation-details').textContent = primary.details || '';
+
+                        const astroDarknessElConst = el('constellation-astro-darkness-const');
+                        const astroDarknessItemElConst = el('constellation-astro-darkness-item-const');
+                        if(primary.astroDarkness && astroDarknessElConst && astroDarknessItemElConst) {
+                            astroDarknessElConst.textContent = primary.astroDarkness;
+                            astroDarknessItemElConst.classList.remove('is-hidden');
+                        } else if (astroDarknessItemElConst) {
+                             astroDarknessItemElConst.classList.add('is-hidden');
+                        }
+                        nightContentRendered = true;
+                    }
+                }
+                
+                if (!nightContentRendered && constellationPanel) { // Végső fallback, ha semmi más
+                     constellationPanel.classList.remove('is-hidden');
+                     el('constellation-svg-container').innerHTML = `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`;
+                     el('constellation-name').textContent = "Hattyú (Cygnus)";
+                     el('constellation-details').textContent = "Keressük az Északi Keresztet!";
+                      if (el('constellation-astro-darkness-item-const')) el('constellation-astro-darkness-item-const').classList.add('is-hidden');
                 }
             }
             
@@ -1117,7 +1362,6 @@
             el('moonrise-value').textContent = sunCalcData.moonrise || '--'; 
             el('moonset-value').textContent = sunCalcData.moonset || '--';
 
-            // ÚJ: Infó sáv frissítése
             renderPrecipitationForecastInfo();
         }
 
@@ -1227,16 +1471,11 @@
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
-            // PWS állomások adatainak lekérése párhuzamosan
-            // Csak akkor dob hibát a Promise.all, ha MINDegyik PWS lekérés hibás.
-            // A hibákat egyedileg kezeljük a fetchPwsStationData-n belül.
             await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
             
             if (!STATIONS[activeDisplayStationKey].isOnline) {
                 const onlineStations = Object.keys(STATIONS).filter(k => STATIONS[k].isOnline);
-                if(onlineStations.length > 0) {
-                    activeDisplayStationKey = onlineStations[0];
-                }
+                if(onlineStations.length > 0) activeDisplayStationKey = onlineStations[0];
             }
 
             const independentPromises = [];
@@ -1250,20 +1489,28 @@
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { 
                 independentPromises.push(fetchDailyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) { 
                     cachedData.forecastDays = data.forecastDays; 
-                    // Napkelte/nyugta adatokat is frissítjük az általános kondíciókban, ha itt újabb van
                     Object.assign(cachedData.generalConditions, { 
                         sunriseTimeLocal: data.sunriseTimeLocal || cachedData.generalConditions.sunriseTimeLocal, 
                         sunsetTimeLocal: data.sunsetTimeLocal || cachedData.generalConditions.sunsetTimeLocal,
                     }); 
                 } }).catch(e => console.warn("Napi előrejelzés lekérési hiba:", e.message))); 
             }
-            // Az órás előrejelzést a scheduleHourlyForecastUpdate kezeli, nem itt hívjuk alapból,
-            // kivéve az első betöltéskor, hogy legyen adatunk.
             if (isInitialLoad && cachedData.hourlyForecast.length === 0) {
                  independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { 
                     if (data) cachedData.hourlyForecast = data; 
-                    renderHourlyForecastData(); // Azonnali renderelés az első betöltésnél
+                    renderHourlyForecastData(); 
                  }).catch(e => console.warn("Kezdeti órás előrejelzés lekérési hiba:", e.message)));
+            }
+
+            if (ENABLE_ISS_TRACKING && (isInitialLoad || now - (lastApiCallTimes.issPasses || 0) > REFRESH_INTERVAL_ISS)) {
+                independentPromises.push(
+                    fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15) // 3 napra, min 15 fokos magasság
+                    .then(passes => {
+                        cachedData.issPasses = passes; // Akkor is frissítjük, ha üres tömb (nincs áthaladás)
+                        lastApiCallTimes.issPasses = Date.now();
+                    })
+                    .catch(e => console.error("Hiba az ISS adatok feldolgozásakor a fő ciklusban:", e)) // Már kezeli a fetchIssPasses, de itt is logolhatunk
+                );
             }
 
             await Promise.allSettled(independentPromises);
@@ -1271,26 +1518,20 @@
             try {
                 const sunCalcResult = await fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
                 cachedData.sunCalc = sunCalcResult;
-                
-                // Frissítjük a napkelte/nyugta időket, ha a SunCalc pontosabb (helyi számítás)
-                if (sunCalcResult.sunriseDateForPath) {
-                    cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString();
-                }
-                if (sunCalcResult.sunsetDateForPath) {
-                    cachedData.generalConditions.sunsetTimeLocal = sunCalcResult.sunsetDateForPath.toISOString();
-                }
-            } catch (e) {
-                console.error("SunCalc hiba:", e);
-            }
+                if (sunCalcResult.sunriseDateForPath) cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString();
+                if (sunCalcResult.sunsetDateForPath) cachedData.generalConditions.sunsetTimeLocal = sunCalcResult.sunsetDateForPath.toISOString();
+            } catch (e) { console.error("SunCalc hiba:", e); }
+
+            cachedData.nightSkyObject = getNightSkyInfo(new Date(), cachedData.sunCalc);
+
 
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             const anyStationOnline = Object.values(STATIONS).some(s => s.isOnline);
-            if (anyStationOnline && STATIONS[activeDisplayStationKey].data) { // Ellenőrizzük, hogy az aktív állomásnak van-e adata
+            if (anyStationOnline && STATIONS[activeDisplayStationKey].data) {
                 compileAndRenderDisplayData(); 
             } else if (!isWeatherDisplayInitialized && !anyStationOnline) { 
                 document.getElementById('weather-display').innerHTML = `<div class="loading" style="padding: 20px; text-align: center; color: var(--current-text-color);">⚠️ Egyik mérőállomás sem elérhető. Kérjük, próbálja később.</div>`; 
             } else if (anyStationOnline && !STATIONS[activeDisplayStationKey].data) {
-                // Ha van online állomás, de az aktívnak pont nincs adata (ritka eset), akkor nem renderelünk, várunk a következő ciklusra
                 console.warn(`Az aktív állomás (${activeDisplayStationKey}) online, de nincs megjeleníthető adata.`);
             }
         }
@@ -1300,22 +1541,18 @@
             if (!STATIONS[stationKey] || !STATIONS[stationKey].isOnline) return;
 
             try {
-                await fetchPwsStationData(stationKey); // Ez frissíti a STATIONS[stationKey].data-t
+                await fetchPwsStationData(stationKey); 
                 const newPwsData = STATIONS[stationKey].data;
 
-                if (newPwsData && cachedData.displayPws) { // cachedData.displayPws is létezzen
+                if (newPwsData && cachedData.displayPws) { 
                     cachedData.displayPws.winddir = newPwsData.winddir;
                     cachedData.displayPws.windSpeed = newPwsData.metric.windSpeed;
                     cachedData.displayPws.windGust = newPwsData.metric.windGust;
                     cachedData.displayPws.obsTimeLocal = newPwsData.obsTimeLocal; 
-
-                    // Csak a releváns részeket rendereljük újra, nem az egészet
-                    // De egyszerűbb most az egészet, a renderWeatherData optimalizált az animációkra
                     renderWeatherData();
                 }
             } catch (error) {
-                // A hiba már naplózva van a fetchPwsStationData-ban
-                // console.warn(`Gyorsított szél-adat lekérés sikertelen (${stationKey}): ${error.message}`);
+                // Hiba már naplózva
             }
         }
 
@@ -1325,26 +1562,32 @@
             const currentSeconds = now.getSeconds();
 
             let targetMinute;
-            // Célpercek: 0, 20, 40 (ezek környékén szoktak frissülni az órás adatok)
-            if (currentMinutes < 18) { // 00-17 között -> cél a 20. perc
+            if (currentMinutes < 18) { 
                 targetMinute = 20;
-            } else if (currentMinutes < 38) { // 18-37 között -> cél a 40. perc
+            } else if (currentMinutes < 38) { 
                 targetMinute = 40;
-            } else { // 38-59 között -> cél a következő óra 0. perce (azaz 60)
+            } else { 
                 targetMinute = 60; 
             }
 
-            // Hozzáadunk egy kis random késleltetést (0-2 perc), hogy ne egyszerre terheljük az API-t
-            const randomDelayMinutes = Math.floor(Math.random() * 3); // 0, 1, vagy 2 perc
-            targetMinute += randomDelayMinutes;
-            if (targetMinute >= 60) targetMinute -=60; // Túlcsordulás kezelése (bár a 60-as célperc miatt ez nem igazán kellene)
+            const randomDelayMinutes = Math.floor(Math.random() * 3); 
+            // targetMinute += randomDelayMinutes; // Ezt a sort kivettem, mert a 60-as célperc miatt bonyolultabbá teszi
+            // if (targetMinute >= 60) targetMinute -=60;
 
 
             let minutesToWait = targetMinute - currentMinutes;
-            if (minutesToWait < 0) { // Ha már túl vagyunk a célpercen ebben az órában
-                minutesToWait += (targetMinute <= currentMinutes && targetMinute < 20 ? 20 : (targetMinute <= currentMinutes && targetMinute < 40 ? 40 : 60 )) ; // Következő ciklusra vár (kb 20 perc)
+            if (minutesToWait < 0) { 
+                minutesToWait += 60; // Következő óra megfelelő perce
             }
-             minutesToWait -=1; // Levonunk egy percet a másodpercek miatt
+            // Biztosítjuk, hogy a random késleltetés ne vigye át a következő 20 perces ciklusba, ha már közel vagyunk
+            if (targetMinute === 20 && currentMinutes >= 18 - randomDelayMinutes) minutesToWait +=20;
+            else if (targetMinute === 40 && currentMinutes >= 38 - randomDelayMinutes) minutesToWait +=20;
+            else if (targetMinute === 60 && currentMinutes >= 58 - randomDelayMinutes) minutesToWait +=20;
+
+
+             minutesToWait = (minutesToWait -1 + randomDelayMinutes); // Alkalmazzuk a random késleltetést itt
+             if (minutesToWait < 0) minutesToWait = 0; // Ne legyen negatív
+
             const secondsToWait = 60 - currentSeconds;
             const delayInMs = (minutesToWait * 60 + secondsToWait) * 1000;
             
@@ -1356,15 +1599,15 @@
                     const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
                     if (data) {
                         cachedData.hourlyForecast = data;
-                        renderHourlyForecastData(); // Frissíti a teljes órás listát
-                        renderPrecipitationForecastInfo(); // Frissíti az új infó sávot is
+                        renderHourlyForecastData(); 
+                        renderPrecipitationForecastInfo(); 
                     }
                 } catch (e) {
                     console.warn("Az időzített órás előrejelzés frissítése sikertelen:", e);
                 }
                 
-                scheduleHourlyForecastUpdate(); // Újraütemezés
-            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); // Minimum 20 perc késleltetés, ha valamiért 0 lenne
+                scheduleHourlyForecastUpdate(); 
+            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); 
         }
 
         function initApp() {
@@ -1378,44 +1621,49 @@
             
             fetchAllDataAndUpdateDisplay(true).finally(() => {
                 
-                const SAFETY_DELAY = 1000; // Csökkentett késleltetés, mivel a kezdeti fetch már lefutott
+                const SAFETY_DELAY = 1000; 
                 
                 setTimeout(() => {
                     console.log("Az időzített frissítések elindulnak.");
                     
-                    scheduleHourlyForecastUpdate(); // Elindítja az órás előrejelzés ütemezett frissítését
+                    scheduleHourlyForecastUpdate(); 
                     
-                    // Fő adatfrissítési ciklus (PWS, általános kondíciók stb.)
                     setInterval(() => fetchAllDataAndUpdateDisplay(false), REFRESH_INTERVAL_PWS);
                     
-                    // Gyorsított széladat frissítés
                     setInterval(fetchAndRefreshWindData, REFRESH_INTERVAL_WIND);
                     
-                    // Téma és égbolt szín frissítése
                     setInterval(() => {
                         if (cachedData.generalConditions.sunriseTimeLocal && cachedData.generalConditions.sunsetTimeLocal) {
                             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal)
                         }
                     }, SKY_COLOR_UPDATE_INTERVAL);
 
-                    // Éjféli visszaállítás ellenőrzése
                     setInterval(() => {
                         const newDay = new Date().getDate();
                         if (newDay !== currentDay) {
                             console.log("Éjfél, a nap újraindult! A csapadékjelző visszaállítva.");
                             currentDay = newDay;
                             hasRainBeenDetectedToday = false;
-                            // OpenMeteo napi csapadékösszegét is újra kellene kérni ilyenkor
                             fetchOpenMeteoExpectedRain_gauge(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
                                 .then(data => { cachedData.expectedRainToday_gauge = data; })
                                 .catch(e => console.warn("Éjféli OpenMeteo csapadék lekérési hiba:", e.message))
                                 .finally(() => {
-                                    if (cachedData.displayPws) { // Csak akkor renderelünk, ha van mit
+                                    if (cachedData.displayPws) { 
                                         renderWeatherData();
                                     }
                                 });
+                             // Éjfélkor az ISS adatokat is frissíthetjük, mert új nap kezdődik
+                            if (ENABLE_ISS_TRACKING) {
+                                fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15)
+                                .then(passes => { 
+                                    cachedData.issPasses = passes; 
+                                    lastApiCallTimes.issPasses = Date.now();
+                                    // Nem kell itt renderelni, a fő ciklus megteszi
+                                })
+                                .catch(e => console.error("Éjféli ISS adatfrissítési hiba:", e));
+                            }
                         }
-                    }, 30 * 1000); // 30 másodpercenként ellenőrizzük
+                    }, 30 * 1000); 
 
                 }, SAFETY_DELAY);
             });
