@@ -141,7 +141,7 @@
             text-align: left;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 2px; /* A sorok közötti rés csökkentve, hogy egységesebb blokkot alkossanak */
             font-size: 12px;
             flex-grow: 1;
             min-width: 190px;
@@ -151,7 +151,7 @@
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            padding: 8px 6px;
+            padding: 10px 8px; /* Növelt belső margó a jobb szellőzésért és olvashatóságért */
             border-bottom: 1px solid var(--current-container-border-color);
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 6px;
@@ -1335,3 +1335,4 @@
     </script>
 </body>
 </html>
+```
