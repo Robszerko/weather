@@ -494,7 +494,7 @@
         }
         @media (min-width: 580px) {
             .forecast-container {
-                grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+                grid-template-columns: 1fr 1fr;
             }
         }
         .forecast-day-card {
@@ -515,10 +515,10 @@
             padding-bottom: 4px;
             border-bottom: 1px solid var(--current-container-border-color);
         }
-        .forecast-day-name { font-size: 12px; font-weight: 600; }
-        .forecast-date { font-size: 9.5px; margin-top: 1px; }
+        .forecast-day-name { font-size: 13px; font-weight: 600; }
+        .forecast-date { font-size: 10px; margin-top: 1px; }
         .forecast-temps {
-            font-size: 17px;
+            font-size: 18px;
             gap: 6px;
             padding: 5px 0;
             margin-bottom: 6px;
@@ -536,7 +536,7 @@
             border: 1px solid rgba(var(--current_text_rgb, 0,0,0), 0.05);
         }
         .forecast-part-header {
-            font-size: 11.5px;
+            font-size: 12px;
             font-weight: 600;
             margin-bottom: 4px;
         }
@@ -545,7 +545,7 @@
             font-size: 0.9em;
         }
         .forecast-part-details {
-            font-size: 10px;
+            font-size: 11px;
             line-height: 1.4;
         }
         .forecast-part-details p {
@@ -1755,7 +1755,7 @@
                         <div class="forecast-part-details">
                             <p><i class="fas fa-cloud-sun"></i>${day.dayPart.phrase || NO_DATA_STRING}</p>
                             <p><i class="fas fa-tint"></i>Csapadék: <strong>${formatValue(day.dayPart.precipChance, '%', 0)}</strong></p>
-                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompassAbbreviated(day.dayPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</strong></p>
+                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompass(day.dayPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</strong></p>
                             <p><i class="fas fa-umbrella-beach"></i>UV Index: <strong>${formatValue(day.dayPart.uvIndex, '', 0)}</strong> (${day.dayPart.uvDescription || 'N/A'})</p>
                         </div>
                     </div>`;
@@ -1766,7 +1766,7 @@
                         <div class="forecast-part-details">
                             <p><i class="fas fa-cloud-moon"></i>${day.nightPart.phrase || NO_DATA_STRING}</p>
                             <p><i class="fas fa-tint"></i>Csapadék: <strong>${formatValue(day.nightPart.precipChance, '%', 0)}</strong></p>
-                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompassAbbreviated(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</strong></p>
+                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompass(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</strong></p>
                         </div>
                     </div>`;
                 }
