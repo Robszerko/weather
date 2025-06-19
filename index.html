@@ -482,111 +482,88 @@
         .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
 
-        /* === ÚJRATERVEZETT 8 NAPOS ELŐREJELZÉS === */
+        /* === KOMPAKT 8 NAPOS ELŐREJELZÉS === */
         .forecast-container {
             width: 100%;
-            max-width: 720px;
+            max-width: 600px;
             padding-bottom: 12px;
             display: grid;
-            gap: 16px;
+            gap: 12px;
             margin: 0 auto;
             grid-template-columns: 1fr;
         }
-        @media (min-width: 680px) {
+        @media (min-width: 580px) {
             .forecast-container {
-                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
             }
         }
         .forecast-day-card {
             display: flex;
             flex-direction: column;
-            padding: 16px;
-            border-radius: 16px;
+            padding: 10px;
+            border-radius: 10px;
             background: var(--current-widget-bg);
             border: 1px solid var(--current-widget-border);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
             color: var(--current-text-color);
             transition: all 0.6s;
+            overflow: hidden;
         }
         .forecast-header {
             text-align: center;
-            margin-bottom: 10px;
-            padding-bottom: 8px;
+            margin-bottom: 5px;
+            padding-bottom: 4px;
             border-bottom: 1px solid var(--current-container-border-color);
         }
-        .forecast-day-name { font-size: 16px; font-weight: 700; }
-        .forecast-date { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
+        .forecast-day-name { font-size: 12px; font-weight: 600; }
+        .forecast-date { font-size: 9.5px; margin-top: 1px; }
         .forecast-temps {
-            font-size: 22px;
-            font-weight: 800;
-            display: flex;
-            justify-content: center;
-            align-items: baseline;
-            gap: 12px;
-            padding: 10px 0;
-            margin-bottom: 12px;
+            font-size: 17px;
+            gap: 6px;
+            padding: 5px 0;
+            margin-bottom: 6px;
         }
-        .forecast-temp-min {
-            font-size: 0.8em;
-            color: var(--current-text-muted-color);
-            font-weight: 600;
-        }
+        .forecast-temp-min { font-size: 0.75em; }
         .forecast-parts-wrapper {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-        }
-        @media (min-width: 400px) {
-            .forecast-parts-wrapper {
-                flex-direction: row;
-                align-items: flex-start;
-            }
+            gap: 6px;
         }
         .forecast-part {
-            flex: 1;
-            padding: 10px;
-            border-radius: 10px;
-            background-color: rgba(0,0,0,0.06);
-            border: 1px solid rgba(var(--current_text_rgb, 0,0,0), 0.08);
+            padding: 6px 8px;
+            border-radius: 6px;
+            background-color: rgba(0,0,0,0.03);
+            border: 1px solid rgba(var(--current_text_rgb, 0,0,0), 0.05);
         }
         .forecast-part-header {
-            display: flex;
-            align-items: center;
-            font-size: 13px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--current-text-color);
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-bottom: 4px;
         }
         .forecast-part-header i {
-            margin-right: 8px;
-            font-size: 1.1em;
-            color: var(--current-icon-color);
-            opacity: 0.85;
+            margin-right: 5px;
+            font-size: 0.9em;
         }
         .forecast-part-details {
-            font-size: 12px;
-            color: var(--current-text-muted-color);
-            line-height: 1.6;
-            text-align: left;
+            font-size: 10px;
+            line-height: 1.4;
         }
         .forecast-part-details p {
-            margin: 4px 0;
+            margin: 1px 0 2px 0;
             display: flex;
             align-items: center;
         }
         .forecast-part-details p i {
-            width: 18px;
-            text-align: center;
-            margin-right: 6px;
-            opacity: 0.7;
-            color: var(--current-icon-color);
+            width: 14px;
+            margin-right: 4px;
+            opacity: 0.6;
         }
         .forecast-part-details strong {
-            font-weight: 600;
-            color: var(--current-text-color);
-            margin-left: 4px;
+            font-weight: 500;
+            margin-left: 2px;
         }
-        /* === EDDIG AZ ÚJRATERVEZETT 8 NAPOS ELŐREJELZÉS === */
+        /* === EDDIG A KOMPAKT 8 NAPOS ELŐREJELZÉS === */
+
 
         .detail-item, .info-bar-item { perspective: 600px; }
         .detail-item .value, .info-bar-item span { perspective: 400px; }
@@ -2019,3 +1996,4 @@
     </script>
 </body>
 </html>
+```
