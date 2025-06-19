@@ -162,11 +162,14 @@
             gap: 4px; 
             font-size: 12px;
             flex-grow: 1;
-            min-width: 190px; /* Alapértelmezett */
+            /* min-width: 190px; */ /* EREDETI */
+            min-width: 0; /* MÓDOSÍTOTT: Lehetővé teszi a zsugorodást a tartalom alapján */
+            flex-basis: 140px; /* MÓDOSÍTOTT: Adunk egy alap szélességet, de engedjük nőni/csökkenni. */
         }
         /* ISS panelhez szélesebb text-details kellhet */
         #iss-info .night-sky-text-details {
             min-width: 250px; /* Szélesebb, hogy az útvonal elférjen */
+            flex-basis: 250px; /* Hozzáigazítjuk a flex-basis-t is */
         }
 
 
@@ -218,6 +221,10 @@
             text-align: right; /* Értékek jobbra igazítása */
             flex-grow: 1; /* Töltse ki a maradék helyet */
             justify-content: flex-end; /* Tartalom jobbra */
+            /* HOZZÁADOTT SOROK A JOBB TÖRDELÉSHEZ ÉS OLVASHATÓSÁGHOZ */
+            white-space: normal;    /* Engedélyezi a szöveg sortörését */
+            word-break: break-word; /* Szavakat tördel, ha szükséges, hogy elférjen */
+            line-height: 1.3;       /* Növeli a sormagasságot a jobb olvashatóságért, ha több sorba kerül a szöveg */
         }
         /* Kifejezetten a hosszabb szövegekhez, mint az ISS útvonal vagy bolygó részletek */
         .night-sky-detail-value.long-text {
