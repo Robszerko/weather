@@ -130,14 +130,14 @@
         .additional-core-info { margin-top: 16px; width: 100%; }
         .secondary-info-bar {
             display: flex;
-            flex-wrap: wrap; /* Megmarad, hogy törhessen, ha muszáj */
+            flex-wrap: wrap;
             justify-content: center;
             align-items: stretch;
-            gap: 10px 18px; /* Csökkentett rés: sor 10px, oszlop 18px */
+            gap: 10px 18px;
             width: auto;
-            max-width: 460px; /* Enyhén növelt max-szélesség */
+            max-width: 460px;
             margin: 0 auto;
-            padding: 6px 10px; /* Csökkentett belső padding */
+            padding: 6px 10px;
             background-color: rgba(0,0,0,0.12);
             border-radius: 16px;
             border: 1px solid var(--current-container-border-color);
@@ -149,7 +149,7 @@
             align-items: center;
             gap: 4px;
             color: var(--current-text-color);
-            padding: 4px 6px; /* Csökkentett padding */
+            padding: 4px 6px;
         }
         .info-bar-label { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
         .info-bar-value { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 6px; }
@@ -306,7 +306,7 @@
             z-index: 10;
             pointer-events: auto;
             cursor: help;
-            font-size: 0; /* Remove FA icon if any */
+            font-size: 0;
             color: transparent;
         }
         .sun-path-arc-main {
@@ -323,7 +323,7 @@
             top: 0; left: 0;
             width: 18px;
             height: 18px;
-            font-size: 18px; /* FA icon size */
+            font-size: 18px;
             color: #E8EAF6;
             text-shadow: 0 0 7px rgba(200, 200, 255, 0.6),
                          0 0 13px rgba(150, 150, 220, 0.4);
@@ -423,11 +423,11 @@
             background-color: rgba(0,0,0,0.08);
             border: 1px solid var(--current-container-border-color);
             border-radius: 12px;
-            padding: 14px 16px; /* Kisebb belső padding felül/alul */
+            padding: 12px 14px; /* Még kisebb belső padding */
             display: grid;
             grid-template-columns: 1fr 1fr;
-            column-gap: 16px; /* Kisebb rés az oszlopok között */
-            row-gap: 8px;     /* Kisebb rés a sorok között */
+            column-gap: 14px; /* Még kisebb rés az oszlopok között */
+            row-gap: 6px;     /* Még kisebb rés a sorok között */
             transition: all 0.6s;
         }
 
@@ -435,14 +435,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11.5px; /* CSÖKKENTETT betűméret az egész itemre */
-            padding: 3px 0;   /* Kisebb padding az itemeken belül */
+            font-size: 11px;  /* TOVÁBB CSÖKKENTETT betűméret */
+            padding: 2px 0;   /* Még kisebb padding az itemeken belül */
         }
 
         .detail-item .label {
             font-weight: 600;
             color: var(--current-text-color);
-            margin-right: 5px; /* Kisebb margó az ikon után */
+            margin-right: 4px; /* Kisebb margó az ikon után */
             display: flex;
             align-items: center;
             transition: color 0.6s;
@@ -450,9 +450,9 @@
         }
 
         .detail-item .label i {
-            margin-right: 6px; /* Kisebb margó az ikon és szöveg között */
-            width: 13px;       /* Kisebb hely az ikonnak */
-            font-size: 0.9em;  /* Kisebb ikon méret a szöveghez képest */
+            margin-right: 5px; /* Kisebb margó az ikon és szöveg között */
+            width: 12px;       /* Kisebb hely az ikonnak */
+            font-size: 0.85em;  /* Kisebb ikon méret a szöveghez képest */
             text-align: center;
             opacity: 0.8;
             color: var(--current-icon-color);
@@ -466,8 +466,8 @@
             display: flex;
             align-items: center;
             text-align: right; /* Érték jobbra igazítva */
-            flex-shrink: 0;
-            margin-left: 4px;
+            flex-shrink: 0; /* Az érték ne zsugorodjon annyira, ha a címke hosszú */
+            margin-left: 3px; /* Még kisebb tér */
         }
         /* === EDDIG A MÓDOSÍTOTT GRID STÍLUSOK === */
 
@@ -488,7 +488,24 @@
         .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
 
-        .forecast-container { width: 100%; max-width: 800px; padding-bottom: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 0 auto; }
+        /* === MÓDOSÍTOTT FORECAST CONTAINER === */
+        .forecast-container {
+            width: 100%;
+            max-width: 800px;
+            padding-bottom: 12px;
+            display: grid;
+            gap: 12px;
+            margin: 0 auto;
+            grid-template-columns: 1fr; /* Alapértelmezetten 1 oszlop (mobilra) */
+        }
+
+        @media (min-width: 600px) { /* Töréspont, ahol 2 oszlopra váltunk */
+            .forecast-container {
+                grid-template-columns: 1fr 1fr; /* 2 egyenlő oszlop */
+            }
+        }
+        /* === EDDIG A MÓDOSÍTOTT FORECAST CONTAINER === */
+
         .forecast-day-card { display: flex; flex-direction: column; padding: 12px; border-radius: 14px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 3px 10px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
         .forecast-header { text-align: center; margin-bottom: 8px; }
         .forecast-day-name { font-size: 14px; font-weight: 700; }
@@ -534,7 +551,7 @@
     <div class="forecast-container" id="forecast-container"></div>
 
     <script>
-        const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525'; // Fontos: Ezt cseréld le saját érvényes kulcsra!
+        const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525';
         const REFRESH_INTERVAL_PWS = 30 * 1000;
         const REFRESH_INTERVAL_WIND = 15 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 5 * 60 * 1000;
@@ -544,7 +561,7 @@
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
         const ENABLE_ISS_TRACKING = true;
-        const N2YO_API_KEY = '589P8Q-SDRYX8-L842ZD-5Z9L'; // Fontos: Ezt cseréld le saját érvényes N2YO kulcsra!
+        const N2YO_API_KEY = '589P8Q-SDRYX8-L842ZD-5Z9L';
         const OBSERVER_ALTITUDE = 120;
         const ISS_NORAD_ID = 25544;
         const REFRESH_INTERVAL_ISS = 2 * 60 * 60 * 1000;
@@ -679,7 +696,7 @@
 
             let events = [];
             days.forEach(day => {
-                const moonTimes = SunCalc.getMoonTimes(day, lat, lon, true);
+                const moonTimes = SunCalc.getMoonTimes(day, lat, lon, true); // true: adds 'alwaysUp' and 'alwaysDown' properties
                 if (moonTimes.rise && !isNaN(moonTimes.rise.getTime())) {
                     events.push({ time: moonTimes.rise, type: 'rise' });
                 }
@@ -1478,7 +1495,6 @@
                 if (el_moonInfoPhasename) el_moonInfoPhasename.textContent = sunCalcData.phaseName || NO_DATA_STRING;
                 if (el_moonInfoIllumination) el_moonInfoIllumination.textContent = formatValue(sunCalcData.phaseValue, '%', 1);
 
-                // Hold ikon opacitásának beállítása a megvilágítottság alapján
                 if (el_moonPathIcon && sunCalcData && typeof sunCalcData.phaseValue === 'number') {
                     const minOpacity = 0.3;
                     const maxOpacity = 1.0;
