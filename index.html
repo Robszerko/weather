@@ -564,7 +564,6 @@
         }
         /* === EDDIG A KOMPAKT 8 NAPOS ELŐREJELZÉS === */
 
-
         .detail-item, .info-bar-item { perspective: 600px; }
         .detail-item .value, .info-bar-item span { perspective: 400px; }
 
@@ -1756,7 +1755,7 @@
                         <div class="forecast-part-details">
                             <p><i class="fas fa-cloud-sun"></i>${day.dayPart.phrase || NO_DATA_STRING}</p>
                             <p><i class="fas fa-tint"></i>Csapadék: <strong>${formatValue(day.dayPart.precipChance, '%', 0)}</strong></p>
-                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompass(day.dayPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</strong></p>
+                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompassAbbreviated(day.dayPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</strong></p>
                             <p><i class="fas fa-umbrella-beach"></i>UV Index: <strong>${formatValue(day.dayPart.uvIndex, '', 0)}</strong> (${day.dayPart.uvDescription || 'N/A'})</p>
                         </div>
                     </div>`;
@@ -1767,7 +1766,7 @@
                         <div class="forecast-part-details">
                             <p><i class="fas fa-cloud-moon"></i>${day.nightPart.phrase || NO_DATA_STRING}</p>
                             <p><i class="fas fa-tint"></i>Csapadék: <strong>${formatValue(day.nightPart.precipChance, '%', 0)}</strong></p>
-                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompass(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</strong></p>
+                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompassAbbreviated(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</strong></p>
                         </div>
                     </div>`;
                 }
@@ -1996,4 +1995,3 @@
     </script>
 </body>
 </html>
-```
