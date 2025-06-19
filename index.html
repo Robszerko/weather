@@ -482,93 +482,111 @@
         .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
 
-
-        /* === VISSZAÁLLÍTOTT ÉS ÚJRATERVEZETT 8 NAPOS ELŐREJELZÉS === */
+        /* === ÚJRATERVEZETT 8 NAPOS ELŐREJELZÉS === */
         .forecast-container {
             width: 100%;
-            max-width: 700px;
+            max-width: 720px;
             padding-bottom: 12px;
             display: grid;
-            gap: 14px;
+            gap: 16px;
             margin: 0 auto;
             grid-template-columns: 1fr;
         }
-        @media (min-width: 640px) {
+        @media (min-width: 680px) {
             .forecast-container {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             }
         }
         .forecast-day-card {
             display: flex;
             flex-direction: column;
-            padding: 14px;
-            border-radius: 14px;
+            padding: 16px;
+            border-radius: 16px;
             background: var(--current-widget-bg);
             border: 1px solid var(--current-widget-border);
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             color: var(--current-text-color);
             transition: all 0.6s;
         }
-        .forecast-header { text-align: center; margin-bottom: 10px; }
-        .forecast-day-name { font-size: 15px; font-weight: 700; }
-        .forecast-date { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
+        .forecast-header {
+            text-align: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--current-container-border-color);
+        }
+        .forecast-day-name { font-size: 16px; font-weight: 700; }
+        .forecast-date { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         .forecast-temps {
-            font-size: 19px;
-            font-weight: 700;
+            font-size: 22px;
+            font-weight: 800;
             display: flex;
             justify-content: center;
-            gap: 10px;
+            align-items: baseline;
+            gap: 12px;
             padding: 10px 0;
-            border-top: 1px solid var(--current-container-border-color);
-            border-bottom: 1px solid var(--current-container-border-color);
-            margin: 10px 0;
-            transition: border-color 0.6s;
+            margin-bottom: 12px;
         }
-        .forecast-temp-min { color: var(--current-text-muted-color); font-weight: 500; }
-
+        .forecast-temp-min {
+            font-size: 0.8em;
+            color: var(--current-text-muted-color);
+            font-weight: 600;
+        }
         .forecast-parts-wrapper {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 8px;
+            flex-direction: column;
+            gap: 12px;
+        }
+        @media (min-width: 400px) {
+            .forecast-parts-wrapper {
+                flex-direction: row;
+                align-items: flex-start;
+            }
         }
         .forecast-part {
-            flex: 1 1 200px;
-            padding: 8px;
-            border-radius: 8px;
-            background-color: rgba(0,0,0,0.05);
-        }
-        .forecast-part:first-of-type {
-            padding-bottom: 8px;
-            border-bottom: none;
-        }
-        .forecast-parts-wrapper:not([style*="flex-direction: row"]) .forecast-part.day {
-             /* Ez a szabály lehet, hogy nem szükséges, ha a gap kezeli a térközt */
-            /* margin-bottom: 10px; */
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgba(0,0,0,0.06);
+            border: 1px solid rgba(var(--current_text_rgb, 0,0,0), 0.08);
         }
         .forecast-part-header {
             display: flex;
             align-items: center;
-            font-size: 13.5px;
+            font-size: 13px;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+            color: var(--current-text-color);
         }
         .forecast-part-header i {
-            margin-right: 6px;
-            opacity: 0.8;
+            margin-right: 8px;
+            font-size: 1.1em;
             color: var(--current-icon-color);
-            transition: color 0.6s;
-            font-size: 1em;
+            opacity: 0.85;
         }
         .forecast-part-details {
-            font-size: 11.5px;
+            font-size: 12px;
             color: var(--current-text-muted-color);
-            line-height: 1.5;
+            line-height: 1.6;
             text-align: left;
         }
-        .forecast-part-details p { margin: 3px 0; }
-        /* === EDDIG A 8 NAPOS ELŐREJELZÉS === */
-
+        .forecast-part-details p {
+            margin: 4px 0;
+            display: flex;
+            align-items: center;
+        }
+        .forecast-part-details p i {
+            width: 18px;
+            text-align: center;
+            margin-right: 6px;
+            opacity: 0.7;
+            color: var(--current-icon-color);
+        }
+        .forecast-part-details strong {
+            font-weight: 600;
+            color: var(--current-text-color);
+            margin-left: 4px;
+        }
+        /* === EDDIG AZ ÚJRATERVEZETT 8 NAPOS ELŐREJELZÉS === */
 
         .detail-item, .info-bar-item { perspective: 600px; }
         .detail-item .value, .info-bar-item span { perspective: 400px; }
@@ -1753,16 +1771,16 @@
                         <span class="forecast-temp-max">${formatValue(day.tempMax, '°', 0, '--')}</span>
                         <span class="forecast-temp-min">${formatValue(day.tempMin, '°', 0, '--')}</span>
                     </div>
-                    <div class="forecast-parts-wrapper">`; // ÚJ WRAPPER
+                    <div class="forecast-parts-wrapper">`;
 
                 if (day.dayPart) {
                     forecastHTML += `<div class="forecast-part day">
                         <div class="forecast-part-header"><i class="fas fa-sun"></i>Nappal</div>
                         <div class="forecast-part-details">
-                            <p>${day.dayPart.phrase || NO_DATA_STRING}</p>
-                            <p>Csapadék: ${formatValue(day.dayPart.precipChance, '%', 0)}</p>
-                            <p>Szél: ${degreesToCompass(day.dayPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</p>
-                            <p>UV Index: ${formatValue(day.dayPart.uvIndex, '', 0)} (${day.dayPart.uvDescription || 'N/A'})</p>
+                            <p><i class="fas fa-cloud-sun"></i>${day.dayPart.phrase || NO_DATA_STRING}</p>
+                            <p><i class="fas fa-tint"></i>Csapadék: <strong>${formatValue(day.dayPart.precipChance, '%', 0)}</strong></p>
+                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompass(day.dayPart.windDir)} ${formatValue(day.dayPart.windSpeed, ' km/h', 0)}</strong></p>
+                            <p><i class="fas fa-umbrella-beach"></i>UV Index: <strong>${formatValue(day.dayPart.uvIndex, '', 0)}</strong> (${day.dayPart.uvDescription || 'N/A'})</p>
                         </div>
                     </div>`;
                 }
@@ -1770,13 +1788,13 @@
                     forecastHTML += `<div class="forecast-part night">
                         <div class="forecast-part-header"><i class="fas fa-moon"></i>Éjjel</div>
                         <div class="forecast-part-details">
-                            <p>${day.nightPart.phrase || NO_DATA_STRING}</p>
-                            <p>Csapadék: ${formatValue(day.nightPart.precipChance, '%', 0)}</p>
-                            <p>Szél: ${degreesToCompass(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</p>
+                            <p><i class="fas fa-cloud-moon"></i>${day.nightPart.phrase || NO_DATA_STRING}</p>
+                            <p><i class="fas fa-tint"></i>Csapadék: <strong>${formatValue(day.nightPart.precipChance, '%', 0)}</strong></p>
+                            <p><i class="fas fa-wind"></i>Szél: <strong>${degreesToCompass(day.nightPart.windDir)} ${formatValue(day.nightPart.windSpeed, ' km/h', 0)}</strong></p>
                         </div>
                     </div>`;
                 }
-                forecastHTML += `</div></div>`; // WRAPPER és day-card zárul
+                forecastHTML += `</div></div>`;
             });
 
             if (forecastHTML.trim() === '') {
