@@ -167,7 +167,6 @@
             width: 100%;
             max-width: 480px;
             box-sizing: border-box;
-            /* Margins are set inline in the HTML for widget-internal placement */
         }
         .precipitation-forecast-info strong {
             color: var(--current-text-color);
@@ -256,28 +255,26 @@
         .path-refresh-btn:hover { opacity: 1; color: var(--current-icon-color); }
         .path-refresh-btn.is-refreshing { transform: rotate(360deg); transition: transform 0.8s; }
 
-
-        /* === ÚJ VAGY MÓDOSÍTOTT STÍLUSOK A NAP ÉS HOLD GRAFIKÁHOZ === */
         .sun-path-visual, .moon-path-visual {
             width: 150px; height: 85px; position: relative;
             display: flex; justify-content: center; align-items: flex-end;
-            margin-bottom: 12px; /* Kicsit több hely alatta */
+            margin-bottom: 12px;
             flex-shrink: 0;
         }
         .sun-path-svg, .moon-path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; }
 
         .sun-path-arc-main, .moon-path-arc-main {
             fill: none;
-            stroke-width: 2.5px; /* Kicsit vastagabb, kontrasztosabb pálya */
+            stroke-width: 2.5px;
             stroke-linecap: round;
         }
         .sun-path-arc-bg, .moon-path-arc-bg {
             fill: none;
-            stroke-width: 1.5px; /* Vékonyabb háttérpálya */
+            stroke-width: 1.5px;
             stroke-linecap: round;
             stroke: var(--current-text-muted-color);
-            stroke-dasharray: 3 3; /* Finomabb szaggatás */
-            opacity: 0.25; /* Halványabb */
+            stroke-dasharray: 3 3;
+            opacity: 0.25;
         }
         .sun-path-horizon, .moon-path-horizon {
             position: absolute; bottom: 10px; left: 0;
@@ -287,7 +284,7 @@
         }
         .sun-path-now-marker, .moon-path-now-marker {
             position: absolute; bottom: 6px;
-            width: 3px; /* Kicsit vastagabb jelző */
+            width: 3px;
             height: 8px;
             border-radius: 1.5px;
             transform: translateX(-50%);
@@ -295,26 +292,25 @@
             opacity: 0.9;
         }
 
-        /* Nap Grafika Specifikus Stílusai */
         #sun-path-icon {
             position: absolute;
-            top: 0; left: 0; /* JS fogja pozícionálni */
+            top: 0; left: 0;
             width: 20px;
             height: 20px;
-            background-color: #FFD700; /* Erős sárga */
+            background-color: #FFD700;
             border-radius: 50%;
-            box-shadow: 0 0 10px 3px gold, /* Intenzívebb ragyogás */
-                        0 0 18px 6px rgba(255, 215, 0, 0.45), /* Lágyabb külső fényudvar */
-                        inset 0 0 4px rgba(255, 255, 220, 0.6); /* Belső fényhatás */
+            box-shadow: 0 0 10px 3px gold,
+                        0 0 18px 6px rgba(255, 215, 0, 0.45),
+                        inset 0 0 4px rgba(255, 255, 220, 0.6);
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
-            pointer-events: auto; /* Maradjon, ha a tooltipet szeretnénk */
+            pointer-events: auto;
             cursor: help;
-            font-size: 0; /* Eltünteti az FA ikont, ha volt */
-            color: transparent; /* Biztosíték az FA ikon elrejtésére */
+            font-size: 0; /* Remove FA icon if any */
+            color: transparent;
         }
         .sun-path-arc-main {
-            stroke: gold; /* Fő pálya színe */
+            stroke: gold;
             opacity: 0.85;
             transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -322,24 +318,22 @@
             background-color: gold;
         }
 
-        /* Hold Grafika Specifikus Stílusai */
         #moon-path-icon {
             position: absolute;
-            top: 0; left: 0; /* JS fogja pozícionálni */
+            top: 0; left: 0;
             width: 18px;
             height: 18px;
-            font-size: 18px; /* FA ikon mérete */
-            color: #E8EAF6; /* Világos, hideg árnyalat a holdnak */
-            text-shadow: 0 0 7px rgba(200, 200, 255, 0.6), /* Kékes fényudvar */
+            font-size: 18px; /* FA icon size */
+            color: #E8EAF6;
+            text-shadow: 0 0 7px rgba(200, 200, 255, 0.6),
                          0 0 13px rgba(150, 150, 220, 0.4);
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease-in-out; /* Opacity átmenet hozzáadva */
+            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease-in-out;
             z-index: 10;
             pointer-events: auto;
             cursor: help;
-            /* Az opacitást JavaScript állítja be a fázis alapján */
         }
         .moon-path-arc-main {
-            stroke: #A0B0C0; /* Hidegebb, halványabb szín a pályának */
+            stroke: #A0B0C0;
             opacity: 0.8;
             transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -349,7 +343,7 @@
 
         .sun-path-label, .moon-path-label {
             position: absolute; bottom: -16px;
-            font-size: 9.5px; /* Kicsit kisebb, letisztultabb */
+            font-size: 9.5px;
             font-weight: 600;
             color: var(--current-text-muted-color);
             opacity: 0.75;
@@ -362,8 +356,6 @@
             color: var(--current-text-color);
             opacity: 0.9;
         }
-        /* === EDDIG AZ ÚJ VAGY MÓDOSÍTOTT STÍLUSOK === */
-
 
         .rain-visual { width: 130px; height: 120px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; }
         #main-rain-visual { clip-path: url(#raindrop-clip-main); }
@@ -412,13 +404,12 @@
             line-height: 1;
         }
 
-        /* Night Sky Panel Styles */
         .night-sky-visual { text-align: center; }
         .night-sky-visual i { font-size: 48px; margin-bottom: 8px; color: var(--current-text-muted-color); transition: color 0.6s; }
         #planet-info .night-sky-visual i.fa-ring { color: #E3D4A8; text-shadow: 0 0 10px #E3D4A8; }
-        #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; } /* Mars */
-        #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; } /* Jupiter */
-        #iss-info .night-sky-visual i.fa-satellite { color: #B0B0B0; text-shadow: 0 0 8px #FFFFFF;} /* ISS */
+        #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; }
+        #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; }
+        #iss-info .night-sky-visual i.fa-satellite { color: #B0B0B0; text-shadow: 0 0 8px #FFFFFF;}
 
         #constellation-svg-container { width: 100px; height: 80px; margin: 0 auto; }
         #constellation-svg-container svg { width: 100%; height: 100%; }
@@ -426,28 +417,59 @@
         #constellation-svg-container .star.bright { fill: #ffffff; }
         #constellation-svg-container .const-line { stroke: var(--text-secondary-night); stroke-width: 1px; opacity: 0.5; }
 
+        /* === MÓDOSÍTOTT STÍLUSOK A GRID ADATOK MÉRETÉNEK CSÖKKENTÉSÉHEZ === */
         .weather-details-grid {
-            margin-top: 20px; /* Megnövelt margó felül */
-            background-color: rgba(0,0,0,0.08); /* Enyhe háttér a blokknak */
-            border: 1px solid var(--current-container-border-color); /* Keret a blokknak */
-            border-radius: 12px; /* Lekerekített sarkok */
-            padding: 16px; /* Belső padding a blokkban */
+            margin-top: 20px;
+            background-color: rgba(0,0,0,0.08);
+            border: 1px solid var(--current-container-border-color);
+            border-radius: 12px;
+            padding: 14px 16px; /* Kisebb belső padding felül/alul */
             display: grid;
             grid-template-columns: 1fr 1fr;
-            column-gap: 20px; /* Rés az oszlopok között */
-            row-gap: 10px;    /* Rés a sorok között */
-            transition: all 0.6s; /* border-color, background-color stb. */
+            column-gap: 16px; /* Kisebb rés az oszlopok között */
+            row-gap: 8px;     /* Kisebb rés a sorok között */
+            transition: all 0.6s;
         }
+
         .detail-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
-            padding: 4px 0; /* Kisebb padding, a rések adják a teret */
+            font-size: 11.5px; /* CSÖKKENTETT betűméret az egész itemre */
+            padding: 3px 0;   /* Kisebb padding az itemeken belül */
         }
-        .detail-item .label { font-weight: 600; color: var(--current-text-color); margin-right: 6px; display: flex; align-items: center; transition: color 0.6s; }
-        .detail-item .label i { margin-right: 7px; width: 14px; font-size: 0.95em; text-align: center; opacity: 0.8; color: var(--current-icon-color); transition: color 0.6s; }
-        .detail-item .value { color: var(--current-text-muted-color); font-weight: 500; transition: color 0.6s; display: flex; align-items: center; }
+
+        .detail-item .label {
+            font-weight: 600;
+            color: var(--current-text-color);
+            margin-right: 5px; /* Kisebb margó az ikon után */
+            display: flex;
+            align-items: center;
+            transition: color 0.6s;
+            white-space: nowrap; /* Címke ne törjön, ha lehet */
+        }
+
+        .detail-item .label i {
+            margin-right: 6px; /* Kisebb margó az ikon és szöveg között */
+            width: 13px;       /* Kisebb hely az ikonnak */
+            font-size: 0.9em;  /* Kisebb ikon méret a szöveghez képest */
+            text-align: center;
+            opacity: 0.8;
+            color: var(--current-icon-color);
+            transition: color 0.6s;
+        }
+
+        .detail-item .value {
+            color: var(--current-text-muted-color);
+            font-weight: 500;
+            transition: color 0.6s;
+            display: flex;
+            align-items: center;
+            text-align: right; /* Érték jobbra igazítva */
+            flex-shrink: 0;
+            margin-left: 4px;
+        }
+        /* === EDDIG A MÓDOSÍTOTT GRID STÍLUSOK === */
 
         .pressure-trend-icon { margin-left: 4px; font-weight: 700; }
         .uv-description-text { margin-left: 4px; font-size: 0.88em; font-style: italic; }
@@ -909,7 +931,7 @@
             }
 
             const arcLength = mainArcEl.getTotalLength();
-            if (arcLength === 0) { // SVG még nem renderelődött teljesen
+            if (arcLength === 0) {
                 setTimeout(() => updatePathVisuals(startTime, endTime, elements), 50);
                 return;
             }
@@ -918,31 +940,27 @@
             mainArcEl.style.strokeDasharray = arcLength;
             mainArcEl.style.strokeDashoffset = offset;
 
-            // Ikon pozícionálása a pályán
-            const angle = Math.PI * (1 - percentageOfPath); // 0 (jobb) to PI (bal)
-            const arcRadius = 65; // SVG viewBox="0 0 150 85" és path d="M 10 75 A 65 65 ..." alapján
-            const centerX = 75;   // SVG viewBox közepe X
-            const centerY = 75;   // SVG path 'A' parancsának Y kiindulópontja
+            const angle = Math.PI * (1 - percentageOfPath);
+            const arcRadius = 65;
+            const centerX = 75;
+            const centerY = 75;
 
-            // Az ikon pozíciójának számítása az SVG koordináta-rendszerében
-            // Az ikon középpontját kell eltolni a pályára
             const svgX = centerX + arcRadius * Math.cos(angle);
-            const svgY = centerY - arcRadius * Math.sin(angle); // Mínusz, mert az SVG Y lefelé nő
+            const svgY = centerY - arcRadius * Math.sin(angle);
 
-            // Az ikonnak saját mérete van (pl. 20x20), ezért a felét le kell vonni a pozícióból, hogy középre kerüljön
             iconEl.style.transform = `translate(${svgX}px, ${svgY}px) translate(-50%, -50%)`;
-            nowMarkerEl.style.left = `${svgX}px`; // A "most" jelző is ide kerül
+            nowMarkerEl.style.left = `${svgX}px`;
         }
 
         function updatePrecipitationVisuals(precipRate, precipTotal, elements) {
             const { gaugeValueEl, totalValueEl } = elements;
             if (!gaugeValueEl || !totalValueEl) return;
 
-            const MAX_INTENSITY = 10; // mm/h - e fölött a gauge tele van
+            const MAX_INTENSITY = 10;
             const percentage = Math.min(1, (precipRate || 0) / MAX_INTENSITY);
 
             const length = gaugeValueEl.getTotalLength();
-            if (length === 0) { // SVG még nem renderelődött
+            if (length === 0) {
                 setTimeout(() => updatePrecipitationVisuals(precipRate, precipTotal, elements), 50);
                 return;
             }
@@ -1074,7 +1092,7 @@
                 </div>
             </div>
             <div class="widget-core-data">
-            <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i class="fas fa-sun" id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
+            <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
             <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="moon-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
             <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
 
@@ -1462,8 +1480,8 @@
 
                 // Hold ikon opacitásának beállítása a megvilágítottság alapján
                 if (el_moonPathIcon && sunCalcData && typeof sunCalcData.phaseValue === 'number') {
-                    const minOpacity = 0.3; // Minimum opacitás (pl. újholdnál)
-                    const maxOpacity = 1.0; // Maximum opacitás (pl. teliholdnál)
+                    const minOpacity = 0.3;
+                    const maxOpacity = 1.0;
                     el_moonPathIcon.style.opacity = (minOpacity + (sunCalcData.phaseValue / 100) * (maxOpacity - minOpacity)).toFixed(2);
                 }
 
@@ -1837,7 +1855,7 @@
                 }
 
                 scheduleHourlyForecastUpdate();
-            }, delayInMs > 0 ? delayInMs : 60 * 1000); // Minimum 1 perces késleltetés
+            }, delayInMs > 0 ? delayInMs : 60 * 1000);
         }
 
         function initApp() {
