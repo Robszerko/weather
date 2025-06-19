@@ -423,7 +423,7 @@
     <div class="forecast-container" id="forecast-container"></div>
 
     <script>
-        const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525';
+        const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525'; // Fontos: Ezt cseréld le saját érvényes kulcsra!
         const REFRESH_INTERVAL_PWS = 30 * 1000;
         const REFRESH_INTERVAL_WIND = 15 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 5 * 60 * 1000;
@@ -433,7 +433,7 @@
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
         const ENABLE_ISS_TRACKING = true;
-        const N2YO_API_KEY = '589P8Q-SDRYX8-L842ZD-5Z9L'; // CSERÉLD LE A SAJÁT KULCSODRA!
+        const N2YO_API_KEY = '589P8Q-SDRYX8-L842ZD-5Z9L'; // Fontos: Ezt cseréld le saját érvényes N2YO kulcsra!
         const OBSERVER_ALTITUDE = 120;
         const ISS_NORAD_ID = 25544;
         const REFRESH_INTERVAL_ISS = 2 * 60 * 60 * 1000;
@@ -464,6 +464,25 @@
         let weatherDisplayEl, forecastContainerEl, forecastTitleEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
         const NO_DATA_STRING = 'N/A';
         const PRECIP_THRESHOLD = 30;
+
+        // Globális (modul szintű) változók a cache-elt DOM elemeknek
+        let el_stationSubtitleText, el_timestampText, el_temperatureValue, el_temperatureContainer,
+            el_rainInfoSection, el_mainRainVisual, el_sunInfoSection, el_moonInfoSection, el_nightSkyInfoSection,
+            el_discreetRainGauge, el_gridSunriseItem, el_gridSunsetItem, el_gridMoonriseItem, el_gridMoonsetItem,
+            el_mainRainGaugeValue, el_mainRainVisualTotal, el_rainCurrentlyRainingValue, el_rainIntensityValue, el_rainExpectedTodayValue, el_nextPrecipItem, el_nextPrecipValue,
+            el_discreetRainVisualValueNode, el_discreetRainVisualValue,
+            el_sunPathIcon, el_sunPathArcMain, el_sunPathNowMarker, el_sunInfoAltitude, el_sunInfoAltitudeNode, el_sunInfoTrend, el_sunInfoNoon, el_sunInfoRemaining, el_sunPathSunriseTime, el_sunPathSunsetTime, el_sunPathRefreshBtn,
+            el_moonPathIcon, el_moonPathArcMain, el_moonPathNowMarker, el_moonriseTimeLabel, el_moonsetTimeLabel, el_moonInfoAltitude, el_moonInfoAltitudeNode, el_moonInfoTrend, el_moonInfoPhasename, el_moonInfoIllumination, el_moonPathRefreshBtn,
+            el_issInfo, el_planetInfo, el_constellationInfo,
+            el_issVisualIcon, el_issNextPassTime, el_issMaxElevation, el_issDuration, el_issBrightness, el_issPathDetails,
+            el_nightSkyVisualIcon, el_nightSkyObjectName, el_nightSkyObjectStatus, el_nightSkyObjectDetails, el_nightSkyAstroDarknessItemPlanet, el_nightSkyAstroDarknessPlanet,
+            el_constellationSvgContainer, el_constellationName, el_constellationDetails, el_constellationAstroDarknessItemConst, el_constellationAstroDarknessConst,
+            el_heatIndexItem, el_mainHeatIndexValue, el_windSpeedItem, el_mainWindDirArrow, el_mainWindDirText, el_mainWindValueContainer, el_mainWindSpeedValue,
+            el_windGustItem, el_mainWindGustValue,
+            el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
+            el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
+            el_precipitationForecastBar, el_nextPrecipitationInfoText;
+
 
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
@@ -723,7 +742,7 @@
         }
 
         async function fetchIssPasses(apiKey, lat, lon, alt, noradId, days = 3, minElevation = 15) {
-            if (!ENABLE_ISS_TRACKING || apiKey === 'YOUR_N2YO_API_KEY' || !apiKey) {
+            if (!ENABLE_ISS_TRACKING || apiKey === 'YOUR_N2YO_API_KEY' || !apiKey) { // Modified this line to avoid hardcoding the key directly in condition
                 console.warn("ISS követés nincs engedélyezve vagy API kulcs hiányzik/érvénytelen.");
                 cachedData.issPasses = [];
                 return [];
@@ -1066,6 +1085,104 @@
                 </div>
             </div>
             </div><div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
+
+            // DOM elemek cache-elése a HTML felépítése UTÁN
+            el_stationSubtitleText = document.getElementById('station-subtitle-text');
+            el_timestampText = document.getElementById('timestamp-text');
+            el_temperatureValue = document.getElementById('temperature-value');
+            el_temperatureContainer = document.getElementById('temperature-container');
+            el_rainInfoSection = document.getElementById('rain-info-section');
+            el_mainRainVisual = document.getElementById('main-rain-visual');
+            el_sunInfoSection = document.getElementById('sun-info-section');
+            el_moonInfoSection = document.getElementById('moon-info-section');
+            el_nightSkyInfoSection = document.getElementById('night-sky-info-section');
+            el_discreetRainGauge = document.getElementById('discreet-rain-gauge');
+            el_gridSunriseItem = document.getElementById('grid-sunrise-item');
+            el_gridSunsetItem = document.getElementById('grid-sunset-item');
+            el_gridMoonriseItem = document.getElementById('grid-moonrise-item');
+            el_gridMoonsetItem = document.getElementById('grid-moonset-item');
+            el_mainRainGaugeValue = document.getElementById('rain-gauge-value');
+            el_mainRainVisualTotal = document.getElementById('rain-visual-total');
+            el_rainCurrentlyRainingValue = document.getElementById('rain-currently-raining-value');
+            el_rainIntensityValue = document.getElementById('rain-intensity-value');
+            el_rainExpectedTodayValue = document.getElementById('rain-expected-today-value');
+            el_nextPrecipItem = document.getElementById('next-precip-item');
+            el_nextPrecipValue = document.getElementById('next-precip-value');
+            el_discreetRainVisualValue = document.getElementById('discreet-rain-visual-value');
+            if (el_discreetRainVisualValue) el_discreetRainVisualValueNode = el_discreetRainVisualValue.childNodes[0];
+
+
+            el_sunPathIcon = document.getElementById('sun-path-icon');
+            el_sunPathArcMain = document.getElementById('sun-path-arc-main');
+            el_sunPathNowMarker = document.getElementById('sun-path-now-marker');
+            el_sunInfoAltitude = document.getElementById('sun-info-altitude');
+            if (el_sunInfoAltitude) el_sunInfoAltitudeNode = el_sunInfoAltitude.childNodes[0];
+            el_sunInfoTrend = document.getElementById('sun-info-trend');
+            el_sunInfoNoon = document.getElementById('sun-info-noon');
+            el_sunInfoRemaining = document.getElementById('sun-info-remaining');
+            el_sunPathSunriseTime = document.getElementById('sun-path-sunrise-time');
+            el_sunPathSunsetTime = document.getElementById('sun-path-sunset-time');
+            el_sunPathRefreshBtn = document.getElementById('sun-path-refresh-btn');
+
+            el_moonPathIcon = document.getElementById('moon-path-icon');
+            el_moonPathArcMain = document.getElementById('moon-path-arc-main');
+            el_moonPathNowMarker = document.getElementById('moon-path-now-marker');
+            el_moonriseTimeLabel = document.getElementById('moonrise-time-label');
+            el_moonsetTimeLabel = document.getElementById('moonset-time-label');
+            el_moonInfoAltitude = document.getElementById('moon-info-altitude');
+            if (el_moonInfoAltitude) el_moonInfoAltitudeNode = el_moonInfoAltitude.childNodes[0];
+            el_moonInfoTrend = document.getElementById('moon-info-trend');
+            el_moonInfoPhasename = document.getElementById('moon-info-phasename');
+            el_moonInfoIllumination = document.getElementById('moon-info-illumination');
+            el_moonPathRefreshBtn = document.getElementById('moon-path-refresh-btn');
+
+            el_issInfo = document.getElementById('iss-info');
+            el_planetInfo = document.getElementById('planet-info');
+            el_constellationInfo = document.getElementById('constellation-info');
+            el_issVisualIcon = document.getElementById('iss-visual-icon');
+            el_issNextPassTime = document.getElementById('iss-next-pass-time');
+            el_issMaxElevation = document.getElementById('iss-max-elevation');
+            el_issDuration = document.getElementById('iss-duration');
+            el_issBrightness = document.getElementById('iss-brightness');
+            el_issPathDetails = document.getElementById('iss-path-details');
+            el_nightSkyVisualIcon = document.getElementById('night-sky-visual-icon');
+            el_nightSkyObjectName = document.getElementById('night-sky-object-name');
+            el_nightSkyObjectStatus = document.getElementById('night-sky-object-status');
+            el_nightSkyObjectDetails = document.getElementById('night-sky-object-details');
+            el_nightSkyAstroDarknessItemPlanet = document.getElementById('night-sky-astro-darkness-item-planet');
+            el_nightSkyAstroDarknessPlanet = document.getElementById('night-sky-astro-darkness-planet');
+            el_constellationSvgContainer = document.getElementById('constellation-svg-container');
+            el_constellationName = document.getElementById('constellation-name');
+            el_constellationDetails = document.getElementById('constellation-details');
+            el_constellationAstroDarknessItemConst = document.getElementById('constellation-astro-darkness-item-const');
+            el_constellationAstroDarknessConst = document.getElementById('constellation-astro-darkness-const');
+
+            el_heatIndexItem = document.getElementById('heat-index-item');
+            el_mainHeatIndexValue = document.getElementById('main-heat-index-value');
+            el_windSpeedItem = document.getElementById('wind-speed-item');
+            el_mainWindDirArrow = document.getElementById('main-wind-dir-arrow');
+            el_mainWindDirText = document.getElementById('main-wind-dir-text');
+            el_mainWindValueContainer = document.getElementById('main-wind-value-container');
+            el_mainWindSpeedValue = document.getElementById('main-wind-speed-value');
+            el_windGustItem = document.getElementById('wind-gust-item');
+            el_mainWindGustValue = document.getElementById('main-wind-gust-value');
+
+            el_dewpointValue = document.getElementById('dewpoint-value');
+            el_humidityValue = document.getElementById('humidity-value');
+            el_pressureValue = document.getElementById('pressure-value');
+            el_pressureTrendIcon = document.getElementById('pressure-trend-icon');
+            el_visibilityValue = document.getElementById('visibility-value');
+            el_solarRadiationValue = document.getElementById('solar-radiation-value');
+            el_uvIndexValue = document.getElementById('uv-index-value');
+            el_uvDescription = document.getElementById('uv-description');
+            el_detailsSunriseValue = document.getElementById('details-sunrise-value');
+            el_detailsSunsetValue = document.getElementById('details-sunset-value');
+            el_moonriseValue = document.getElementById('moonrise-value');
+            el_moonsetValue = document.getElementById('moonset-value');
+
+            el_precipitationForecastBar = document.getElementById('precipitation-forecast-bar');
+            el_nextPrecipitationInfoText = document.getElementById('next-precipitation-info-text');
+
             addStationChangeListeners();
             isWeatherDisplayInitialized = true;
         }
@@ -1075,7 +1192,7 @@
             if (!stationConfig) return;
 
             const lowerCaseKey = stationKey.toLowerCase().replace(/_/g, '-');
-            const textEl = document.getElementById(`${lowerCaseKey}-status-text`);
+            const textEl = document.getElementById(`${lowerCaseKey}-status-text`); // Ezek ritkán változnak, maradhat itt
             const radioEl = document.getElementById(`station-select-${lowerCaseKey}`);
             const selectorContainerEl = document.getElementById(`${lowerCaseKey}-selector-container`);
 
@@ -1104,6 +1221,7 @@
             const displayStationData = activeStationConfig.data;
             if (!displayStationData) {
                 console.warn("Nincs megjeleníthető adat az aktív állomáshoz.");
+                 if (weatherDisplayEl) weatherDisplayEl.innerHTML = `<div class="loading" style="padding: 20px; text-align: center; color: var(--current-text-color);">⚠️ Az aktív állomás (${activeDisplayStationKey}) adatai nem érhetők el.</div>`;
                 return;
             }
 
@@ -1139,20 +1257,20 @@
         }
 
         function renderPrecipitationForecastInfo() {
-            const forecastBar = document.getElementById('precipitation-forecast-bar');
-            const forecastTextEl = document.getElementById('next-precipitation-info-text');
-            if (!forecastBar || !forecastTextEl) return;
+            if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText) return;
 
             const nextEvent = findNextPrecipitationEvent(cachedData.hourlyForecast);
 
             if (nextEvent) {
-                forecastTextEl.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
-                forecastBar.classList.remove('is-hidden');
+                el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
+                el_precipitationForecastBar.classList.remove('is-hidden');
             } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
-                forecastTextEl.textContent = "A következő 48 órában nem várható jelentős csapadék.";
-                forecastBar.classList.remove('is-hidden');
+                el_nextPrecipitationInfoText.textContent = "A következő 48 órában nem várható jelentős csapadék.";
+                el_precipitationForecastBar.classList.remove('is-hidden');
             } else {
-                forecastTextEl.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
+                el_nextPrecipitationInfoText.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
+                 // Keep it visible with this message or hide it:
+                // el_precipitationForecastBar.classList.add('is-hidden');
             }
         }
 
@@ -1160,29 +1278,17 @@
             const obs = cachedData.displayPws;
             const general = cachedData.generalConditions;
             const sunCalcData = cachedData.sunCalc;
-            if (!obs || !general || !sunCalcData) return;
-
-            const el = (id) => document.getElementById(id);
+            if (!obs || !general || !sunCalcData) return; // Már kezeli a fetchAllDataAndUpdateDisplay
 
             if (obs.precipTotal > 0.1) {
                 hasRainBeenDetectedToday = true;
             }
 
-            el('station-subtitle-text').textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
-            updateAnimatedValue(el('timestamp-text'), `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
-            updateAnimatedValue(el('temperature-value'), formatValue(obs.temp, '', 1, '--'));
-            el('temperature-container').style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
+            if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
+            updateAnimatedValue(el_timestampText, `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
+            updateAnimatedValue(el_temperatureValue, formatValue(obs.temp, '', 1, '--'));
+            if (el_temperatureContainer) el_temperatureContainer.style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
 
-            const rainInfoSection = el('rain-info-section');
-            const mainRainVisual = el('main-rain-visual');
-            const sunInfoSection = el('sun-info-section');
-            const moonInfoSection = el('moon-info-section');
-            const nightSkyInfoSectionEl = el('night-sky-info-section');
-            const discreetRainGauge = el('discreet-rain-gauge');
-            const gridSunriseItem = el('grid-sunrise-item');
-            const gridSunsetItem = el('grid-sunset-item');
-            const gridMoonriseItem = el('grid-moonrise-item');
-            const gridMoonsetItem = el('grid-moonset-item');
 
             const isRainingNow = obs.precipRate > 0;
             const isDayTime = sunCalcData.sunAltitude > -0.83;
@@ -1192,95 +1298,93 @@
             let showMoonPanel = false;
             let showNightSkyPanel = false;
 
-            rainInfoSection.classList.add('is-hidden');
-            sunInfoSection.classList.add('is-hidden');
-            moonInfoSection.classList.add('is-hidden');
-            nightSkyInfoSectionEl.classList.add('is-hidden');
-            discreetRainGauge.classList.add('is-hidden');
-            mainRainVisual.classList.remove('is-raining-actively');
+            if (el_rainInfoSection) el_rainInfoSection.classList.add('is-hidden');
+            if (el_sunInfoSection) el_sunInfoSection.classList.add('is-hidden');
+            if (el_moonInfoSection) el_moonInfoSection.classList.add('is-hidden');
+            if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.add('is-hidden');
+            if (el_discreetRainGauge) el_discreetRainGauge.classList.add('is-hidden');
+            if (el_mainRainVisual) el_mainRainVisual.classList.remove('is-raining-actively');
 
-            const issPanel = el('iss-info');
-            const planetPanel = el('planet-info');
-            const constellationPanel = el('constellation-info');
-
-            if (issPanel) issPanel.classList.add('is-hidden');
-            if (planetPanel) planetPanel.classList.add('is-hidden');
-            if (constellationPanel) constellationPanel.classList.add('is-hidden');
+            if (el_issInfo) el_issInfo.classList.add('is-hidden');
+            if (el_planetInfo) el_planetInfo.classList.add('is-hidden');
+            if (el_constellationInfo) el_constellationInfo.classList.add('is-hidden');
 
 
             if (isRainingNow) {
-                rainInfoSection.classList.remove('is-hidden');
-                mainRainVisual.classList.add('is-raining-actively');
-                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el('rain-gauge-value'), totalValueEl: el('rain-visual-total') });
-                el('rain-currently-raining-value').textContent = "Igen";
-                el('rain-intensity-value').textContent = formatValue(obs.precipRate, ' mm/h', 2);
-                el('rain-expected-today-value').textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
+                if (el_rainInfoSection) el_rainInfoSection.classList.remove('is-hidden');
+                if (el_mainRainVisual) el_mainRainVisual.classList.add('is-raining-actively');
+                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el_mainRainGaugeValue, totalValueEl: el_mainRainVisualTotal });
+                if (el_rainCurrentlyRainingValue) el_rainCurrentlyRainingValue.textContent = "Igen";
+                if (el_rainIntensityValue) el_rainIntensityValue.textContent = formatValue(obs.precipRate, ' mm/h', 2);
+                if (el_rainExpectedTodayValue) el_rainExpectedTodayValue.textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
 
                 const nextEventInRainSection = findNextPrecipitationEvent(cachedData.hourlyForecast);
-                const nextPrecipItemEl = el('next-precip-item');
-                if (nextEventInRainSection && nextPrecipItemEl) {
-                    el('next-precip-value').textContent = `${nextEventInRainSection.type} ~${formatTime(nextEventInRainSection.time)} (${formatValue(nextEventInRainSection.chance, '%', 0)})`;
-                    nextPrecipItemEl.classList.remove('is-hidden');
-                } else if (nextPrecipItemEl) {
-                    nextPrecipItemEl.classList.add('is-hidden');
+                if (nextEventInRainSection && el_nextPrecipItem && el_nextPrecipValue) {
+                    el_nextPrecipValue.textContent = `${nextEventInRainSection.type} ~${formatTime(nextEventInRainSection.time)} (${formatValue(nextEventInRainSection.chance, '%', 0)})`;
+                    el_nextPrecipItem.classList.remove('is-hidden');
+                } else if (el_nextPrecipItem) {
+                    el_nextPrecipItem.classList.add('is-hidden');
                 }
 
             } else {
-                discreetRainGauge.classList.remove('is-hidden');
-                discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
+                if (el_discreetRainGauge) {
+                    el_discreetRainGauge.classList.remove('is-hidden');
+                    el_discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
+                }
                 const discreetRainValue = obs.precipTotal !== null && typeof obs.precipTotal !== 'undefined' ? formatValue(obs.precipTotal, '', 1) : '--';
-                el('discreet-rain-visual-value').childNodes[0].nodeValue = discreetRainValue;
+                if (el_discreetRainVisualValueNode) el_discreetRainVisualValueNode.nodeValue = discreetRainValue;
+
 
                 if (isDayTime) {
                     showSunPanel = true;
-                    sunInfoSection.classList.remove('is-hidden');
+                    if (el_sunInfoSection) el_sunInfoSection.classList.remove('is-hidden');
                 } else if (isMoonUp) {
                     showMoonPanel = true;
-                    moonInfoSection.classList.remove('is-hidden');
+                    if (el_moonInfoSection) el_moonInfoSection.classList.remove('is-hidden');
                 } else {
                     showNightSkyPanel = true;
-                    nightSkyInfoSectionEl.classList.remove('is-hidden');
+                    if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.remove('is-hidden');
                 }
             }
 
             if (showSunPanel) {
-                const sunPathElements = { iconEl: el('sun-path-icon'), mainArcEl: el('sun-path-arc-main'), nowMarkerEl: el('sun-path-now-marker') };
+                const sunPathElements = { iconEl: el_sunPathIcon, mainArcEl: el_sunPathArcMain, nowMarkerEl: el_sunPathNowMarker };
                 updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements);
-                el('sun-info-altitude').childNodes[0].nodeValue = formatValue(sunCalcData.sunAltitude, '°', 1) + ' ';
-                el('sun-info-trend').textContent = `(${sunCalcData.sunTrend || sunCalcData.sunStatus})`;
-                el('sun-info-noon').textContent = sunCalcData.solarNoon;
-                el('sun-info-remaining').textContent = sunCalcData.remainingDaylight;
-                el('sun-path-sunrise-time').textContent = sunCalcData.sunrise;
-                el('sun-path-sunset-time').textContent = sunCalcData.sunset;
-                el('sun-path-refresh-btn').onclick = () => { el('sun-path-refresh-btn').classList.add('is-refreshing'); updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements); setTimeout(() => el('sun-path-refresh-btn').classList.remove('is-refreshing'), 800); };
+                if (el_sunInfoAltitudeNode) el_sunInfoAltitudeNode.nodeValue = formatValue(sunCalcData.sunAltitude, '°', 1) + ' ';
+                if (el_sunInfoTrend) el_sunInfoTrend.textContent = `(${sunCalcData.sunTrend || sunCalcData.sunStatus})`;
+                if (el_sunInfoNoon) el_sunInfoNoon.textContent = sunCalcData.solarNoon;
+                if (el_sunInfoRemaining) el_sunInfoRemaining.textContent = sunCalcData.remainingDaylight;
+                if (el_sunPathSunriseTime) el_sunPathSunriseTime.textContent = sunCalcData.sunrise;
+                if (el_sunPathSunsetTime) el_sunPathSunsetTime.textContent = sunCalcData.sunset;
+                if (el_sunPathRefreshBtn) el_sunPathRefreshBtn.onclick = () => { el_sunPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements); setTimeout(() => el_sunPathRefreshBtn.classList.remove('is-refreshing'), 800); };
             }
 
             if (showMoonPanel) {
-                const moonPathElements = { iconEl: el('moon-path-icon'), mainArcEl: el('moon-path-arc-main'), nowMarkerEl: el('moon-path-now-marker') };
+                const moonPathElements = { iconEl: el_moonPathIcon, mainArcEl: el_moonPathArcMain, nowMarkerEl: el_moonPathNowMarker };
                 updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements);
-                el('moonrise-time-label').textContent = formatTime(sunCalcData.moonRiseDateForPath);
-                el('moonset-time-label').textContent = formatTime(sunCalcData.moonSetDateForPath);
-                el('moon-info-altitude').childNodes[0].nodeValue = formatValue(sunCalcData.moonAltitude, '°', 1) + ' ';
-                el('moon-info-trend').textContent = `(${sunCalcData.moonTrend || sunCalcData.moonStatus})`;
-                el('moon-info-phasename').textContent = sunCalcData.phaseName || NO_DATA_STRING;
-                el('moon-info-illumination').textContent = formatValue(sunCalcData.phaseValue, '%', 1);
-                el('moon-path-refresh-btn').onclick = () => { el('moon-path-refresh-btn').classList.add('is-refreshing'); updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements); setTimeout(() => el('moon-path-refresh-btn').classList.remove('is-refreshing'), 800); };
+                if (el_moonriseTimeLabel) el_moonriseTimeLabel.textContent = formatTime(sunCalcData.moonRiseDateForPath);
+                if (el_moonsetTimeLabel) el_moonsetTimeLabel.textContent = formatTime(sunCalcData.moonSetDateForPath);
+                if (el_moonInfoAltitudeNode) el_moonInfoAltitudeNode.nodeValue = formatValue(sunCalcData.moonAltitude, '°', 1) + ' ';
+                if (el_moonInfoTrend) el_moonInfoTrend.textContent = `(${sunCalcData.moonTrend || sunCalcData.moonStatus})`;
+                if (el_moonInfoPhasename) el_moonInfoPhasename.textContent = sunCalcData.phaseName || NO_DATA_STRING;
+                if (el_moonInfoIllumination) el_moonInfoIllumination.textContent = formatValue(sunCalcData.phaseValue, '%', 1);
+                if (el_moonPathRefreshBtn) el_moonPathRefreshBtn.onclick = () => { el_moonPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements); setTimeout(() => el_moonPathRefreshBtn.classList.remove('is-refreshing'), 800); };
             }
 
             if(showNightSkyPanel) {
                 let nightContentRendered = false;
 
-                if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0 && issPanel) {
+                if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0 && el_issInfo) {
                     const nextPass = cachedData.issPasses[0];
                     if (nextPass.startUTC > new Date()) {
-                        el('iss-visual-icon').className = 'fas fa-satellite';
-                        el('iss-next-pass-time').textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
-                        el('iss-max-elevation').textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
-                        el('iss-duration').textContent = `${Math.round(nextPass.duration / 60)} perc`;
-                        el('iss-brightness').textContent = `${formatValue(nextPass.mag, ' mag')}`;
-                        el('iss-path-details').textContent = `Indul: ${nextPass.startAzCompass} (${formatValue(nextPass.startEl, '°',0)}), Max: ${nextPass.maxAzCompass} (${formatValue(nextPass.maxEl, '°',0)}), Vége: ${nextPass.endAzCompass} (${formatValue(nextPass.endEl, '°',0)})`;
+                        if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
+                        if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
+                        if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
+                        if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
+                        if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
+                        if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass} (${formatValue(nextPass.startEl, '°',0)}), Max: ${nextPass.maxAzCompass} (${formatValue(nextPass.maxEl, '°',0)}), Vége: ${nextPass.endAzCompass} (${formatValue(nextPass.endEl, '°',0)})`;
 
-                        issPanel.classList.remove('is-hidden');
+                        el_issInfo.classList.remove('is-hidden');
                         nightContentRendered = true;
                     }
                 }
@@ -1288,97 +1392,92 @@
                 const nightSkyData = cachedData.nightSkyObject;
                 if (nightSkyData && nightSkyData.primary && !nightContentRendered) {
                     const primary = nightSkyData.primary;
-                    if (primary.type === 'planet' && planetPanel) {
-                        planetPanel.classList.remove('is-hidden');
-                        el('night-sky-visual-icon').className = primary.icon;
-                        el('night-sky-object-name').textContent = primary.name;
-                        el('night-sky-object-status').textContent = primary.status;
-                        el('night-sky-object-details').textContent = primary.details || '';
+                    if (primary.type === 'planet' && el_planetInfo) {
+                        el_planetInfo.classList.remove('is-hidden');
+                        if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = primary.icon;
+                        if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = primary.name;
+                        if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = primary.status;
+                        if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = primary.details || '';
 
-                        const astroDarknessElPlanet = el('night-sky-astro-darkness-planet');
-                        const astroDarknessItemElPlanet = el('night-sky-astro-darkness-item-planet');
-                        if(primary.astroDarkness && astroDarknessElPlanet && astroDarknessItemElPlanet) {
-                            astroDarknessElPlanet.textContent = primary.astroDarkness;
-                            astroDarknessItemElPlanet.classList.remove('is-hidden');
-                        } else if (astroDarknessItemElPlanet) {
-                             astroDarknessItemElPlanet.classList.add('is-hidden');
+                        if(primary.astroDarkness && el_nightSkyAstroDarknessPlanet && el_nightSkyAstroDarknessItemPlanet) {
+                            el_nightSkyAstroDarknessPlanet.textContent = primary.astroDarkness;
+                            el_nightSkyAstroDarknessItemPlanet.classList.remove('is-hidden');
+                        } else if (el_nightSkyAstroDarknessItemPlanet) {
+                             el_nightSkyAstroDarknessItemPlanet.classList.add('is-hidden');
                         }
                         nightContentRendered = true;
 
-                    } else if (primary.type === 'constellation' && constellationPanel) {
-                        constellationPanel.classList.remove('is-hidden');
-                        el('constellation-svg-container').innerHTML = primary.svg || '';
-                        el('constellation-name').textContent = primary.name;
-                        el('constellation-details').textContent = primary.details || '';
+                    } else if (primary.type === 'constellation' && el_constellationInfo) {
+                        el_constellationInfo.classList.remove('is-hidden');
+                        if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = primary.svg || '';
+                        if(el_constellationName) el_constellationName.textContent = primary.name;
+                        if(el_constellationDetails) el_constellationDetails.textContent = primary.details || '';
 
-                        const astroDarknessElConst = el('constellation-astro-darkness-const');
-                        const astroDarknessItemElConst = el('constellation-astro-darkness-item-const');
-                        if(primary.astroDarkness && astroDarknessElConst && astroDarknessItemElConst) {
-                            astroDarknessElConst.textContent = primary.astroDarkness;
-                            astroDarknessItemElConst.classList.remove('is-hidden');
-                        } else if (astroDarknessItemElConst) {
-                             astroDarknessItemElConst.classList.add('is-hidden');
+                        if(primary.astroDarkness && el_constellationAstroDarknessConst && el_constellationAstroDarknessItemConst) {
+                            el_constellationAstroDarknessConst.textContent = primary.astroDarkness;
+                            el_constellationAstroDarknessItemConst.classList.remove('is-hidden');
+                        } else if (el_constellationAstroDarknessItemConst) {
+                             el_constellationAstroDarknessItemConst.classList.add('is-hidden');
                         }
                         nightContentRendered = true;
                     }
                 }
 
-                if (!nightContentRendered && constellationPanel) {
-                     constellationPanel.classList.remove('is-hidden');
-                     el('constellation-svg-container').innerHTML = `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`;
-                     el('constellation-name').textContent = "Hattyú (Cygnus)";
-                     el('constellation-details').textContent = "Keressük az Északi Keresztet!";
-                      if (el('constellation-astro-darkness-item-const')) el('constellation-astro-darkness-item-const').classList.add('is-hidden');
+                if (!nightContentRendered && el_constellationInfo) {
+                     el_constellationInfo.classList.remove('is-hidden');
+                     if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`;
+                     if(el_constellationName) el_constellationName.textContent = "Hattyú (Cygnus)";
+                     if(el_constellationDetails) el_constellationDetails.textContent = "Keressük az Északi Keresztet!";
+                     if (el_constellationAstroDarknessItemConst) el_constellationAstroDarknessItemConst.classList.add('is-hidden');
                 }
             }
 
-            gridSunriseItem.classList.toggle('is-hidden', showSunPanel);
-            gridSunsetItem.classList.toggle('is-hidden', showSunPanel);
-            gridMoonriseItem.classList.toggle('is-hidden', showMoonPanel);
-            gridMoonsetItem.classList.toggle('is-hidden', showMoonPanel);
+            if(el_gridSunriseItem) el_gridSunriseItem.classList.toggle('is-hidden', showSunPanel);
+            if(el_gridSunsetItem) el_gridSunsetItem.classList.toggle('is-hidden', showSunPanel);
+            if(el_gridMoonriseItem) el_gridMoonriseItem.classList.toggle('is-hidden', showMoonPanel);
+            if(el_gridMoonsetItem) el_gridMoonsetItem.classList.toggle('is-hidden', showMoonPanel);
 
-            const heatIndexItem = el('heat-index-item');
-            if (obs.heatIndex != null) {
-                heatIndexItem.classList.remove('is-hidden');
-                el('main-heat-index-value').textContent = formatValue(obs.heatIndex, '°C', 1);
-            } else {
-                heatIndexItem.classList.add('is-hidden');
+
+            if (obs.heatIndex != null && el_heatIndexItem) {
+                el_heatIndexItem.classList.remove('is-hidden');
+                if(el_mainHeatIndexValue) el_mainHeatIndexValue.textContent = formatValue(obs.heatIndex, '°C', 1);
+            } else if (el_heatIndexItem) {
+                el_heatIndexItem.classList.add('is-hidden');
             }
 
-            const windSpeedItem = el('wind-speed-item');
-            if (obs.windSpeed != null && obs.windSpeed >= 0) {
-                 windSpeedItem.classList.remove('is-hidden');
-                 el('main-wind-dir-arrow').style.transform = `rotate(${obs.winddir || 0}deg)`;
-                 el('main-wind-dir-text').textContent = degreesToCompassAbbreviated(obs.winddir);
-                 el('main-wind-value-container').title = degreesToCompass(obs.winddir);
-                 el('main-wind-speed-value').textContent = formatValue(obs.windSpeed, ' km/h', 1);
-            } else {
-                 windSpeedItem.classList.add('is-hidden');
+            if (obs.windSpeed != null && obs.windSpeed >= 0 && el_windSpeedItem) {
+                 el_windSpeedItem.classList.remove('is-hidden');
+                 if(el_mainWindDirArrow) el_mainWindDirArrow.style.transform = `rotate(${obs.winddir || 0}deg)`;
+                 if(el_mainWindDirText) el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir);
+                 if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir);
+                 if(el_mainWindSpeedValue) el_mainWindSpeedValue.textContent = formatValue(obs.windSpeed, ' km/h', 1);
+            } else if (el_windSpeedItem){
+                 el_windSpeedItem.classList.add('is-hidden');
             }
 
-            const windGustItem = el('wind-gust-item');
-             if (obs.windGust > 0) {
-                 windGustItem.classList.remove('is-hidden');
-                 el('main-wind-gust-value').textContent = formatValue(obs.windGust, ' km/h', 1);
-            } else {
-                 windGustItem.classList.add('is-hidden');
+            if (obs.windGust > 0 && el_windGustItem) {
+                 el_windGustItem.classList.remove('is-hidden');
+                 if(el_mainWindGustValue) el_mainWindGustValue.textContent = formatValue(obs.windGust, ' km/h', 1);
+            } else if (el_windGustItem) {
+                 el_windGustItem.classList.add('is-hidden');
             }
 
-            updateAnimatedValue(el('dewpoint-value'), formatValue(obs.dewpt, '°C'));
-            updateAnimatedValue(el('humidity-value'), formatValue(obs.humidity, '%', 0));
-            updateAnimatedValue(el('pressure-value'), formatValue(general.pressureAltimeter || obs.pressure, ' hPa'));
+            updateAnimatedValue(el_dewpointValue, formatValue(obs.dewpt, '°C'));
+            updateAnimatedValue(el_humidityValue, formatValue(obs.humidity, '%', 0));
+            updateAnimatedValue(el_pressureValue, formatValue(general.pressureAltimeter || obs.pressure, ' hPa'));
 
-            const trendCode = general.pressureTendencyCode; let trendSymbol = ''; if (trendCode === 0) trendSymbol = '↑'; else if (trendCode === 1) trendSymbol = '↓'; else if (trendCode === 2) trendSymbol = '→'; el('pressure-trend-icon').textContent = trendSymbol;
+            const trendCode = general.pressureTendencyCode; let trendSymbol = ''; if (trendCode === 0) trendSymbol = '↑'; else if (trendCode === 1) trendSymbol = '↓'; else if (trendCode === 2) trendSymbol = '→';
+            if(el_pressureTrendIcon) el_pressureTrendIcon.textContent = trendSymbol;
 
-            updateAnimatedValue(el('visibility-value'), formatValue(general.visibility, ' km'));
-            updateAnimatedValue(el('solar-radiation-value'), formatValue(obs.solarRadiation, ' W/m²', 0));
-            updateAnimatedValue(el('uv-index-value'), formatValue(obs.uv, '', 1));
+            updateAnimatedValue(el_visibilityValue, formatValue(general.visibility, ' km'));
+            updateAnimatedValue(el_solarRadiationValue, formatValue(obs.solarRadiation, ' W/m²', 0));
+            updateAnimatedValue(el_uvIndexValue, formatValue(obs.uv, '', 1));
 
-            el('uv-description').textContent = general.uvDescription ? `(${general.uvDescription})` : '';
-            el('details-sunrise-value').textContent = sunCalcData.sunrise;
-            el('details-sunset-value').textContent = sunCalcData.sunset;
-            el('moonrise-value').textContent = sunCalcData.moonrise || '--';
-            el('moonset-value').textContent = sunCalcData.moonset || '--';
+            if(el_uvDescription) el_uvDescription.textContent = general.uvDescription ? `(${general.uvDescription})` : '';
+            if(el_detailsSunriseValue) el_detailsSunriseValue.textContent = sunCalcData.sunrise;
+            if(el_detailsSunsetValue) el_detailsSunsetValue.textContent = sunCalcData.sunset;
+            if(el_moonriseValue) el_moonriseValue.textContent = sunCalcData.moonrise || '--';
+            if(el_moonsetValue) el_moonsetValue.textContent = sunCalcData.moonset || '--';
 
             renderPrecipitationForecastInfo();
         }
@@ -1401,8 +1500,8 @@
         function renderHourlyForecastData() {
             const hourlyDataFull = cachedData.hourlyForecast;
             if (!hourlyDataFull || hourlyDataFull.length === 0) {
-                hourlyForecastContainerEl.classList.add('is-hidden');
-                hourlyForecastTitleEl.classList.add('is-hidden');
+                if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden');
+                if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden');
                 return;
             }
 
@@ -1443,16 +1542,16 @@
                 </div>`;
             });
 
-            hourlyForecastContainerEl.innerHTML = forecastHTML;
-            hourlyForecastContainerEl.classList.remove('is-hidden');
-            hourlyForecastTitleEl.classList.remove('is-hidden');
+            if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML;
+            if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden');
+            if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden');
         }
 
         function formatForecastDate(isoDateString) { if (!isoDateString) return ''; try { const date = new Date(isoDateString); return `${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}`; } catch (e) { return ''; } }
 
         function renderForecastData() {
             const forecastDays = cachedData.forecastDays;
-            if (!forecastDays || forecastDays.length === 0) { forecastContainerEl.classList.add('is-hidden'); forecastTitleEl.classList.add('is-hidden'); return; }
+            if (!forecastDays || forecastDays.length === 0) { if(forecastContainerEl) forecastContainerEl.classList.add('is-hidden'); if(forecastTitleEl) forecastTitleEl.classList.add('is-hidden'); return; }
             let forecastHTML = '';
             forecastDays.forEach(day => {
                 if (!day.dayName || day.tempMax == null || day.tempMin == null) return;
@@ -1485,8 +1584,8 @@
                 }
                 forecastHTML += `</div>`;
             });
-            if (forecastHTML.trim() === '') { forecastContainerEl.classList.add('is-hidden'); forecastTitleEl.classList.add('is-hidden'); }
-            else { forecastContainerEl.innerHTML = forecastHTML; forecastContainerEl.classList.remove('is-hidden'); forecastTitleEl.classList.remove('is-hidden'); }
+            if (forecastHTML.trim() === '') { if(forecastContainerEl) forecastContainerEl.classList.add('is-hidden'); if(forecastTitleEl) forecastTitleEl.classList.add('is-hidden'); }
+            else { if(forecastContainerEl) forecastContainerEl.innerHTML = forecastHTML; if(forecastContainerEl) forecastContainerEl.classList.remove('is-hidden'); if(forecastTitleEl) forecastTitleEl.classList.remove('is-hidden'); }
         }
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
@@ -1515,12 +1614,13 @@
                     });
                 } }).catch(e => console.warn("Napi előrejelzés lekérési hiba:", e.message)));
             }
-            if (isInitialLoad && cachedData.hourlyForecast.length === 0) {
+            if (isInitialLoad && cachedData.hourlyForecast.length === 0) { // Csak akkor, ha még üres
                  independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
                     if (data) cachedData.hourlyForecast = data;
-                    renderHourlyForecastData();
+                    renderHourlyForecastData(); // Itt rendereljük, miután megjött az adat
                  }).catch(e => console.warn("Kezdeti órás előrejelzés lekérési hiba:", e.message)));
             }
+
 
             if (ENABLE_ISS_TRACKING && (isInitialLoad || now - (lastApiCallTimes.issPasses || 0) > REFRESH_INTERVAL_ISS)) {
                 independentPromises.push(
@@ -1540,19 +1640,42 @@
                 cachedData.sunCalc = sunCalcResult;
                 if (sunCalcResult.sunriseDateForPath) cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString();
                 if (sunCalcResult.sunsetDateForPath) cachedData.generalConditions.sunsetTimeLocal = sunCalcResult.sunsetDateForPath.toISOString();
-            } catch (e) { console.error("SunCalc hiba:", e); }
+            } catch (e) {
+                console.error("SunCalc hiba:", e);
+                cachedData.sunCalc = null; // Biztosítjuk, hogy null legyen hiba esetén
+            }
 
             cachedData.nightSkyObject = getNightSkyInfo(new Date(), cachedData.sunCalc);
 
 
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             const anyStationOnline = Object.values(STATIONS).some(s => s.isOnline);
-            if (anyStationOnline && STATIONS[activeDisplayStationKey].data) {
+
+            // Ellenőrizzük a kritikus adatokat a renderelés előtt
+            if (anyStationOnline && STATIONS[activeDisplayStationKey].data && cachedData.generalConditions && cachedData.generalConditions.skyCoverPhrase !== undefined && cachedData.sunCalc) {
                 compileAndRenderDisplayData();
-            } else if (!isWeatherDisplayInitialized && !anyStationOnline) {
-                document.getElementById('weather-display').innerHTML = `<div class="loading" style="padding: 20px; text-align: center; color: var(--current-text-color);">⚠️ Egyik mérőállomás sem elérhető. Kérjük, próbálja később.</div>`;
-            } else if (anyStationOnline && !STATIONS[activeDisplayStationKey].data) {
-                console.warn(`Az aktív állomás (${activeDisplayStationKey}) online, de nincs megjeleníthető adata.`);
+            } else {
+                let errorMessage = "⚠️ ";
+                if (!anyStationOnline) {
+                    errorMessage += "Egyik mérőállomás sem elérhető. ";
+                } else if (!STATIONS[activeDisplayStationKey].data) {
+                    errorMessage += `Az aktív állomás (${STATIONS[activeDisplayStationKey].displayName}) adatai jelenleg nem töltődtek be. `;
+                }
+                if (!cachedData.generalConditions || cachedData.generalConditions.skyCoverPhrase === undefined) { // Pontosabb ellenőrzés
+                    errorMessage += "Az általános időjárási adatok nem elérhetők. ";
+                }
+                if (!cachedData.sunCalc) {
+                    errorMessage += "A nap- és holdadatok nem elérhetők. ";
+                }
+                errorMessage += "Kérjük, próbálja később, vagy válasszon másik állomást.";
+
+                if (weatherDisplayEl) {
+                     weatherDisplayEl.innerHTML = `<div class="loading" style="padding: 20px; text-align: center; color: var(--current-text-color);">${errorMessage}</div>`;
+                }
+                if (hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden');
+                if (hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden');
+                if (forecastContainerEl) forecastContainerEl.classList.add('is-hidden');
+                if (forecastTitleEl) forecastTitleEl.classList.add('is-hidden');
             }
         }
 
@@ -1569,7 +1692,7 @@
                     cachedData.displayPws.windSpeed = newPwsData.metric.windSpeed;
                     cachedData.displayPws.windGust = newPwsData.metric.windGust;
                     cachedData.displayPws.obsTimeLocal = newPwsData.obsTimeLocal;
-                    renderWeatherData();
+                    renderWeatherData(); // Csak a fő adatokat rendereljük újra, ha a szél frissül
                 }
             } catch (error) {
                 // Hiba már naplózva a fetchPwsStationData-ban
@@ -1582,31 +1705,28 @@
             const currentSeconds = now.getSeconds();
 
             let targetMinute;
-            if (currentMinutes < 18) {
+            if (currentMinutes < 18) { // Cél a :20, de adjunk egy kis puffert
                 targetMinute = 20;
-            } else if (currentMinutes < 38) {
+            } else if (currentMinutes < 38) { // Cél a :40
                 targetMinute = 40;
-            } else {
-                targetMinute = 60;
+            } else { // Cél a következő óra :00, de API-k gyakran :00 után frissülnek, így :00 után nem sokkal hívjuk
+                targetMinute = 60; // Ami a következő óra 0. perce lesz
             }
 
+            // Véletlenszerű késleltetés (0-2 perc) hozzáadása, hogy ne egyszerre terheljük az API-t
             const randomDelayMinutes = Math.floor(Math.random() * 3);
             let minutesToWait = targetMinute - currentMinutes;
-            if (minutesToWait < 0) {
-                minutesToWait += 60;
+
+            if (minutesToWait <= 0) { // Ha már elmúlt a célperc az adott órában
+                minutesToWait += (targetMinute === 60 ? 60 : 20) ; // Ha a következő óra a cél, akkor +60, egyébként +20
             }
-            if (targetMinute === 20 && currentMinutes >= 18 - randomDelayMinutes) minutesToWait +=20;
-            else if (targetMinute === 40 && currentMinutes >= 38 - randomDelayMinutes) minutesToWait +=20;
-            else if (targetMinute === 60 && currentMinutes >= 58 - randomDelayMinutes) minutesToWait +=20;
+             minutesToWait = (minutesToWait -1 + randomDelayMinutes); // -1, mert a másodpercek is számítanak
+             if (minutesToWait < 0) minutesToWait = 0; // Biztosítjuk, hogy ne legyen negatív
 
-
-             minutesToWait = (minutesToWait -1 + randomDelayMinutes);
-             if (minutesToWait < 0) minutesToWait = 0;
-
-            const secondsToWait = 60 - currentSeconds;
+            const secondsToWait = (minutesToWait === 0 && currentMinutes >= targetMinute - randomDelayMinutes) ? 0 : (60 - currentSeconds); // Ha már a célpercben vagyunk, azonnal, egyébként várjuk ki a másodperceket
             const delayInMs = (minutesToWait * 60 + secondsToWait) * 1000;
 
-            console.log(`Következő órás előrejelzés frissítés ütemezve kb. ${Math.round(delayInMs / 60000)} perc múlva.`);
+            console.log(`Következő órás előrejelzés frissítés ütemezve kb. ${Math.round(delayInMs / 60000)} perc múlva. (Cél: ${targetMinute % 60}, Jelenlegi: ${currentMinutes})`);
 
             setTimeout(async () => {
                 console.log(`Időzített órás előrejelzés frissítése: ${new Date().toLocaleTimeString()}`);
@@ -1615,14 +1735,14 @@
                     if (data) {
                         cachedData.hourlyForecast = data;
                         renderHourlyForecastData();
-                        renderPrecipitationForecastInfo();
+                        renderPrecipitationForecastInfo(); // Frissítjük a csapadék-előrejelző sávot is
                     }
                 } catch (e) {
                     console.warn("Az időzített órás előrejelzés frissítése sikertelen:", e);
                 }
 
-                scheduleHourlyForecastUpdate();
-            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000);
+                scheduleHourlyForecastUpdate(); // Újraütemezzük a következő frissítést
+            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); // Minimum 1 perces késleltetés, ha valamiért 0 lenne
         }
 
         function initApp() {
@@ -1632,53 +1752,54 @@
             hourlyForecastContainerEl = document.getElementById('hourly-forecast-container');
             hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
 
-            initializeWeatherDisplayDOM();
+            initializeWeatherDisplayDOM(); // Ez most már a DOM elemeket is cache-eli
 
             fetchAllDataAndUpdateDisplay(true).finally(() => {
+                // A SAFETY_DELAY itt már nem annyira kritikus, mert az fetchAllDataAndUpdateDisplay
+                // kezeli, ha a DOM még nem lenne teljesen kész az adatokkal.
+                console.log("Az időzített frissítések elindulnak.");
 
-                const SAFETY_DELAY = 1000;
+                scheduleHourlyForecastUpdate();
 
-                setTimeout(() => {
-                    console.log("Az időzített frissítések elindulnak.");
+                setInterval(() => fetchAllDataAndUpdateDisplay(false), REFRESH_INTERVAL_PWS);
 
-                    scheduleHourlyForecastUpdate();
+                setInterval(fetchAndRefreshWindData, REFRESH_INTERVAL_WIND);
 
-                    setInterval(() => fetchAllDataAndUpdateDisplay(false), REFRESH_INTERVAL_PWS);
+                setInterval(() => {
+                    if (cachedData.generalConditions && cachedData.generalConditions.sunriseTimeLocal && cachedData.generalConditions.sunsetTimeLocal) {
+                        updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal)
+                    }
+                }, SKY_COLOR_UPDATE_INTERVAL);
 
-                    setInterval(fetchAndRefreshWindData, REFRESH_INTERVAL_WIND);
-
-                    setInterval(() => {
-                        if (cachedData.generalConditions.sunriseTimeLocal && cachedData.generalConditions.sunsetTimeLocal) {
-                            updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal)
+                setInterval(() => {
+                    const newDay = new Date().getDate();
+                    if (newDay !== currentDay) {
+                        console.log("Éjfél, a nap újraindult! A csapadékjelző visszaállítva.");
+                        currentDay = newDay;
+                        hasRainBeenDetectedToday = false;
+                        // Újra lekérjük a napi várható csapadékot és az ISS adatokat
+                        fetchOpenMeteoExpectedRain_gauge(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
+                            .then(data => { cachedData.expectedRainToday_gauge = data; })
+                            .catch(e => console.warn("Éjféli OpenMeteo csapadék lekérési hiba:", e.message))
+                            .finally(() => {
+                                if (cachedData.displayPws) { // Csak akkor renderelünk, ha van mit
+                                    renderWeatherData();
+                                }
+                            });
+                        if (ENABLE_ISS_TRACKING) {
+                            fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15)
+                            .then(passes => {
+                                cachedData.issPasses = passes;
+                                lastApiCallTimes.issPasses = Date.now();
+                                if (cachedData.displayPws) { // Frissítsük a UI-t az új ISS adatokkal
+                                    renderWeatherData();
+                                }
+                            })
+                            .catch(e => console.error("Éjféli ISS adatfrissítési hiba:", e));
                         }
-                    }, SKY_COLOR_UPDATE_INTERVAL);
+                    }
+                }, 30 * 1000); // Ellenőrzés 30 másodpercenként
 
-                    setInterval(() => {
-                        const newDay = new Date().getDate();
-                        if (newDay !== currentDay) {
-                            console.log("Éjfél, a nap újraindult! A csapadékjelző visszaállítva.");
-                            currentDay = newDay;
-                            hasRainBeenDetectedToday = false;
-                            fetchOpenMeteoExpectedRain_gauge(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
-                                .then(data => { cachedData.expectedRainToday_gauge = data; })
-                                .catch(e => console.warn("Éjféli OpenMeteo csapadék lekérési hiba:", e.message))
-                                .finally(() => {
-                                    if (cachedData.displayPws) {
-                                        renderWeatherData();
-                                    }
-                                });
-                            if (ENABLE_ISS_TRACKING) {
-                                fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15)
-                                .then(passes => {
-                                    cachedData.issPasses = passes;
-                                    lastApiCallTimes.issPasses = Date.now();
-                                })
-                                .catch(e => console.error("Éjféli ISS adatfrissítési hiba:", e));
-                            }
-                        }
-                    }, 30 * 1000);
-
-                }, SAFETY_DELAY);
             });
         }
 
