@@ -128,47 +128,59 @@
         .info-tooltip-content li { margin-bottom: 2px; }
         .info-tooltip-content p:last-child { margin-bottom: 0; }
 
-        .station-status-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; text-align: center; margin-bottom: 12px; padding-top: 5px; padding-bottom: 10px; border-bottom: 1px solid var(--current-container-border-color); transition: border-color 0.6s; }
+        .station-status-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; text-align: center; margin-bottom: 8px; padding-top: 5px; padding-bottom: 10px; border-bottom: 1px solid var(--current-container-border-color); transition: border-color 0.6s; }
         .station-selector { flex: 1; }
         .station-selector label { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--current-text-color); font-weight: 500; transition: color 0.6s; }
         .station-selector input[type="radio"] { margin: 0 0 4px 0; accent-color: var(--current-icon-color); }
         .station-selector.disabled label { opacity: 0.55; cursor: not-allowed; }
         .station-name { font-size: 12px; font-weight: 600; line-height: 1; }
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; }
-
-        .widget-core-data { display: flex; flex-direction: column; align-items: stretch; gap: 20px; margin-bottom: 12px; }
-        .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; width: 100%;}
-        .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section { order: 1; width: 100%; max-width: 100%; }
-
-        /* === VÁLTOZTATÁS KEZDETE === */
+        
+        /* === VÁLTOZTATÁS KEZDETE (Új elrendezés és stílus) === */
         .temperature-and-gauge-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 25px; /* Növelt távolság */
+            gap: 30px;
             width: 100%;
-            min-height: 120px;
+            margin-bottom: 20px;
         }
         
         .temperature {
-            font-size: 52px; /* Csökkentett méret a kompakt elrendezéshez */
+            font-size: 60px;
             font-weight: 700;
             line-height: 1;
-            background-color: rgba(0, 0, 0, 0.15); /* A fejléc stílusát másolja */
-            padding: 10px 22px; /* Igazított padding */
-            border-radius: 12px; /* Egységes rádiusz */
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 12px 24px;
+            border-radius: 14px;
             display: inline-flex;
             align-items: baseline;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.25); /* Belső árnyék */
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.25);
             perspective: 800px;
             transition: all 0.6s;
         }
+        
+        #temperature-value {
+            display: inline-block;
+            transform-style: preserve-3d;
+            color: var(--current-text-color); /* Látható szín */
+            text-shadow: 0 1px 3px rgba(0,0,0,0.4); /* Árnyék a jobb olvashatóságért */
+        }
+        
+        .temperature-symbol {
+            font-size: 0.5em;
+            vertical-align: super;
+            margin-left: 4px;
+            opacity: 0.85;
+            color: var(--current-text-muted-color); /* Tompítottabb szín */
+        }
         /* === VÁLTOZTATÁS VÉGE === */
 
-        #temperature-value { display: inline-block; transform-style: preserve-3d; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
-        .temperature-symbol { font-size: 0.5em; vertical-align: super; margin-left: 4px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
-
-        .additional-core-info { margin-top: 16px; width: 100%; }
+        .widget-core-data { display: flex; flex-direction: column; align-items: stretch; gap: 16px; margin-bottom: 8px; }
+        .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; width: 100%;}
+        .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section { order: 1; width: 100%; max-width: 100%; }
+        
+        .additional-core-info { margin-top: 0; width: 100%; } /* Margó eltávolítva */
         .secondary-info-bar {
             display: flex;
             flex-wrap: wrap;
@@ -208,6 +220,7 @@
             width: 100%;
             max-width: 480px;
             box-sizing: border-box;
+            margin-top: 16px;
         }
         .precipitation-forecast-info strong {
             color: var(--current-text-color);
@@ -460,7 +473,7 @@
         #constellation-svg-container .const-line { stroke: var(--text-secondary-night); stroke-width: 1px; opacity: 0.5; }
 
         .weather-details-grid {
-            margin-top: 20px;
+            margin-top: 16px;
             background-color: rgba(0,0,0,0.08);
             border: 1px solid var(--current-container-border-color);
             border-radius: 12px;
@@ -679,13 +692,6 @@
                 justify-content: flex-end;
             }
 
-
-            .temperature-and-gauge-wrapper {
-                flex-direction: row; /* Visszaállítva a sorba rendezésre kisebb képernyőn is */
-                flex-wrap: wrap; /* Tördelés engedélyezése, ha kell */
-                gap: 20px;
-                align-items: center;
-            }
             .weather-details-grid {
                 grid-template-columns: 1fr;
                 row-gap: 8px;
@@ -712,6 +718,9 @@
                 padding: 6px 18px;
             }
             
+            .temperature-and-gauge-wrapper {
+                gap: 15px;
+            }
             .temperature {
                 font-size: 48px;
                 padding: 8px 18px;
@@ -1277,6 +1286,7 @@
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             const discreetRaindropPath = `M50,85 C25,85 20,55 50,15 C80,55 75,85 50,85`;
 
+            // === VÁLTOZTATÁS KEZDETE (HTML STRUKTÚRA) ===
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1310,111 +1320,114 @@
                     </label>
                 </div>
             </div>
-            <div class="widget-core-data">
-            <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
-            <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
-            <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
-
-            <div class="night-sky-info-section is-hidden" id="night-sky-info-section">
-                <div id="iss-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
-                    <div class="night-sky-visual"><i id="iss-visual-icon" class="fas fa-satellite"></i></div>
-                    <div class="night-sky-text-details">
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-rocket"></i>Objektum</span>
-                            <span class="night-sky-detail-value">Nemzetközi Űrállomás</span>
-                        </div>
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-stopwatch"></i>Következő</span>
-                            <span class="night-sky-detail-value" id="iss-next-pass-time">--:--</span>
-                        </div>
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-sort-amount-up-alt"></i>Max. magasság</span>
-                            <span class="night-sky-detail-value" id="iss-max-elevation">--°</span>
-                        </div>
-                         <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="far fa-lightbulb"></i>Fényesség</span>
-                            <span class="night-sky-detail-value" id="iss-brightness">-- mag</span>
-                        </div>
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-hourglass-half"></i>Láthatóság</span>
-                            <span class="night-sky-detail-value" id="iss-duration">-- perc</span>
-                        </div>
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-route"></i>Útvonal</span>
-                            <span class="night-sky-detail-value long-text" id="iss-path-details">--</span>
-                        </div>
+            
+            <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
+                <div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div>
+                <div class="rain-visual" id="discreet-rain-gauge">
+                    <div class="rain-visual-center">
+                        <div id="discreet-rain-visual-value">--<span id="discreet-rain-visual-value-unit">mm</span></div>
+                        <div id="discreet-rain-visual-label">esett eddig ma</div>
                     </div>
-                </div>
-
-                <div id="planet-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
-                    <div class="night-sky-visual"><i id="night-sky-visual-icon" class=""></i></div>
-                    <div class="night-sky-text-details">
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-satellite-dish"></i>Objektum</span>
-                            <span class="night-sky-detail-value" id="night-sky-object-name"></span>
-                        </div>
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-eye"></i></span>
-                            <span class="night-sky-detail-value long-text" id="night-sky-object-status"></span>
-                        </div>
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span>
-                            <span class="night-sky-detail-value long-text" id="night-sky-object-details"></span>
-                        </div>
-                         <div class="night-sky-detail-item is-hidden" id="night-sky-astro-darkness-item-planet">
-                            <span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span>
-                            <span class="night-sky-detail-value long-text" id="night-sky-astro-darkness-planet"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="constellation-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
-                    <div id="constellation-svg-container" style="flex-shrink: 0;"></div>
-                    <div class="night-sky-text-details">
-                        <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span>
-                            <span class="night-sky-detail-value" id="constellation-name"></span>
-                        </div>
-                         <div class="night-sky-detail-item">
-                            <span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span>
-                            <span class="night-sky-detail-value long-text" id="constellation-details"></span>
-                        </div>
-                         <div class="night-sky-detail-item is-hidden" id="constellation-astro-darkness-item-const">
-                            <span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span>
-                            <span class="night-sky-detail-value long-text" id="constellation-astro-darkness-const"></span>
-                        </div>
-                    </div>
+                    <svg class="rain-gauge-svg" viewBox="0 0 100 100">
+                        <defs><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs>
+                        <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
+                        <path class="rain-gauge-value" d="${discreetRaindropPath}"></path>
+                    </svg>
                 </div>
             </div>
 
-            <div class="temperature-section">
-                <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
-                    <div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div>
-                    <div class="rain-visual" id="discreet-rain-gauge">
-                        <div class="rain-visual-center">
-                            <div id="discreet-rain-visual-value">--<span id="discreet-rain-visual-value-unit">mm</span></div>
-                            <div id="discreet-rain-visual-label">esett eddig ma</div>
+            <div class="widget-core-data">
+                <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
+                <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
+                <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
+
+                <div class="night-sky-info-section is-hidden" id="night-sky-info-section">
+                    <div id="iss-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
+                        <div class="night-sky-visual"><i id="iss-visual-icon" class="fas fa-satellite"></i></div>
+                        <div class="night-sky-text-details">
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-rocket"></i>Objektum</span>
+                                <span class="night-sky-detail-value">Nemzetközi Űrállomás</span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-stopwatch"></i>Következő</span>
+                                <span class="night-sky-detail-value" id="iss-next-pass-time">--:--</span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-sort-amount-up-alt"></i>Max. magasság</span>
+                                <span class="night-sky-detail-value" id="iss-max-elevation">--°</span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="far fa-lightbulb"></i>Fényesség</span>
+                                <span class="night-sky-detail-value" id="iss-brightness">-- mag</span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-hourglass-half"></i>Láthatóság</span>
+                                <span class="night-sky-detail-value" id="iss-duration">-- perc</span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-route"></i>Útvonal</span>
+                                <span class="night-sky-detail-value long-text" id="iss-path-details">--</span>
+                            </div>
                         </div>
-                        <svg class="rain-gauge-svg" viewBox="0 0 100 100">
-                            <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
-                            <path class="rain-gauge-value" d="${discreetRaindropPath}"></path>
-                        </svg>
+                    </div>
+
+                    <div id="planet-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
+                        <div class="night-sky-visual"><i id="night-sky-visual-icon" class=""></i></div>
+                        <div class="night-sky-text-details">
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-satellite-dish"></i>Objektum</span>
+                                <span class="night-sky-detail-value" id="night-sky-object-name"></span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-eye"></i></span>
+                                <span class="night-sky-detail-value long-text" id="night-sky-object-status"></span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span>
+                                <span class="night-sky-detail-value long-text" id="night-sky-object-details"></span>
+                            </div>
+                            <div class="night-sky-detail-item is-hidden" id="night-sky-astro-darkness-item-planet">
+                                <span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span>
+                                <span class="night-sky-detail-value long-text" id="night-sky-astro-darkness-planet"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="constellation-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
+                        <div id="constellation-svg-container" style="flex-shrink: 0;"></div>
+                        <div class="night-sky-text-details">
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span>
+                                <span class="night-sky-detail-value" id="constellation-name"></span>
+                            </div>
+                            <div class="night-sky-detail-item">
+                                <span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span>
+                                <span class="night-sky-detail-value long-text" id="constellation-details"></span>
+                            </div>
+                            <div class="night-sky-detail-item is-hidden" id="constellation-astro-darkness-item-const">
+                                <span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span>
+                                <span class="night-sky-detail-value long-text" id="constellation-astro-darkness-const"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar" style="margin-top: 16px; margin-bottom: 0px;">
-                    <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
-                </div>
-
-                <div class="additional-core-info">
-                     <div class="secondary-info-bar">
-                        <div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value"></span></div></div>
-                        <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text"></span><span id="main-wind-speed-value"></span></div></div>
-                        <div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value"></span></div></div>
+                <div class="temperature-section">
+                     <div class="additional-core-info">
+                        <div class="secondary-info-bar">
+                            <div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value"></span></div></div>
+                            <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text"></span><span id="main-wind-speed-value"></span></div></div>
+                            <div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value"></span></div></div>
+                        </div>
+                     </div>
+                     <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar">
+                         <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
                      </div>
                 </div>
             </div>
-            </div><div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
+            <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
+            // === VÁLTOZTATÁS VÉGE (HTML STRUKTÚRA) ===
 
             // DOM elemek cache-elése a HTML felépítése UTÁN
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
@@ -1598,7 +1611,8 @@
                 el_nextPrecipitationInfoText.textContent = "A következő 48 órában nem várható jelentős csapadék.";
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else {
-                el_nextPrecipitationInfoText.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
+                 el_precipitationForecastBar.classList.add('is-hidden');
+                 el_nextPrecipitationInfoText.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
             }
         }
 
@@ -1616,9 +1630,6 @@
             updateAnimatedValue(el_timestampText, `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
             updateAnimatedValue(el_temperatureValue, formatValue(obs.temp, '', 1, '--'));
             
-            // === VÁLTOZTATÁS KEZDETE (JS LOGIKA) ===
-            // A hőmérséklet-szín már nem a háttérre, hanem pl. egy jövőbeli elemre vonatkozhatna, de a kérés szerint a háttér már nem színes.
-            // A diszkrét esőcsepp mostantól mindig látható, így a láthatóságát nem kell kapcsolgatni, csak a tartalmát frissíteni.
             if (el_discreetRainGauge) {
                 el_discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
             }
@@ -1626,13 +1637,11 @@
             if (el_discreetRainVisualValueNode) {
                 el_discreetRainVisualValueNode.nodeValue = discreetRainValue;
             }
-            // === VÁLTOZTATÁS VÉGE (JS LOGIKA) ===
 
             const isRainingNow = obs.precipRate > 0;
             const isDayTime = sunCalcData.sunAltitude > -0.83;
             const isMoonUp = sunCalcData.isUp;
 
-            // Reset panelek
             if (el_rainInfoSection) el_rainInfoSection.classList.add('is-hidden');
             if (el_sunInfoSection) el_sunInfoSection.classList.add('is-hidden');
             if (el_moonInfoSection) el_moonInfoSection.classList.add('is-hidden');
@@ -1643,7 +1652,6 @@
             if (el_planetInfo) el_planetInfo.classList.add('is-hidden');
             if (el_constellationInfo) el_constellationInfo.classList.add('is-hidden');
 
-            // Logika a panelek megjelenítésére
             if (isRainingNow) {
                 if (el_rainInfoSection) el_rainInfoSection.classList.remove('is-hidden');
                 if (el_mainRainVisual) el_mainRainVisual.classList.add('is-raining-actively');
@@ -1660,7 +1668,6 @@
                     el_nextPrecipItem.classList.add('is-hidden');
                 }
             } else {
-                // Ha nem esik, akkor jelenjen meg a Nap, Hold vagy éjjeli égbolt panel
                 if (isDayTime) {
                     if (el_sunInfoSection) el_sunInfoSection.classList.remove('is-hidden');
                 } else if (isMoonUp) {
@@ -1670,7 +1677,6 @@
                 }
             }
 
-            // Nap panel frissítése (ha látható)
             const sunPathElements = { iconEl: el_sunPathIcon, mainArcEl: el_sunPathArcMain, nowMarkerEl: el_sunPathNowMarker };
             updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements);
             if (el_sunInfoAltitudeNode) el_sunInfoAltitudeNode.nodeValue = formatValue(sunCalcData.sunAltitude, '°', 1) + ' ';
@@ -1681,7 +1687,6 @@
             if (el_sunPathSunsetTime) el_sunPathSunsetTime.textContent = sunCalcData.sunset;
             if (el_sunPathRefreshBtn) el_sunPathRefreshBtn.onclick = () => { el_sunPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements); setTimeout(() => el_sunPathRefreshBtn.classList.remove('is-refreshing'), 800); };
 
-            // Hold panel frissítése (ha látható)
             const moonPathElements = { iconEl: el_moonPathIcon, mainArcEl: el_moonPathArcMain, nowMarkerEl: el_moonPathNowMarker };
             updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements);
             if (el_moonriseTimeLabel) el_moonriseTimeLabel.textContent = formatTime(sunCalcData.moonRiseDateForPath);
@@ -1697,66 +1702,66 @@
             }
             if (el_moonPathRefreshBtn) el_moonPathRefreshBtn.onclick = () => { el_moonPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements); setTimeout(() => el_moonPathRefreshBtn.classList.remove('is-refreshing'), 800); };
             
-            // Éjjeli égbolt panel frissítése (ha látható)
             let nightContentRendered = false;
-            if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0 && el_issInfo) {
-                const nextPass = cachedData.issPasses[0];
-                if (nextPass.startUTC > new Date()) {
-                    if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
-                    if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
-                    if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
-                    if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
-                    if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
-                    if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass} (${formatValue(nextPass.startEl, '°',0)}), Max: ${nextPass.maxAzCompass} (${formatValue(nextPass.maxEl, '°',0)}), Vége: ${nextPass.endAzCompass} (${formatValue(nextPass.endEl, '°',0)})`;
-                    el_issInfo.classList.remove('is-hidden');
-                    nightContentRendered = true;
-                }
-            }
-            const nightSkyData = cachedData.nightSkyObject;
-            if (nightSkyData && nightSkyData.primary && !nightContentRendered) {
-                const primary = nightSkyData.primary;
-                if (primary.type === 'planet' && el_planetInfo) {
-                    el_planetInfo.classList.remove('is-hidden');
-                    if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = primary.icon;
-                    if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = primary.name;
-                    if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = primary.status;
-                    if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = primary.details || '';
-                    if(primary.astroDarkness && el_nightSkyAstroDarknessPlanet && el_nightSkyAstroDarknessItemPlanet) {
-                        el_nightSkyAstroDarknessPlanet.textContent = primary.astroDarkness;
-                        el_nightSkyAstroDarknessItemPlanet.classList.remove('is-hidden');
-                    } else if (el_nightSkyAstroDarknessItemPlanet) {
-                         el_nightSkyAstroDarknessItemPlanet.classList.add('is-hidden');
+            if (!isDayTime && !isMoonUp) {
+                if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0 && el_issInfo) {
+                    const nextPass = cachedData.issPasses[0];
+                    if (nextPass.startUTC > new Date()) {
+                        if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
+                        if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
+                        if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
+                        if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
+                        if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
+                        if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass} (${formatValue(nextPass.startEl, '°',0)}), Max: ${nextPass.maxAzCompass} (${formatValue(nextPass.maxEl, '°',0)}), Vége: ${nextPass.endAzCompass} (${formatValue(nextPass.endEl, '°',0)})`;
+                        el_issInfo.classList.remove('is-hidden');
+                        nightContentRendered = true;
                     }
-                    nightContentRendered = true;
-                } else if (primary.type === 'constellation' && el_constellationInfo) {
-                    el_constellationInfo.classList.remove('is-hidden');
-                    if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = primary.svg || '';
-                    if(el_constellationName) el_constellationName.textContent = primary.name;
-                    if(el_constellationDetails) el_constellationDetails.textContent = primary.details || '';
-                    if(primary.astroDarkness && el_constellationAstroDarknessConst && el_constellationAstroDarknessItemConst) {
-                        el_constellationAstroDarknessConst.textContent = primary.astroDarkness;
-                        el_constellationAstroDarknessItemConst.classList.remove('is-hidden');
-                    } else if (el_constellationAstroDarknessItemConst) {
-                         el_constellationAstroDarknessItemConst.classList.add('is-hidden');
-                    }
-                    nightContentRendered = true;
                 }
-            }
-            if (!nightContentRendered && el_constellationInfo && !el_nightSkyInfoSection.classList.contains('is-hidden')) {
-                 el_constellationInfo.classList.remove('is-hidden');
-                 if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`;
-                 if(el_constellationName) el_constellationName.textContent = "Hattyú (Cygnus)";
-                 if(el_constellationDetails) el_constellationDetails.textContent = "Keressük az Északi Keresztet!";
-                 if (el_constellationAstroDarknessItemConst) el_constellationAstroDarknessItemConst.classList.add('is-hidden');
+                const nightSkyData = cachedData.nightSkyObject;
+                if (nightSkyData && nightSkyData.primary && !nightContentRendered) {
+                    const primary = nightSkyData.primary;
+                    if (primary.type === 'planet' && el_planetInfo) {
+                        el_planetInfo.classList.remove('is-hidden');
+                        if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = primary.icon;
+                        if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = primary.name;
+                        if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = primary.status;
+                        if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = primary.details || '';
+                        if(primary.astroDarkness && el_nightSkyAstroDarknessPlanet && el_nightSkyAstroDarknessItemPlanet) {
+                            el_nightSkyAstroDarknessPlanet.textContent = primary.astroDarkness;
+                            el_nightSkyAstroDarknessItemPlanet.classList.remove('is-hidden');
+                        } else if (el_nightSkyAstroDarknessItemPlanet) {
+                             el_nightSkyAstroDarknessItemPlanet.classList.add('is-hidden');
+                        }
+                        nightContentRendered = true;
+                    } else if (primary.type === 'constellation' && el_constellationInfo) {
+                        el_constellationInfo.classList.remove('is-hidden');
+                        if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = primary.svg || '';
+                        if(el_constellationName) el_constellationName.textContent = primary.name;
+                        if(el_constellationDetails) el_constellationDetails.textContent = primary.details || '';
+                        if(primary.astroDarkness && el_constellationAstroDarknessConst && el_constellationAstroDarknessItemConst) {
+                            el_constellationAstroDarknessConst.textContent = primary.astroDarkness;
+                            el_constellationAstroDarknessItemConst.classList.remove('is-hidden');
+                        } else if (el_constellationAstroDarknessItemConst) {
+                             el_constellationAstroDarknessItemConst.classList.add('is-hidden');
+                        }
+                        nightContentRendered = true;
+                    }
+                }
+                if (!nightContentRendered && el_constellationInfo && !el_nightSkyInfoSection.classList.contains('is-hidden')) {
+                     el_constellationInfo.classList.remove('is-hidden');
+                     if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`;
+                     if(el_constellationName) el_constellationName.textContent = "Hattyú (Cygnus)";
+                     if(el_constellationDetails) el_constellationDetails.textContent = "Keressük az Északi Keresztet!";
+                     if (el_constellationAstroDarknessItemConst) el_constellationAstroDarknessItemConst.classList.add('is-hidden');
+                }
             }
 
-            // Grid elemek láthatóságának beállítása
+
             if(el_gridSunriseItem) el_gridSunriseItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
             if(el_gridSunsetItem) el_gridSunsetItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
             if(el_gridMoonriseItem) el_gridMoonriseItem.classList.toggle('is-hidden', !el_moonInfoSection.classList.contains('is-hidden'));
             if(el_gridMoonsetItem) el_gridMoonsetItem.classList.toggle('is-hidden', !el_moonInfoSection.classList.contains('is-hidden'));
 
-            // További adatok frissítése
             if (obs.heatIndex != null && el_heatIndexItem) {
                 el_heatIndexItem.classList.remove('is-hidden');
                 if(el_mainHeatIndexValue) el_mainHeatIndexValue.textContent = formatValue(obs.heatIndex, '°C', 1);
