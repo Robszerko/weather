@@ -143,7 +143,23 @@
         .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section { order: 1; width: 100%; max-width: 100%; }
 
         .temperature-and-gauge-wrapper { display: flex; align-items: center; justify-content: center; gap: 15px; width: 100%; min-height: 120px;}
-        .temperature { font-size: 58px; font-weight: 700; line-height: 1; background-color: var(--current-temp-bg-color); padding: 10px 24px 10px 18px; border-radius: 12px 35px 35px 12px; display: inline-flex; align-items: baseline; box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.15); perspective: 800px; transition: all 0.6s; }
+        
+        /* === VÁLTOZTATÁS KEZDETE === */
+        .temperature {
+            font-size: 64px; /* NÖVELVE */
+            font-weight: 700;
+            line-height: 1;
+            background-color: var(--current-temp-bg-color);
+            padding: 12px 24px 12px 18px; /* NÖVELVE */
+            border-radius: 12px 35px 35px 12px;
+            display: inline-flex;
+            align-items: baseline;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.15);
+            perspective: 800px;
+            transition: all 0.6s;
+        }
+        /* === VÁLTOZTATÁS VÉGE === */
+
         #temperature-value { display: inline-block; transform-style: preserve-3d; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
         .temperature-symbol { font-size: 0.55em; vertical-align: super; margin-left: 2px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
 
@@ -195,16 +211,19 @@
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; padding-top: 10px; min-height: 110px; }
 
+        /* === VÁLTOZTATÁS KEZDETE === */
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
             text-align: left;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            font-size: 11px;
+            gap: 6px; /* NÖVELVE */
+            font-size: 12px; /* NÖVELVE */
             flex-grow: 1;
             min-width: 0;
             flex-basis: 130px;
         }
+        /* === VÁLTOZTATÁS VÉGE === */
+
         #iss-info .night-sky-text-details {
             min-width: 250px;
             flex-basis: 250px;
@@ -226,18 +245,20 @@
             transform: translateY(-2px) scale(1.02);
         }
 
+        /* === VÁLTOZTATÁS KEZDETE === */
         .sun-detail-label, .moon-detail-label, .rain-detail-label, .night-sky-detail-label {
             display: flex;
             align-items: center;
             gap: 6px;
             font-weight: 600;
-            font-size: 9.5px;
+            font-size: 11px; /* NÖVELVE */
             color: var(--current-text-muted-color);
             text-transform: uppercase;
             letter-spacing: 0.3px;
             transition: color 0.6s;
             flex-shrink: 0;
         }
+        /* === VÁLTOZTATÁS VÉGE === */
 
         .sun-detail-label i, .moon-detail-label i, .rain-detail-label i, .night-sky-detail-label i {
             width: 13px;
@@ -248,9 +269,10 @@
             transition: color 0.6s, opacity 0.6s;
         }
 
+        /* === VÁLTOZTATÁS KEZDETE === */
         .sun-detail-value, .moon-detail-value, .rain-detail-value, .night-sky-detail-value {
             font-weight: 700;
-            font-size: 12px;
+            font-size: 14px; /* NÖVELVE */
             color: var(--current-text-color);
             transition: color 0.6s;
             display: flex;
@@ -262,6 +284,8 @@
             word-break: break-word;
             line-height: 1.25;
         }
+        /* === VÁLTOZTATÁS VÉGE === */
+        
         .night-sky-detail-value.long-text {
             font-size: 10.5px;
             white-space: normal;
@@ -436,6 +460,7 @@
         #constellation-svg-container .star.bright { fill: #ffffff; }
         #constellation-svg-container .const-line { stroke: var(--text-secondary-night); stroke-width: 1px; opacity: 0.5; }
 
+        /* === VÁLTOZTATÁS KEZDETE === */
         .weather-details-grid {
             margin-top: 20px;
             background-color: rgba(0,0,0,0.08);
@@ -445,16 +470,18 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: 14px;
-            row-gap: 6px;
+            row-gap: 8px; /* NÖVELVE */
             transition: all 0.6s;
         }
         .detail-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
+            font-size: 12.5px; /* NÖVELVE */
             padding: 2px 0;
         }
+        /* === VÁLTOZTATÁS VÉGE === */
+
         .detail-item .label {
             font-weight: 600;
             color: var(--current-text-color);
