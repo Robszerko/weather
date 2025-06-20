@@ -137,8 +137,8 @@
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; }
         
         /* === VÁLTOZTATÁS KEZDETE === */
-        .widget-core-data { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 4px; }
-        .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 4px;}
+        .widget-core-data { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 8px; }
+        .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 8px; }
         .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section { order: 1; width: 100%; max-width: 100%; }
 
         .temperature-and-gauge-wrapper {
@@ -147,6 +147,7 @@
             justify-content: flex-start;
             gap: 25px;
             width: 100%;
+            margin-bottom: 8px; /* Csökkentett margó */
         }
         
         .temperature {
@@ -198,7 +199,7 @@
         }
 
         #discreet-rain-gauge .rain-gauge-bg {
-            fill: none;
+            fill: none; /* Sziluetté alakítva */
             stroke: var(--current-text-muted-color);
             stroke-width: 2px;
             stroke-opacity: 0.4;
@@ -208,7 +209,7 @@
             stroke: var(--accent-interactive-night);
             stroke-opacity: 0.8;
         }
-        #discreet-rain-gauge .rain-gauge-value { display: none; } /* Nincs szükség rá */
+        #discreet-rain-gauge .rain-gauge-value { display: none; }
         
         .discreet-rain-text {
             text-align: center;
@@ -235,7 +236,7 @@
         .secondary-info-bar { gap: 8px 14px; }
         /* === VÁLTOZTATÁS VÉGE === */
 
-        .additional-core-info { margin-top: 16px; width: 100%; }
+        .additional-core-info { margin-top: 12px; width: 100%; }
         .secondary-info-bar {
             display: flex;
             flex-wrap: wrap;
@@ -274,7 +275,7 @@
             width: 100%;
             max-width: 480px;
             box-sizing: border-box;
-            margin-top: 16px;
+            margin-top: 12px;
         }
         .precipitation-forecast-info strong {
             color: var(--current-text-color);
@@ -501,7 +502,7 @@
         #constellation-svg-container .const-line { stroke: var(--text-secondary-night); stroke-width: 1px; opacity: 0.5; }
 
         .weather-details-grid {
-            margin-top: 16px;
+            margin-top: 12px;
             background-color: rgba(0,0,0,0.08);
             border: 1px solid var(--current-container-border-color);
             border-radius: 12px;
@@ -509,7 +510,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: 14px;
-            row-gap: 10px;
+            row-gap: 6px;
             transition: all 0.6s;
         }
         .detail-item {
@@ -554,7 +555,7 @@
 
         .forecast-title { width: 100%; max-width: 800px; font-size: 16px; font-weight: 700; color: var(--current-text-color); margin-top: 24px; margin-bottom: 12px; text-align: center; transition: color 0.6s; }
         
-        .hourly-forecast-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
+        .hourly-forecast-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 6px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
         .hourly-forecast-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
         .hourly-primary-info { display: flex; align-items: center; gap: 20px; flex-grow: 1; }
         .hourly-time { font-size: 15px; font-weight: 700; min-width: 50px; text-align: left; }
@@ -572,13 +573,13 @@
             padding-bottom: 12px; 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
-            gap: 12px;
+            gap: 10px;
             margin: 0 auto;
         }
         .forecast-day-card { 
             display: flex; 
             flex-direction: column; 
-            padding: 14px;
+            padding: 12px;
             border-radius: 14px; 
             background: var(--current-widget-bg); 
             border: 1px solid var(--current-widget-border); 
