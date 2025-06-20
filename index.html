@@ -144,7 +144,7 @@
         .temperature-and-gauge-wrapper {
             display: flex;
             align-items: center;
-            justify-content: flex-start; /* Balra igazítás */
+            justify-content: flex-start;
             gap: 25px;
             width: 100%;
         }
@@ -184,30 +184,47 @@
             color: transparent;
             text-shadow: none;
         }
+
+        .discreet-rain-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
         
         #discreet-rain-gauge {
-            width: 90px; /* Kisebb méret */
-            height: 90px;
+            width: 60px;
+            height: 60px;
+            clip-path: none; /* Nincs szükség vágómaszkra a konténeren */
         }
 
-        #discreet-rain-gauge .rain-visual-center {
-            transform: none; /* Resetelt pozíció */
-            gap: 2px;
+        #discreet-rain-gauge .rain-gauge-bg {
+            fill: var(--current-text-muted-color); /* Alapértelmezett kitöltés */
+            stroke: none;
+            opacity: 0.15;
+        }
+        #discreet-rain-gauge.has-rained-today .rain-gauge-bg {
+            fill: var(--accent-interactive-night); /* Kitöltés, ha esett */
+            opacity: 0.7;
+        }
+        
+        .discreet-rain-text {
+            text-align: center;
         }
 
         #discreet-rain-visual-value {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--current-text-color);
         }
         #discreet-rain-visual-value-unit {
-            font-size: 0.6em;
+            font-size: 0.7em;
             opacity: 0.8;
-            margin-left: 3px;
+            margin-left: 2px;
             font-weight: 500;
         }
         #discreet-rain-visual-label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 500;
             color: var(--current-text-muted-color);
             line-height: 1.2;
@@ -449,12 +466,11 @@
 
         .rain-visual { width: 130px; height: 120px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; }
         #main-rain-visual { clip-path: url(#raindrop-clip-main); }
-        #discreet-rain-gauge { clip-path: url(#raindrop-clip-discreet); }
 
         .rain-gauge-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .rain-gauge-bg, .rain-gauge-value { fill: none; stroke-width: 10; stroke-linecap: round; stroke-linejoin: round; transform-origin: center center; }
         #main-rain-visual .rain-gauge-bg, #main-rain-visual .rain-gauge-value { transform: scale(0.85) translate(8px, 8px); }
-        .rain-gauge-bg { stroke: var(--current-text-muted-color); opacity: 0.2; transition: stroke 0.6s, stroke-opacity 0.6s; }
+        #main-rain-visual .rain-gauge-bg { stroke: var(--current-text-muted-color); opacity: 0.2; transition: stroke 0.6s, stroke-opacity 0.6s; }
         .rain-gauge-value { stroke: var(--accent-interactive-night); transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
         .rain-visual-center { position: absolute; text-align: center; color: var(--current-text-color); display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;}
@@ -467,11 +483,6 @@
 
         @keyframes streak-animation { 0% { transform: translateY(-110%); opacity: 0; } 10% { transform: translateY(110%); opacity: 0.7; } 11% { opacity: 0; } 100% { opacity: 0; } }
         .rain-visual.is-raining-actively .rain-streak { display: block; animation: streak-animation 60s linear infinite; }
-
-        #discreet-rain-gauge .rain-gauge-svg { transform: scale(1.1) translate(5px, 5px); }
-        #discreet-rain-gauge .rain-gauge-bg { stroke: var(--current-text-muted-color); fill: none; stroke-opacity: 0.3; transition: stroke 0.5s ease, stroke-opacity 0.5s ease; }
-        #discreet-rain-gauge.has-rained-today .rain-gauge-bg { stroke: var(--accent-interactive-night); stroke-opacity: 0.8; }
-        #discreet-rain-gauge .rain-gauge-value { display: none; }
 
         .night-sky-visual { text-align: center; }
         .night-sky-visual i { font-size: 48px; margin-bottom: 8px; color: var(--current-text-muted-color); transition: color 0.6s; }
@@ -1297,7 +1308,6 @@
             } return null;
         }
 
-        // === VÁLTOZTATÁS KEZDETE (HTML STRUKTÚRA) ===
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
@@ -1375,16 +1385,16 @@
                 <div class="temperature-section">
                     <div class="temperature-and-gauge-wrapper" id="temperature-and-gauge-wrapper">
                         <div class="temperature" id="temperature-container"><span id="temperature-value">--</span><span class="temperature-symbol">°C</span></div>
-                        <div class="rain-visual" id="discreet-rain-gauge">
-                            <div class="rain-visual-center">
+                        <div class="discreet-rain-container">
+                            <div class="rain-visual" id="discreet-rain-gauge">
+                                <svg class="rain-gauge-svg" viewBox="0 0 100 100">
+                                    <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
+                                </svg>
+                            </div>
+                            <div class="discreet-rain-text">
                                 <div id="discreet-rain-visual-value">--<span id="discreet-rain-visual-value-unit">mm</span></div>
                                 <div id="discreet-rain-visual-label">esett eddig ma</div>
                             </div>
-                            <svg class="rain-gauge-svg" viewBox="0 0 100 100">
-                                <defs><clipPath id="raindrop-clip-discreet"><path d="${discreetRaindropPath}"></path></clipPath></defs>
-                                <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
-                                <path class="rain-gauge-value" d="${discreetRaindropPath}"></path>
-                            </svg>
                         </div>
                     </div>
                      <div class="additional-core-info">
@@ -1400,7 +1410,6 @@
                 </div>
             </div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
-            // === VÁLTOZTATÁS VÉGE ===
 
             // DOM elemek cache-elése
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
@@ -1924,7 +1933,7 @@
                         sunriseTimeLocal: data.sunriseTimeLocal || cachedData.generalConditions.sunriseTimeLocal,
                         sunsetTimeLocal: data.sunsetTimeLocal || cachedData.generalConditions.sunsetTimeLocal,
                     });
-                } }).catch(e => console.warn("Napi előrejelzés lekérési hiba:", e.message)));
+                } }).catch(e => console.warn("Napi előrejelzés hiba:", e.message)));
             }
             if (isInitialLoad && cachedData.hourlyForecast.length === 0) {
                  independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
