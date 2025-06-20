@@ -98,14 +98,13 @@
         .timestamp-container { display: flex; justify-content: center; align-items: center; gap: 8px; }
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
 
-        /* === JAVÍTOTT TOOLTIP === */
         .info-tooltip-container { position: relative; cursor: help; color: var(--current-text-muted-color); line-height: 1; }
         .info-tooltip-container .fa-info-circle { transition: color 0.3s; }
         .info-tooltip-container:hover .fa-info-circle { color: var(--current-icon-color); }
         .info-tooltip-content {
             visibility: hidden; opacity: 0;
             position: absolute;
-            top: calc(100% + 12px); /* Kicsit nagyobb távolság */
+            top: calc(100% + 12px);
             left: 50%;
             transform: translateX(-50%);
             width: max-content;
@@ -119,7 +118,7 @@
             transition: opacity 0.3s, visibility 0.3s;
             font-size: 12px;
             line-height: 1.6;
-            z-index: 1000; /* Magas z-index, hogy minden fölött megjelenjen */
+            z-index: 1000;
         }
         .info-tooltip-content::after { content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: transparent transparent #f9fafb transparent; }
         .info-tooltip-container:hover .info-tooltip-content { visibility: visible; opacity: 1; }
@@ -128,7 +127,6 @@
         .info-tooltip-content ul { list-style-position: inside; padding-left: 4px; }
         .info-tooltip-content li { margin-bottom: 2px; }
         .info-tooltip-content p:last-child { margin-bottom: 0; }
-        /* === JAVÍTÁS VÉGE === */
 
         .station-status-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; text-align: center; margin-bottom: 12px; padding-top: 5px; padding-bottom: 10px; border-bottom: 1px solid var(--current-container-border-color); transition: border-color 0.6s; }
         .station-selector { flex: 1; }
@@ -146,22 +144,22 @@
         
         /* === VÁLTOZTATÁS KEZDETE === */
         .temperature {
-            font-size: 64px; /* NÖVELVE */
-            font-weight: 700;
+            font-size: 72px; /* NÖVELVE */
+            font-weight: 800; /* Kiemeltebb */
             line-height: 1;
             background-color: var(--current-temp-bg-color);
-            padding: 12px 24px 12px 18px; /* NÖVELVE */
-            border-radius: 12px 35px 35px 12px;
+            padding: 14px 28px 14px 20px; /* NÖVELVE */
+            border-radius: 14px 40px 40px 14px; /* Finomhangolva */
             display: inline-flex;
             align-items: baseline;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.15);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.18);
             perspective: 800px;
             transition: all 0.6s;
         }
         /* === VÁLTOZTATÁS VÉGE === */
 
         #temperature-value { display: inline-block; transform-style: preserve-3d; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
-        .temperature-symbol { font-size: 0.55em; vertical-align: super; margin-left: 2px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
+        .temperature-symbol { font-size: 0.5em; vertical-align: super; margin-left: 4px; opacity: 0.95; background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none; }
 
         .additional-core-info { margin-top: 16px; width: 100%; }
         .secondary-info-bar {
@@ -211,18 +209,16 @@
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; padding-top: 10px; min-height: 110px; }
 
-        /* === VÁLTOZTATÁS KEZDETE === */
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
             text-align: left;
             display: flex;
             flex-direction: column;
-            gap: 6px; /* NÖVELVE */
-            font-size: 12px; /* NÖVELVE */
+            gap: 6px;
+            font-size: 12px;
             flex-grow: 1;
             min-width: 0;
             flex-basis: 130px;
         }
-        /* === VÁLTOZTATÁS VÉGE === */
 
         #iss-info .night-sky-text-details {
             min-width: 250px;
@@ -245,20 +241,18 @@
             transform: translateY(-2px) scale(1.02);
         }
 
-        /* === VÁLTOZTATÁS KEZDETE === */
         .sun-detail-label, .moon-detail-label, .rain-detail-label, .night-sky-detail-label {
             display: flex;
             align-items: center;
             gap: 6px;
             font-weight: 600;
-            font-size: 11px; /* NÖVELVE */
+            font-size: 11px;
             color: var(--current-text-muted-color);
             text-transform: uppercase;
             letter-spacing: 0.3px;
             transition: color 0.6s;
             flex-shrink: 0;
         }
-        /* === VÁLTOZTATÁS VÉGE === */
 
         .sun-detail-label i, .moon-detail-label i, .rain-detail-label i, .night-sky-detail-label i {
             width: 13px;
@@ -269,10 +263,9 @@
             transition: color 0.6s, opacity 0.6s;
         }
 
-        /* === VÁLTOZTATÁS KEZDETE === */
         .sun-detail-value, .moon-detail-value, .rain-detail-value, .night-sky-detail-value {
             font-weight: 700;
-            font-size: 14px; /* NÖVELVE */
+            font-size: 14px;
             color: var(--current-text-color);
             transition: color 0.6s;
             display: flex;
@@ -284,7 +277,6 @@
             word-break: break-word;
             line-height: 1.25;
         }
-        /* === VÁLTOZTATÁS VÉGE === */
         
         .night-sky-detail-value.long-text {
             font-size: 10.5px;
@@ -470,14 +462,14 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             column-gap: 14px;
-            row-gap: 8px; /* NÖVELVE */
+            row-gap: 10px; /* NÖVELVE */
             transition: all 0.6s;
         }
         .detail-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12.5px; /* NÖVELVE */
+            font-size: 13.5px; /* NÖVELVE */
             padding: 2px 0;
         }
         /* === VÁLTOZTATÁS VÉGE === */
@@ -515,19 +507,22 @@
         .uv-description-text { margin-left: 4px; font-size: 0.88em; font-style: italic; }
 
         .forecast-title { width: 100%; max-width: 800px; font-size: 16px; font-weight: 700; color: var(--current-text-color); margin-top: 24px; margin-bottom: 12px; text-align: center; transition: color 0.6s; }
-
-        .hourly-forecast-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
-        .hourly-forecast-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
-        .hourly-primary-info { display: flex; align-items: center; gap: 16px; flex-grow: 1; }
-        .hourly-time { font-size: 13px; font-weight: 700; min-width: 45px; text-align: left; }
-        .hourly-icon-and-condition { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 80px; }
-        .hourly-icon { font-size: 24px; color: var(--current-icon-color); transition: color 0.6s; }
-        .hourly-condition-text { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); white-space: nowrap; text-align: center; }
-        .hourly-temp { font-size: 18px; font-weight: 700; }
-        .hourly-secondary-details { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 11px; color: var(--current-text-muted-color); flex-shrink: 0; }
-        .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
-        .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
         
+        /* === VÁLTOZTATÁS KEZDETE (ÓRÁS ELŐREJELZÉS) === */
+        .hourly-forecast-container { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
+        .hourly-forecast-card { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
+        .hourly-primary-info { display: flex; align-items: center; gap: 20px; flex-grow: 1; }
+        .hourly-time { font-size: 15px; font-weight: 700; min-width: 50px; text-align: left; }
+        .hourly-icon-and-condition { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 85px; }
+        .hourly-icon { font-size: 28px; color: var(--current-icon-color); transition: color 0.6s; }
+        .hourly-condition-text { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); white-space: nowrap; text-align: center; }
+        .hourly-temp { font-size: 20px; font-weight: 700; }
+        .hourly-secondary-details { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; font-size: 12.5px; color: var(--current-text-muted-color); flex-shrink: 0; }
+        .hourly-detail-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+        .hourly-detail-row i { width: 13px; text-align: center; opacity: 0.8; }
+        /* === VÁLTOZTATÁS VÉGE === */
+        
+        /* === VÁLTOZTATÁS KEZDETE (8 NAPOS ELŐREJELZÉS) === */
         .forecast-container { 
             width: 100%; 
             max-width: 800px;
@@ -540,7 +535,7 @@
         .forecast-day-card { 
             display: flex; 
             flex-direction: column; 
-            padding: 12px; 
+            padding: 14px; /* NÖVELVE */
             border-radius: 14px; 
             background: var(--current-widget-bg); 
             border: 1px solid var(--current-widget-border); 
@@ -553,20 +548,20 @@
             margin-bottom: 8px; 
         }
         .forecast-day-name { 
-            font-size: 14px; 
+            font-size: 16px; /* NÖVELVE */
             font-weight: 700; 
         }
         .forecast-date { 
-            font-size: 11px; 
+            font-size: 12px; /* NÖVELVE */
             font-weight: 500; 
             color: var(--current-text-muted-color); 
         }
         .forecast-temps { 
-            font-size: 18px; 
+            font-size: 20px; /* NÖVELVE */
             font-weight: 700; 
             display: flex; 
             justify-content: center; 
-            gap: 8px; 
+            gap: 10px; 
             padding: 8px 0; 
             border-top: 1px solid var(--current-container-border-color); 
             border-bottom: 1px solid var(--current-container-border-color); 
@@ -588,7 +583,7 @@
         .forecast-part-header { 
             display: flex; 
             align-items: center; 
-            font-size: 13px; 
+            font-size: 14px; /* NÖVELVE */
             font-weight: 700; 
             margin-bottom: 6px; 
         }
@@ -599,7 +594,7 @@
             transition: color 0.6s; 
         }
         .forecast-part-details { 
-            font-size: 11.5px; 
+            font-size: 12.5px; /* NÖVELVE */
             color: var(--current-text-muted-color); 
             line-height: 1.5; 
             text-align: left; 
@@ -607,6 +602,7 @@
         .forecast-part-details p { 
             margin: 2px 0; 
         }
+        /* === VÁLTOZTATÁS VÉGE === */
 
         .detail-item, .info-bar-item { perspective: 600px; }
         .detail-item .value, .info-bar-item span { perspective: 400px; }
@@ -622,30 +618,28 @@
             transform: rotateX(90deg);
         }
 
-        /* === ÚJ, FEJLETT RESZPONZÍV SZABÁLYOK === */
+        /* === RESZPONZÍV SZABÁLYOK === */
         
-        /* Nagy képernyős (desktop) elrendezés */
         @media (min-width: 1000px) {
             .weather-widget {
-                max-width: 960px; /* Nagyobb maximális szélesség */
+                max-width: 960px;
             }
             .widget-core-data {
-                flex-direction: row; /* Vízszintes elrendezés a két fő blokknak */
+                flex-direction: row;
                 align-items: flex-start;
                 gap: 24px;
             }
             .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section {
                 order: 1;
-                flex: 1 1 45%; /* Bal oldali oszlop */
+                flex: 1 1 45%;
             }
             .temperature-section {
                 order: 2;
-                flex: 1 1 55%; /* Jobb oldali oszlop */
-                margin-top: 0; /* Nincs szükség extra margóra */
+                flex: 1 1 55%;
+                margin-top: 0;
             }
         }
 
-        /* Tablet és kisebb képernyők (visszaáll az eredeti függőleges elrendezésre) */
         @media (max-width: 999px) {
             .widget-core-data {
                 flex-direction: column;
@@ -701,7 +695,6 @@
             }
         }
 
-        /* Kisebb mobil képernyők */
         @media (max-width: 480px) {
             body {
                 padding: 10px;
@@ -720,8 +713,8 @@
             }
             
             .temperature {
-                font-size: 50px;
-                padding: 8px 20px 8px 14px;
+                font-size: 60px; /* Mobilra optimalizálva */
+                padding: 10px 22px 10px 16px;
             }
             
             .hourly-forecast-card {
