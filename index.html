@@ -86,7 +86,6 @@
 
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
 
-        /* === VÁLTOZTATÁS KEZDETE === */
         .weather-widget { 
             border-radius: 18px; 
             padding: 22px 24px; 
@@ -94,7 +93,7 @@
             max-width: 800px; 
             box-sizing: border-box; 
             margin: 0 auto; 
-            position: relative; /* Fontos a nyelvek pozicionálásához */
+            position: relative;
             z-index: 10; 
             background: var(--current-widget-bg); 
             border: 1px solid var(--current-widget-border); 
@@ -102,12 +101,10 @@
             backdrop-filter: blur(20px) saturate(140%); 
             -webkit-backdrop-filter: blur(20px) saturate(140%); 
             transition: all 0.6s ease-in-out; 
-            margin-top: 50px; /* Hely a felső nyelveknek */
         }
         
-        .side-tongue {
-            position: absolute;
-            top: -30px; /* A kártya tetejéhez igazítva, kicsit feljebb */
+        /* === VÁLTOZTATÁS KEZDETE === */
+        .info-tongue {
             padding: 8px 16px;
             color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.4);
@@ -115,8 +112,8 @@
             text-align: center;
             box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 2px rgba(255,255,255,0.2);
             border: 1px solid rgba(255,255,255,0.1);
-            transition: background-color 0.6s ease, transform 0.4s ease;
-            z-index: 20;
+            transition: background-color 0.6s ease;
+            border-radius: 12px;
         }
 
         .tongue-label {
@@ -134,16 +131,11 @@
             line-height: 1;
         }
 
-        .left-tongue {
-            left: 0;
-            border-radius: 12px 12px 12px 0;
-            transform: translateX(20px);
-        }
-
-        .right-tongue {
-            right: 0;
-            border-radius: 12px 12px 0 12px;
-            transform: translateX(-20px);
+        .top-info-tongues-container {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 12px;
         }
         /* === VÁLTOZTATÁS VÉGE === */
 
@@ -654,7 +646,6 @@
             }
             .weather-widget {
                 padding: 18px;
-                margin-top: 50px;
             }
 
             .widget-core-data {
@@ -688,11 +679,9 @@
                 grid-template-columns: 1fr;
                 row-gap: 8px;
             }
-            /* === VÁLTOZTATÁS KEZDETE === */
             .forecast-container {
                 grid-template-columns: repeat(2, 1fr);
             }
-             /* === VÁLTOZTATÁS VÉGE === */
         }
 
         @media (max-width: 480px) {
@@ -744,17 +733,6 @@
     <div class="sky-gradient-overlay"></div>
 
     <div class="weather-widget">
-        <!-- === VÁLTOZTATÁS KEZDETE: Új nyelvek hozzáadása === -->
-        <div class="side-tongue left-tongue" id="temp-tongue-container">
-            <div class="tongue-label">Jelenleg:</div>
-            <div class="tongue-content" id="temp-tongue-value">-- °C</div>
-        </div>
-        <div class="side-tongue right-tongue" id="rain-tongue-container">
-            <div class="tongue-label">Ennyi esett ma eddig:</div>
-            <div class="tongue-content" id="rain-tongue-value">-- mm</div>
-        </div>
-        <!-- === VÁLTOZTATÁS VÉGE === -->
-
         <div id="widget-background-image"></div>
         <div id="weather-display"></div>
     </div>
@@ -825,9 +803,7 @@
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
             el_precipitationForecastBar, el_nextPrecipitationInfoText,
-            // === VÁLTOZTATÁS KEZDETE: Új DOM elemek cache-elése ===
             el_tempTongueContainer, el_tempTongueValue, el_rainTongueContainer, el_rainTongueValue;
-            // === VÁLTOZTATÁS VÉGE ===
 
 
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
@@ -1292,7 +1268,7 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             
-            // === VÁLTOZTATÁS KEZDETE: A HTML struktúra módosítása az új nyelvek miatt ===
+            // === VÁLTOZTATÁS KEZDETE: A HTML struktúra módosítása a kérésnek megfelelően ===
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1364,6 +1340,16 @@
                 </div>
             </div>
             <div class="additional-core-info">
+                 <div class="top-info-tongues-container">
+                    <div class="info-tongue" id="temp-tongue-container">
+                        <div class="tongue-label">Jelenleg:</div>
+                        <div class="tongue-content" id="temp-tongue-value">-- °C</div>
+                    </div>
+                    <div class="info-tongue" id="rain-tongue-container">
+                        <div class="tongue-label">Ennyi esett ma eddig:</div>
+                        <div class="tongue-content" id="rain-tongue-value">-- mm</div>
+                    </div>
+                </div>
                 <div class="secondary-info-bar">
                     <div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value">--</span>°C</div></div>
                     <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text">--</span><span id="main-wind-speed-value">--</span> km/h</div></div>
@@ -1467,12 +1453,10 @@
             el_precipitationForecastBar = document.getElementById('precipitation-forecast-bar');
             el_nextPrecipitationInfoText = document.getElementById('next-precipitation-info-text');
 
-            // === VÁLTOZTATÁS KEZDETE: Új DOM elemek cache-elése ===
             el_tempTongueContainer = document.getElementById('temp-tongue-container');
             el_tempTongueValue = document.getElementById('temp-tongue-value');
             el_rainTongueContainer = document.getElementById('rain-tongue-container');
             el_rainTongueValue = document.getElementById('rain-tongue-value');
-            // === VÁLTOZTATÁS VÉGE ===
 
             addStationChangeListeners();
             isWeatherDisplayInitialized = true;
@@ -1580,7 +1564,7 @@
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
 
-            // === VÁLTOZTATÁS KEZDETE: Az új nyelvek frissítése ===
+            // === VÁLTOZTATÁS KEZDETE: Az új panelek frissítése ===
             if (el_tempTongueContainer && el_tempTongueValue) {
                 const temp = obs.temp;
                 el_tempTongueValue.textContent = formatValue(temp, '°C', 1, '--');
