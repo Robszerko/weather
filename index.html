@@ -136,7 +136,6 @@
         .station-name { font-size: 12px; font-weight: 600; line-height: 1; }
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; margin-top: 2px; }
         
-        /* === VÁLTOZTATÁS KEZDETE === */
         .top-data-container {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -258,7 +257,6 @@
         }
 
         .precipitation-forecast-info { margin: 12px auto 0 auto; }
-        /* === VÁLTOZTATÁS VÉGE === */
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; min-height: 110px; }
 
@@ -545,15 +543,18 @@
         .hourly-detail-row { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
         .hourly-detail-row i { width: 13px; text-align: center; opacity: 0.8; }
         
+        /* === VÁLTOZTATÁS KEZDETE === */
         .forecast-container { 
             width: 100%; 
             max-width: 800px;
             padding-bottom: 12px; 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             margin: 0 auto;
         }
+        /* === VÁLTOZTATÁS VÉGE === */
+
         .forecast-day-card { 
             display: flex; 
             flex-direction: column; 
@@ -1205,7 +1206,7 @@
             }
 
             const offset = length * (1 - percentage);
-            gaugeValueEl.style.strokeDasharray = length;
+            gaugeValueEl.style.strokeDasharray = arcLength;
             gaugeValueEl.style.strokeDashoffset = offset;
 
             totalValueEl.textContent = formatValue(precipTotal, '', 2);
@@ -1297,7 +1298,6 @@
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             const discreetRaindropPath = `M50,85 C25,85 20,55 50,15 C80,55 75,85 50,85`;
             
-            // === VÁLTOZTATÁS KEZDETE ===
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1321,7 +1321,7 @@
                      <label for="station-select-nyiregyhazi-ut">
                         <input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">
                         <span class="station-name">${STATIONS.NYIREGYHAZI_UT.displayName}</span>
-                        <div id="nyiregyhazi_ut-status-text" class="station-status-text">állapot ?</div>
+                        <div id="nyiregyhazi-ut-status-text" class="station-status-text">állapot ?</div>
                     </label>
                 </div>
                 <div class="station-selector" id="kossuth-selector-container">
@@ -1400,8 +1400,7 @@
                 <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
             </div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
-            // === VÁLTOZTATÁS VÉGE ===
-
+            
             // DOM elemek cache-elése
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
             el_timestampText = document.getElementById('timestamp-text');
@@ -1507,12 +1506,9 @@
             if (!stationConfig) return;
 
             const lowerCaseKey = stationKey.toLowerCase().replace(/_/g, '-');
-            // === VÁLTOZTATÁS KEZDETE ===
-            // A statusz szöveg most a megfelelő állomásválasztó elemen belül található
             const textEl = document.getElementById(`${lowerCaseKey}-status-text`);
             const radioEl = document.getElementById(`station-select-${lowerCaseKey}`);
             const selectorContainerEl = document.getElementById(`${lowerCaseKey}-selector-container`);
-            // === VÁLTOZTATÁS VÉGE ===
 
             if (!textEl || !radioEl || !selectorContainerEl) return;
 
@@ -1605,17 +1601,14 @@
             const sunCalcData = cachedData.sunCalc;
             if (!obs || !general || !sunCalcData) return;
 
-            // === VÁLTOZTATÁS KEZDETE ===
             if (obs.precipTotal > 0.1) {
                 hasRainBeenDetectedToday = true;
             }
-            // === VÁLTOZTATÁS VÉGE ===
 
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
             updateAnimatedValue(el_temperatureValue, formatValue(obs.temp, '', 1, '--'));
             
-            // === VÁLTOZTATÁS KEZDETE ===
             if (el_discreetRainGauge) {
                 el_discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
             }
@@ -1623,7 +1616,6 @@
             if (el_discreetRainVisualValueNode) {
                 el_discreetRainVisualValueNode.nodeValue = discreetRainValue;
             }
-            // === VÁLTOZTATÁS VÉGE ===
 
             const isRainingNow = obs.precipRate > 0;
             const isDayTime = sunCalcData.sunAltitude > -0.83;
@@ -1749,7 +1741,6 @@
             if(el_gridMoonriseItem) el_gridMoonriseItem.classList.toggle('is-hidden', !el_moonInfoSection.classList.contains('is-hidden'));
             if(el_gridMoonsetItem) el_gridMoonsetItem.classList.toggle('is-hidden', !el_moonInfoSection.classList.contains('is-hidden'));
 
-            // === VÁLTOZTATÁS KEZDETE ===
             if (obs.heatIndex != null && el_heatIndexItem && el_mainHeatIndexValue) {
                 el_heatIndexItem.classList.remove('is-hidden');
                 updateAnimatedValue(el_mainHeatIndexValue, formatValue(obs.heatIndex, '', 1));
@@ -1773,7 +1764,6 @@
             } else if (el_windGustItem) {
                  el_windGustItem.classList.add('is-hidden');
             }
-            // === VÁLTOZTATÁS VÉGE ===
 
             updateAnimatedValue(el_dewpointValue, formatValue(obs.dewpt, '°C'));
             updateAnimatedValue(el_humidityValue, formatValue(obs.humidity, '%', 0));
