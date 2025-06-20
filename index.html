@@ -103,7 +103,6 @@
             transition: all 0.6s ease-in-out; 
         }
         
-        /* === VÁLTOZTATÁS KEZDETE === */
         .info-tongue {
             padding: 8px 16px;
             color: white;
@@ -137,7 +136,6 @@
             gap: 16px;
             margin-bottom: 12px;
         }
-        /* === VÁLTOZTATÁS VÉGE === */
 
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
 
@@ -238,7 +236,28 @@
             transition: transform 0.8s ease-out;
         }
 
-        .precipitation-forecast-info { margin: 12px auto 0 auto; }
+        /* === VÁLTOZTATÁS KEZDETE === */
+        .precipitation-forecast-info {
+            margin: 12px auto 0 auto;
+            padding: 8px 16px;
+            background-color: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            transition: all 0.6s;
+            text-align: center;
+            max-width: 450px;
+        }
+        #next-precipitation-info-text {
+            color: var(--current-text-color);
+            transition: color 0.6s;
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+        #next-precipitation-info-text strong {
+            font-weight: 700;
+            color: var(--current-text-color);
+        }
+        /* === VÁLTOZTATÁS VÉGE === */
 
         .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; min-height: 110px; }
 
@@ -776,7 +795,6 @@
             hourlyForecast: [],
             sunCalc: null,
             issPasses: [],
-            nightSkyObject: null
         };
         let isWeatherDisplayInitialized = false;
 
@@ -786,6 +804,62 @@
         let weatherDisplayEl, forecastContainerEl, forecastTitleEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
         const NO_DATA_STRING = 'N/A';
         const PRECIP_THRESHOLD = 30;
+
+        // === VÁLTOZTATÁS KEZDETE: Éjszakai égbolt dinamikus vezérlése ===
+        let nightSkyRotationInterval = null;
+        let lastDisplayedNightSkyObjectId = null;
+        const NIGHT_SKY_ROTATION_INTERVAL_MS = 15 * 1000; // 15 másodperc
+        const NIGHT_SKY_OBJECTS = [
+            {
+                id: 'saturn_summer', type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring',
+                status: 'Késő este délkeleti, déli irányban keresd',
+                details: 'Gyűrűi már egy kisebb távcsővel is gyönyörűen látszanak. Sárgás, nyugodt fényű.',
+                visibilityCheck: (m, h) => (m >= 6 && m <= 9) && (h >= 22 || h <= 3)
+            },
+            {
+                id: 'jupiter_summer_early', type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe',
+                status: 'Hajnalban a keleti égbolton ragyog',
+                details: 'A Vénusz után az égbolt legfényesebb bolygója. Négy nagy holdja kézitávcsővel is látható.',
+                visibilityCheck: (m, h) => (m >= 5 && m <= 9) && (h >= 2 && h <= 5)
+            },
+            {
+                id: 'jupiter_winter', type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe',
+                status: 'Este feltűnően fényes a keleti-déli égen',
+                details: 'Fényes, uralkodó jelenség az őszi/téli esti égen. Nem lehet eltéveszteni.',
+                visibilityCheck: (m, h) => (m >= 10 && m <= 12) && (h >= 18 && h <= 23)
+            },
+            {
+                id: 'venus_morning', type: 'planet', name: 'Vénusz', icon: 'far fa-circle',
+                status: 'Hajnalcsillagként ragyog keleten',
+                details: 'Rendkívül fényes, vakító jelenség napkelte előtt. Fázisai távcsővel megfigyelhetők.',
+                visibilityCheck: (m, h) => (m >= 1 && m <= 4) && (h >= 4 && h <= 6)
+            },
+            {
+                id: 'mars_winter', type: 'planet', name: 'Mars', icon: 'fas fa-circle',
+                status: 'Éjfél körül magasan, vöröses fénypontként',
+                details: 'A "vörös bolygó" jellegzetes színéről könnyen azonosítható. Fényessége nagyban változik.',
+                visibilityCheck: (m, h) => (m >= 1 && m <= 3 || m === 12) && (h >= 20 || h <= 3)
+            },
+            {
+                id: 'summer_triangle', type: 'constellation', name: 'Nyári Háromszög',
+                svg: `<svg viewBox="0 0 100 80"><path d="M50,10 L85,70 L15,70 Z" class="const-line" stroke-width="0.5" /><circle class="star bright" cx="50" cy="10" r="3" /><circle class="star bright" cx="85" cy="70" r="2.5" /><circle class="star bright" cx="15" cy="70" r="2.8" /></svg>`,
+                details: 'A Vega (Lant), Deneb (Hattyú) és Altair (Sas) csillagok alkotják, nyáron magasan látható.',
+                visibilityCheck: (m, h) => (m >= 6 && m <= 9) && (h >= 21 || h <= 4)
+            },
+            {
+                id: 'orion', type: 'constellation', name: 'Orion',
+                svg: `<svg viewBox="0 0 100 80"><line class="const-line" x1="25" y1="15" x2="45" y2="40"/><line class="const-line" x1="75" y1="15" x2="55" y2="40"/><line class="const-line" x1="25" y1="65" x2="45" y2="40"/><line class="const-line" x1="75" y1="65" x2="55" y2="40"/><line class="const-line" x1="45" y1="40" x2="55" y2="40"/><circle class="star bright" cx="25" cy="15" r="3"></circle><circle class="star bright" cx="75" cy="15" r="2.5"></circle><circle class="star bright" cx="25" cy="65" r="2.8"></circle><circle class="star bright" cx="75" cy="65" r="3"></circle><circle class="star" cx="45" cy="40" r="2"></circle><circle class="star" cx="50" cy="40" r="2"></circle><circle class="star" cx="55" cy="40" r="2"></circle></svg>`,
+                details: 'A téli égbolt meghatározó csillagképe, övével és fényes csillagaival (Betelgeuse, Rigel).',
+                visibilityCheck: (m, h) => (m >= 11 || m <= 3) && (h >= 20 || h <= 5)
+            },
+             {
+                id: 'default_const', type: 'constellation', name: 'Nagy Göncöl',
+                svg: `<svg viewBox="0 0 100 80"><path d="M10,60 L30,45 L50,50 L70,40 L90,20" class="const-line" fill="none" /><circle cx="10" cy="60" r="2" class="star"></circle><circle cx="30" cy="45" r="2" class="star"></circle><circle cx="50" cy="50" r="2" class="star"></circle><circle cx="70" cy="40" r="2" class="star"></circle><circle cx="90" cy="20" r="2" class="star bright"></circle><circle cx="68" cy="42" r="2" class="star"></circle><circle cx="52" cy="52" r="2" class="star"></circle></svg>`,
+                details: 'Az egyik legismertebb csillagkép, segít megtalálni a Sarkcsillagot. Egész évben látható.',
+                visibilityCheck: (m, h) => true // Mindig látható, mint alapértelmezett
+            }
+        ];
+        // === VÁLTOZTATÁS VÉGE ===
 
         // Globális (modul szintű) változók a cache-elt DOM elemeknek
         let el_stationSubtitleText, el_timestampText,
@@ -1005,63 +1079,122 @@
                 astronomicalTwilightEnd: sunTimesToday.nightEnd,
             };
         }
-
-        function getNightSkyInfo(date, sunCalcData) {
-            const month = date.getMonth() + 1;
-            const hour = date.getHours();
-            let primaryObject = null;
-            let secondaryInfo = null;
-
-            if (month >= 5 && month <= 9) {
-                if (hour >= 22 || hour <= 1) {
-                    primaryObject = { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Késő este DDK-D felé keresd', details: 'Gyűrűi távcsővel láthatók. Sárgás fényű.' };
-                } else if (hour >= 1 && hour <= 4) {
-                    primaryObject = { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Hajnalban KDK-DK égbolton ragyog', details: 'Az égbolt egyik legfényesebb objektuma.'};
-                }
-                if (!primaryObject && (hour >= 21 && hour <= 3)) {
-                     secondaryInfo = { type: 'constellation', name: 'Nyári Háromszög', details: 'A Vega (Lant), Deneb (Hattyú) és Altair (Sas) csillagok alkotják, magasan látható.' };
-                }
-            } else if (month >= 10 && month <= 12) {
-                 if (hour >= 19 && hour <= 23) {
-                    primaryObject = { type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe', status: 'Este feltűnően látszik K-DK irányban', details: 'Fényes, uralkodó jelenség az esti égen.' };
-                } else if (hour >= 21 && hour <= 2) {
-                    if (!primaryObject) primaryObject = { type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring', status: 'Este, éjfél körül DNY felé keresd', details: 'Halványabb a Jupiternél.' };
-                }
-                 if (!primaryObject && (hour >= 20 || hour <= 2)) {
-                    secondaryInfo = { type: 'constellation', name: 'Pegazus és Androméda', details: 'Keressük a Pegazus nagy négyszögét és az Androméda-galaxist (fényszennyezésmentes helyen).' };
-                 }
-            } else if (month >= 1 && month <= 4) {
-                if (hour >= 19 && hour <= 22) {
-                } else if (hour >= 4 && hour <= 6) {
-                     primaryObject = { type: 'planet', name: 'Vénusz', icon: 'far fa-circle', status: 'Hajnalcsillagként ragyog K-DK-en', details: 'Rendkívül fényes, nem lehet eltéveszteni.'};
-                }
-                 if (!primaryObject && (hour >= 20 || hour <= 5)) {
-                    secondaryInfo = { type: 'constellation', name: 'Orion', details: 'A téli égbolt meghatározó csillagképe, az Orion-köddel és fényes csillagaival (Betelgeuse, Rigel).' };
-                 }
+        
+        // === VÁLTOZTATÁS KEZDETE: Éjszakai égbolt objektumok ciklikus frissítése ===
+        function updateNightSkyDisplay() {
+            if (!el_nightSkyInfoSection || el_nightSkyInfoSection.classList.contains('is-hidden')) {
+                stopNightSkyRotation();
+                return;
             }
 
-            if (!primaryObject) {
-                 primaryObject = {
-                    type: 'constellation',
-                    name: 'Hattyú (Cygnus)',
-                    svg: `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`,
-                    details: 'Az Északi Keresztként is ismert, nyáron magasan látható.'
-                };
+            const now = new Date();
+            const month = now.getMonth() + 1;
+            const hour = now.getHours();
+
+            let visibleObjects = NIGHT_SKY_OBJECTS.filter(obj => obj.visibilityCheck(month, hour));
+
+            // ISS hozzáadása a lehetséges objektumokhoz, ha van közelgő áthaladás
+            if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0) {
+                const nextPass = cachedData.issPasses[0];
+                if (nextPass.startUTC > now) {
+                    visibleObjects.unshift({
+                        id: 'iss', type: 'iss', passData: nextPass
+                    });
+                }
             }
 
+            if (visibleObjects.length === 0) { // Végső fallback
+                visibleObjects.push(NIGHT_SKY_OBJECTS.find(o => o.id === 'default_const'));
+            }
+
+            let objectToDisplay;
+            if (visibleObjects.length === 1) {
+                objectToDisplay = visibleObjects[0];
+            } else {
+                // Szűrjük ki az utoljára mutatottat, és válasszunk egy újat
+                const eligibleObjects = visibleObjects.filter(o => o.id !== lastDisplayedNightSkyObjectId);
+                objectToDisplay = eligibleObjects[Math.floor(Math.random() * eligibleObjects.length)];
+            }
+            lastDisplayedNightSkyObjectId = objectToDisplay.id;
+
+            // Panelek elrejtése, majd a megfelelő megjelenítése
+            if(el_issInfo) el_issInfo.classList.add('is-hidden');
+            if(el_planetInfo) el_planetInfo.classList.add('is-hidden');
+            if(el_constellationInfo) el_constellationInfo.classList.add('is-hidden');
+
+            const sunCalcData = cachedData.sunCalc;
+            let astroDarknessText = null;
             if (sunCalcData && sunCalcData.astronomicalTwilightStart && sunCalcData.astronomicalTwilightEnd) {
-                 const nowMs = date.getTime();
+                 const nowMs = now.getTime();
                  const astroNightStartObj = new Date(sunCalcData.astronomicalTwilightStart);
                  const astroNightEndObj = new Date(sunCalcData.astronomicalTwilightEnd);
-
                  if (!isNaN(astroNightStartObj.getTime()) && !isNaN(astroNightEndObj.getTime())) {
                     if (nowMs > astroNightStartObj.getTime() || nowMs < astroNightEndObj.getTime()) {
-                        primaryObject.astroDarkness = `Csill. sötét: ${formatTime(astroNightStartObj)} - ${formatTime(astroNightEndObj)}`;
+                        astroDarknessText = `Csill. sötét: ${formatTime(astroNightStartObj)} - ${formatTime(astroNightEndObj)}`;
                     }
                  }
             }
-            return { primary: primaryObject, secondary: secondaryInfo };
+
+            switch(objectToDisplay.type) {
+                case 'iss':
+                    if(el_issInfo) {
+                        const nextPass = objectToDisplay.passData;
+                        if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
+                        if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
+                        if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
+                        if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
+                        if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
+                        if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass}, Max: ${nextPass.maxAzCompass}, Vége: ${nextPass.endAzCompass}`;
+                        el_issInfo.classList.remove('is-hidden');
+                    }
+                    break;
+                case 'planet':
+                    if(el_planetInfo) {
+                        if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = objectToDisplay.icon;
+                        if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = objectToDisplay.name;
+                        if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = objectToDisplay.status;
+                        if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = objectToDisplay.details || '';
+
+                        if(astroDarknessText && el_nightSkyAstroDarknessPlanet && el_nightSkyAstroDarknessItemPlanet) {
+                            el_nightSkyAstroDarknessPlanet.textContent = astroDarknessText;
+                            el_nightSkyAstroDarknessItemPlanet.classList.remove('is-hidden');
+                        } else if (el_nightSkyAstroDarknessItemPlanet) {
+                             el_nightSkyAstroDarknessItemPlanet.classList.add('is-hidden');
+                        }
+                        el_planetInfo.classList.remove('is-hidden');
+                    }
+                    break;
+                case 'constellation':
+                     if(el_constellationInfo) {
+                        if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = objectToDisplay.svg || '';
+                        if(el_constellationName) el_constellationName.textContent = objectToDisplay.name;
+                        if(el_constellationDetails) el_constellationDetails.textContent = objectToDisplay.details || '';
+                        if(astroDarknessText && el_constellationAstroDarknessConst && el_constellationAstroDarknessItemConst) {
+                            el_constellationAstroDarknessConst.textContent = astroDarknessText;
+                            el_constellationAstroDarknessItemConst.classList.remove('is-hidden');
+                        } else if (el_constellationAstroDarknessItemConst) {
+                             el_constellationAstroDarknessItemConst.classList.add('is-hidden');
+                        }
+                        el_constellationInfo.classList.remove('is-hidden');
+                    }
+                    break;
+            }
         }
+
+        function startNightSkyRotation() {
+            if (nightSkyRotationInterval) return; // Már fut
+            updateNightSkyDisplay(); // Azonnali frissítés
+            nightSkyRotationInterval = setInterval(updateNightSkyDisplay, NIGHT_SKY_ROTATION_INTERVAL_MS);
+        }
+
+        function stopNightSkyRotation() {
+            if (nightSkyRotationInterval) {
+                clearInterval(nightSkyRotationInterval);
+                nightSkyRotationInterval = null;
+                lastDisplayedNightSkyObjectId = null;
+            }
+        }
+        // === VÁLTOZTATÁS VÉGE ===
 
         async function fetchIssPasses(apiKey, lat, lon, alt, noradId, days = 3, minElevation = 15) {
             if (!ENABLE_ISS_TRACKING || apiKey === 'YOUR_N2YO_API_KEY' || !apiKey) {
@@ -1268,7 +1401,6 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             
-            // === VÁLTOZTATÁS KEZDETE: A HTML struktúra módosítása a kérésnek megfelelően ===
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1360,8 +1492,7 @@
                 <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
             </div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
-            // === VÁLTOZTATÁS VÉGE ===
-
+            
             // DOM elemek cache-elése
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
             el_timestampText = document.getElementById('timestamp-text');
@@ -1564,7 +1695,6 @@
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
 
-            // === VÁLTOZTATÁS KEZDETE: Az új panelek frissítése ===
             if (el_tempTongueContainer && el_tempTongueValue) {
                 const temp = obs.temp;
                 el_tempTongueValue.textContent = formatValue(temp, '°C', 1, '--');
@@ -1580,11 +1710,11 @@
                 if (precip >= 15) rainColor = '#1D4ED8'; // Sötétkék
                 el_rainTongueContainer.style.backgroundColor = rainColor;
             }
-            // === VÁLTOZTATÁS VÉGE ===
 
             const isRainingNow = obs.precipRate > 0;
             const isDayTime = sunCalcData.sunAltitude > -0.83;
             const isMoonUp = sunCalcData.isUp;
+            const isNightWithoutMoon = !isDayTime && !isMoonUp;
 
             if (el_rainInfoSection) el_rainInfoSection.classList.add('is-hidden');
             if (el_sunInfoSection) el_sunInfoSection.classList.add('is-hidden');
@@ -1592,9 +1722,7 @@
             if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.add('is-hidden');
             if (el_mainRainVisual) el_mainRainVisual.classList.remove('is-raining-actively');
 
-            if (el_issInfo) el_issInfo.classList.add('is-hidden');
-            if (el_planetInfo) el_planetInfo.classList.add('is-hidden');
-            if (el_constellationInfo) el_constellationInfo.classList.add('is-hidden');
+            stopNightSkyRotation(); // Alapból leállítjuk, és csak akkor indítjuk, ha kell
 
             if (isRainingNow) {
                 if (el_rainInfoSection) el_rainInfoSection.classList.remove('is-hidden');
@@ -1616,8 +1744,9 @@
                     if (el_sunInfoSection) el_sunInfoSection.classList.remove('is-hidden');
                 } else if (isMoonUp) {
                     if (el_moonInfoSection) el_moonInfoSection.classList.remove('is-hidden');
-                } else {
+                } else { // Itt indul az éjszakai égbolt logika
                     if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.remove('is-hidden');
+                    startNightSkyRotation();
                 }
             }
 
@@ -1645,61 +1774,6 @@
                 el_moonPathIcon.style.opacity = (minOpacity + (sunCalcData.phaseValue / 100) * (maxOpacity - minOpacity)).toFixed(2);
             }
             if (el_moonPathRefreshBtn) el_moonPathRefreshBtn.onclick = () => { el_moonPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements); setTimeout(() => el_moonPathRefreshBtn.classList.remove('is-refreshing'), 800); };
-            
-            let nightContentRendered = false;
-            if (!isDayTime && !isMoonUp) {
-                if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0 && el_issInfo) {
-                    const nextPass = cachedData.issPasses[0];
-                    if (nextPass.startUTC > new Date()) {
-                        if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
-                        if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
-                        if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
-                        if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
-                        if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
-                        if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass} (${formatValue(nextPass.startEl, '°',0)}), Max: ${nextPass.maxAzCompass} (${formatValue(nextPass.maxEl, '°',0)}), Vége: ${nextPass.endAzCompass} (${formatValue(nextPass.endEl, '°',0)})`;
-                        el_issInfo.classList.remove('is-hidden');
-                        nightContentRendered = true;
-                    }
-                }
-                const nightSkyData = cachedData.nightSkyObject;
-                if (nightSkyData && nightSkyData.primary && !nightContentRendered) {
-                    const primary = nightSkyData.primary;
-                    if (primary.type === 'planet' && el_planetInfo) {
-                        el_planetInfo.classList.remove('is-hidden');
-                        if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = primary.icon;
-                        if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = primary.name;
-                        if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = primary.status;
-                        if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = primary.details || '';
-                        if(primary.astroDarkness && el_nightSkyAstroDarknessPlanet && el_nightSkyAstroDarknessItemPlanet) {
-                            el_nightSkyAstroDarknessPlanet.textContent = primary.astroDarkness;
-                            el_nightSkyAstroDarknessItemPlanet.classList.remove('is-hidden');
-                        } else if (el_nightSkyAstroDarknessItemPlanet) {
-                             el_nightSkyAstroDarknessItemPlanet.classList.add('is-hidden');
-                        }
-                        nightContentRendered = true;
-                    } else if (primary.type === 'constellation' && el_constellationInfo) {
-                        el_constellationInfo.classList.remove('is-hidden');
-                        if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = primary.svg || '';
-                        if(el_constellationName) el_constellationName.textContent = primary.name;
-                        if(el_constellationDetails) el_constellationDetails.textContent = primary.details || '';
-                        if(primary.astroDarkness && el_constellationAstroDarknessConst && el_constellationAstroDarknessItemConst) {
-                            el_constellationAstroDarknessConst.textContent = primary.astroDarkness;
-                            el_constellationAstroDarknessItemConst.classList.remove('is-hidden');
-                        } else if (el_constellationAstroDarknessItemConst) {
-                             el_constellationAstroDarknessItemConst.classList.add('is-hidden');
-                        }
-                        nightContentRendered = true;
-                    }
-                }
-                if (!nightContentRendered && el_constellationInfo && !el_nightSkyInfoSection.classList.contains('is-hidden')) {
-                     el_constellationInfo.classList.remove('is-hidden');
-                     if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = `<svg viewBox="0 0 100 80"><line class="const-line" x1="50" y1="5" x2="50" y2="75"/><line class="const-line" x1="20" y1="45" x2="80" y2="45"/><circle class="star bright" cx="50" cy="5" r="3"></circle><circle class="star" cx="50" cy="75" r="2.5"></circle><circle class="star" cx="20" cy="45" r="2"></circle><circle class="star" cx="80" cy="45" r="2"></circle><circle class="star" cx="50" cy="45" r="2.5"></circle></svg>`;
-                     if(el_constellationName) el_constellationName.textContent = "Hattyú (Cygnus)";
-                     if(el_constellationDetails) el_constellationDetails.textContent = "Keressük az Északi Keresztet!";
-                     if (el_constellationAstroDarknessItemConst) el_constellationAstroDarknessItemConst.classList.add('is-hidden');
-                }
-            }
-
 
             if(el_gridSunriseItem) el_gridSunriseItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
             if(el_gridSunsetItem) el_gridSunsetItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
@@ -1922,9 +1996,6 @@
                 console.error("SunCalc hiba:", e);
                 cachedData.sunCalc = null;
             }
-
-            cachedData.nightSkyObject = getNightSkyInfo(new Date(), cachedData.sunCalc);
-
 
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             const anyStationOnline = Object.values(STATIONS).some(s => s.isOnline);
