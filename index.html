@@ -480,16 +480,15 @@
         .hourly-secondary-details { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; font-size: 11px; color: var(--current-text-muted-color); flex-shrink: 0; }
         .hourly-detail-row { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.8; }
-        
-        /* === MÓDOSÍTOTT 8 NAPOS ELŐREJELZÉS (kód1-ből) === */
+
         .forecast-container { 
             width: 100%; 
-            max-width: 480px; /* Eredeti szélesség kód1-ből */
+            max-width: 800px; /* Megnövelt szélesség, hogy illeszkedjen */
             padding-bottom: 12px; 
             display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
+            grid-template-columns: repeat(2, 1fr); /* Alapértelmezett 2 oszlopos elrendezés */
             gap: 12px;
-            margin: 0 auto; /* Középre igazítás a szélesebb nézetben is */
+            margin: 0 auto;
         }
         .forecast-day-card { 
             display: flex; 
@@ -561,7 +560,6 @@
         .forecast-part-details p { 
             margin: 2px 0; 
         }
-        /* === MÓDOSÍTÁS VÉGE === */
 
         .detail-item, .info-bar-item { perspective: 600px; }
         .detail-item .value, .info-bar-item span { perspective: 400px; }
@@ -575,6 +573,95 @@
 
         #temperature-value.is-flipping, #main-heat-index-value.is-flipping, #main-wind-speed-value.is-flipping, #main-wind-gust-value.is-flipping, #dewpoint-value.is-flipping, #humidity-value.is-flipping, #pressure-value.is-flipping, #visibility-value.is-flipping, #solar-radiation-value.is-flipping, #uv-index-value.is-flipping {
             transform: rotateX(90deg);
+        }
+
+        /* === ÚJ RESZPONZÍV SZABÁLYOK === */
+        
+        /* Tablet és kisebb képernyők (pl. 768px alatt) */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            .weather-widget {
+                padding: 18px;
+            }
+
+            .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
+                width: 100%;
+                max-width: 320px; /* Megakadályozza a túlzott szétterülést */
+                text-align: center;
+            }
+             .sun-detail-item, .moon-detail-item, .rain-detail-item, .night-sky-detail-item {
+                justify-content: space-between;
+             }
+            #iss-info .night-sky-text-details {
+                 min-width: unset;
+                 flex-basis: auto;
+            }
+            .night-sky-detail-value.long-text {
+                text-align: right;
+                justify-content: flex-end;
+            }
+
+
+            .temperature-and-gauge-wrapper {
+                flex-direction: column;
+                gap: 20px;
+                align-items: center;
+            }
+            .weather-details-grid {
+                grid-template-columns: 1fr; /* 1 oszlopos rács mobilon */
+                row-gap: 8px;
+            }
+            .forecast-container {
+                grid-template-columns: 1fr; /* 1 oszlopos előrejelzés mobilon */
+            }
+        }
+
+        /* Kisebb mobil képernyők (pl. 480px alatt) */
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            .weather-widget {
+                padding: 15px;
+            }
+            .location-title {
+                font-size: 20px;
+            }
+            .station-subtitle {
+                font-size: 12px;
+            }
+            .header-container {
+                padding: 6px 18px;
+            }
+            
+            .temperature {
+                font-size: 50px; /* Kisebb betűméret a fő hőmérsékletnek */
+                padding: 8px 20px 8px 14px;
+            }
+            
+            .hourly-forecast-card {
+                flex-direction: column;
+                align-items: stretch; /* Igazítja az elemeket a teljes szélességre */
+                gap: 10px;
+            }
+            .hourly-primary-info {
+                justify-content: space-around; /* Jobb elosztás kis helyen */
+            }
+            .hourly-secondary-details {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px 12px;
+                border-top: 1px solid var(--current-container-border-color);
+                padding-top: 8px;
+            }
         }
     </style>
 </head>
@@ -1726,7 +1813,6 @@
 
         function formatForecastDate(isoDateString) { if (!isoDateString) return ''; try { const date = new Date(isoDateString); return `${(date.getMonth() + 1).toString().padStart(2, '0')}.${date.getDate().toString().padStart(2, '0')}`; } catch (e) { return ''; } }
 
-        // === MÓDOSÍTOTT RENDERFORECASTDATA FÜGGVÉNY (kód1-ből) ===
         function renderForecastData() {
             const forecastDays = cachedData.forecastDays;
             if (!forecastDays || forecastDays.length === 0) {
@@ -1776,7 +1862,6 @@
                 if (forecastTitleEl) forecastTitleEl.classList.remove('is-hidden');
             }
         }
-        // === MÓDOSÍTÁS VÉGE ===
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
