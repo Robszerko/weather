@@ -89,7 +89,7 @@
         .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 800px; box-sizing: border-box; margin: 0 auto; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); transition: all 0.6s ease-in-out; }
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
 
-        .widget-header { text-align: center; margin-bottom: 0; padding-bottom: 12px; }
+        .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
 
         .header-container { display: inline-block; background-color: rgba(0, 0, 0, 0.1); padding: 8px 24px; border-radius: 12px; margin-bottom: 4px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); transition: all 0.6s; }
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
@@ -128,7 +128,7 @@
         .info-tooltip-content li { margin-bottom: 2px; }
         .info-tooltip-content p:last-child { margin-bottom: 0; }
 
-        .station-status-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; text-align: center; padding: 10px 0; border-bottom: 1px solid var(--current-container-border-color); transition: border-color 0.6s; }
+        .station-status-container { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; text-align: center; padding: 10px 0; border-top: 1px solid var(--current-container-border-color); border-bottom: 1px solid var(--current-container-border-color); transition: border-color 0.6s; margin-top: 10px; }
         .station-selector { flex: 1; }
         .station-selector label { cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--current-text-color); font-weight: 500; transition: color 0.6s; }
         .station-selector input[type="radio"] { margin: 0 0 4px 0; accent-color: var(--current-icon-color); }
@@ -136,42 +136,39 @@
         .station-name { font-size: 12px; font-weight: 600; line-height: 1; }
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; }
         
-        /* === VÁLTOZTATÁS KEZDETE (Új elrendezés és stílusok) === */
-        .main-info-wrapper {
-            position: relative;
-            width: 100%;
-            margin-top: 12px;
+        /* === VÁLTOZTATÁS KEZDETE === */
+        .top-data-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            padding: 8px 0;
+            align-items: center;
         }
+        .glance-temp-container { justify-self: start; }
+        .glance-rain-container { justify-self: end; }
         
-        .overlay-temp-display {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 100;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 5px 12px;
-            display: flex;
-            align-items: baseline;
-        }
-        body[data-theme="day"] .overlay-temp-display {
-             background: rgba(255, 255, 255, 0.3);
-             border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .overlay-temp-display .temperature {
+        .temperature {
             font-size: 28px;
             font-weight: 700;
             line-height: 1;
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 6px 14px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: baseline;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            transition: all 0.6s;
+        }
+        
+        #temperature-value {
+            display: inline-block;
+            transform-style: preserve-3d;
             color: var(--current-text-color);
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
         }
         
-        .overlay-temp-display .temperature-symbol {
-            font-size: 0.6em;
+        .temperature-symbol {
+            font-size: 0.5em;
             font-weight: 600;
             vertical-align: super;
             margin-left: 3px;
@@ -179,36 +176,26 @@
             color: var(--current-text-color);
         }
 
-        .overlay-rain-display {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 100;
+        .discreet-rain-container {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 5px 10px;
-        }
-        body[data-theme="day"] .overlay-rain-display {
-             background: rgba(255, 255, 255, 0.3);
-             border-color: rgba(255, 255, 255, 0.5);
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 6px 12px;
+            border-radius: 10px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
         }
         
         #discreet-rain-gauge {
-            width: 30px;
-            height: 30px;
+            width: 28px;
+            height: 28px;
         }
 
         #discreet-rain-gauge .rain-gauge-bg {
             fill: none;
             stroke: var(--current-text-muted-color);
-            stroke-width: 4px;
-            stroke-opacity: 0.4;
+            stroke-width: 5px;
+            stroke-opacity: 0.5;
             transition: stroke 0.5s ease, stroke-opacity 0.5s ease;
         }
         #discreet-rain-gauge.has-rained-today .rain-gauge-bg {
@@ -216,28 +203,17 @@
             stroke-opacity: 0.8;
         }
         
-        .discreet-rain-text {
-            text-align: left;
-        }
-
-        #discreet-rain-visual-value {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--current-text-color);
-        }
-        #discreet-rain-visual-value-unit {
-            font-size: 0.7em;
-            opacity: 0.8;
-            margin-left: 2px;
-            font-weight: 500;
-        }
+        .discreet-rain-text { text-align: left; }
+        #discreet-rain-visual-value { font-size: 14px; font-weight: 700; color: var(--current-text-color); }
+        #discreet-rain-visual-value-unit { font-size: 0.7em; opacity: 0.8; margin-left: 2px; font-weight: 500; }
         
-        .widget-core-data { display: flex; flex-direction: column; align-items: stretch; gap: 12px; margin-bottom: 8px; }
+        .widget-core-data { display: flex; flex-direction: column; align-items: stretch; gap: 8px; margin-top: 10px; margin-bottom: 8px; }
         .additional-core-info { margin-top: 12px; width: 100%; }
         .secondary-info-bar { gap: 10px 18px; flex-wrap: wrap; }
+        .precipitation-forecast-info { margin: 12px auto 0 auto; }
         /* === VÁLTOZTATÁS VÉGE === */
 
-        .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; min-height: 110px; padding-top: 10px; }
+        .sun-info-section, .moon-info-section, .rain-info-section, .night-sky-info-section { flex: 1; display: flex; align-items: center; justify-content: center; gap: 20px; min-height: 110px; }
 
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details {
             text-align: left;
@@ -704,8 +680,13 @@
             }
             
             .temperature {
-                font-size: 48px;
-                padding: 10px 18px 10px 14px;
+                font-size: 24px;
+                padding: 6px 12px;
+            }
+
+            .overlay-rain-display {
+                gap: 4px;
+                padding: 5px 8px;
             }
             
             .hourly-forecast-card {
@@ -1279,15 +1260,37 @@
                 </div>
             </div>
             
-            <div class="top-glance-container">
+            <div class="station-status-container">
+                <div class="station-selector" id="honved-selector-container">
+                    <label for="station-select-honved">
+                        <input type="radio" name="station-select" id="station-select-honved" value="HONVED">
+                        <span class="station-name">${STATIONS.HONVED.displayName}</span>
+                    </label>
+                </div>
+                <div class="station-selector" id="nyiregyhazi-ut-selector-container">
+                     <label for="station-select-nyiregyhazi-ut">
+                        <input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">
+                        <span class="station-name">${STATIONS.NYIREGYHAZI_UT.displayName}</span>
+                    </label>
+                </div>
+                <div class="station-selector" id="kossuth-selector-container">
+                    <label for="station-select-kossuth">
+                        <input type="radio" name="station-select" id="station-select-kossuth" value="KOSSUTH">
+                        <span class="station-name">${STATIONS.KOSSUTH.displayName}</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="top-data-container">
                 <div class="glance-temp-container">
-                    <div class="overlay-temp-display">
-                        <span class="temperature" id="temperature-value">--</span>
+                    <div class="temperature" id="temperature-container">
+                        <span id="temperature-value">--</span>
                         <span class="temperature-symbol">°C</span>
                     </div>
                 </div>
+                <div id="honved-status-text" class="station-status-text"></div>
                 <div class="glance-rain-container">
-                    <div class="overlay-rain-display" title="Napi csapadékösszeg">
+                    <div class="discreet-rain-container" title="Napi csapadékösszeg">
                         <div id="discreet-rain-gauge" class="rain-visual">
                             <svg class="rain-gauge-svg" viewBox="0 0 100 100">
                                 <path class="rain-gauge-bg" d="${discreetRaindropPath}"></path>
@@ -1300,29 +1303,6 @@
                 </div>
             </div>
 
-            <div class="station-status-container">
-                <div class="station-selector" id="honved-selector-container">
-                    <label for="station-select-honved">
-                        <input type="radio" name="station-select" id="station-select-honved" value="HONVED">
-                        <span class="station-name">${STATIONS.HONVED.displayName}</span>
-                        <span id="honved-status-text" class="station-status-text"></span>
-                    </label>
-                </div>
-                <div class="station-selector" id="nyiregyhazi-ut-selector-container">
-                     <label for="station-select-nyiregyhazi-ut">
-                        <input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">
-                        <span class="station-name">${STATIONS.NYIREGYHAZI_UT.displayName}</span>
-                        <span id="nyiregyhazi-ut-status-text" class="station-status-text"></span>
-                    </label>
-                </div>
-                <div class="station-selector" id="kossuth-selector-container">
-                    <label for="station-select-kossuth">
-                        <input type="radio" name="station-select" id="station-select-kossuth" value="KOSSUTH">
-                        <span class="station-name">${STATIONS.KOSSUTH.displayName}</span>
-                        <span id="kossuth-status-text" class="station-status-text"></span>
-                    </label>
-                </div>
-            </div>
             <div class="main-info-wrapper">
                 <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
                 <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
