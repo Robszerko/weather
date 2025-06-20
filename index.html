@@ -136,26 +136,27 @@
         .station-name { font-size: 12px; font-weight: 600; line-height: 1; }
         .station-status-text { color: var(--current-text-muted-color); font-weight: 400; font-size: 10px; line-height: 1; transition: color 0.6s; }
         
-        /* === VÁLTOZTATÁS KEZDETE (Új elrendezés és stílus) === */
+        /* === VÁLTOZTATÁS KEZDETE (Visszaállított stílus és elrendezés) === */
         .temperature-and-gauge-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 30px;
+            gap: 25px;
             width: 100%;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
+            padding-top: 8px;
         }
         
         .temperature {
-            font-size: 60px;
+            font-size: 64px;
             font-weight: 700;
             line-height: 1;
-            background-color: rgba(0, 0, 0, 0.15);
-            padding: 12px 24px;
-            border-radius: 14px;
+            background-color: var(--current-temp-bg-color); /* Visszaállítva a színes háttér */
+            padding: 12px 26px 12px 18px;
+            border-radius: 12px 35px 35px 12px; /* Visszaállítva az egyedi forma */
             display: inline-flex;
             align-items: baseline;
-            box-shadow: inset 0 1px 4px rgba(0,0,0,0.25);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.15); /* Visszaállítva a külső árnyék */
             perspective: 800px;
             transition: all 0.6s;
         }
@@ -163,16 +164,23 @@
         #temperature-value {
             display: inline-block;
             transform-style: preserve-3d;
-            color: var(--current-text-color); /* Látható szín */
-            text-shadow: 0 1px 3px rgba(0,0,0,0.4); /* Árnyék a jobb olvashatóságért */
+            background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); /* Visszaállítva az áttetsző effekt */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
         }
         
         .temperature-symbol {
             font-size: 0.5em;
             vertical-align: super;
             margin-left: 4px;
-            opacity: 0.85;
-            color: var(--current-text-muted-color); /* Tompítottabb szín */
+            opacity: 0.95;
+            background: linear-gradient(180deg, var(--current-sky-color-top), var(--current-sky-color-bottom)); /* Visszaállítva az áttetsző effekt */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: none;
         }
         /* === VÁLTOZTATÁS VÉGE === */
 
@@ -180,7 +188,7 @@
         .temperature-section { order: 2; display: flex; flex-direction: column; align-items: center; width: 100%;}
         .rain-info-section, .sun-info-section, .moon-info-section, .night-sky-info-section { order: 1; width: 100%; max-width: 100%; }
         
-        .additional-core-info { margin-top: 0; width: 100%; } /* Margó eltávolítva */
+        .additional-core-info { margin-top: 0; width: 100%; }
         .secondary-info-bar {
             display: flex;
             flex-wrap: wrap;
@@ -722,8 +730,8 @@
                 gap: 15px;
             }
             .temperature {
-                font-size: 48px;
-                padding: 8px 18px;
+                font-size: 52px;
+                padding: 10px 20px 10px 16px;
             }
             
             .hourly-forecast-card {
@@ -1286,7 +1294,6 @@
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             const discreetRaindropPath = `M50,85 C25,85 20,55 50,15 C80,55 75,85 50,85`;
 
-            // === VÁLTOZTATÁS KEZDETE (HTML STRUKTÚRA) ===
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1427,9 +1434,8 @@
                 </div>
             </div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
-            // === VÁLTOZTATÁS VÉGE (HTML STRUKTÚRA) ===
 
-            // DOM elemek cache-elése a HTML felépítése UTÁN
+            // DOM elemek cache-elése
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
             el_timestampText = document.getElementById('timestamp-text');
             el_temperatureValue = document.getElementById('temperature-value');
@@ -1629,6 +1635,13 @@
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             updateAnimatedValue(el_timestampText, `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`);
             updateAnimatedValue(el_temperatureValue, formatValue(obs.temp, '', 1, '--'));
+            
+            // === VÁLTOZTATÁS KEZDETE (JS LOGIKA) ===
+            // Hőmérséklet-függő háttérszín beállítása
+            if (el_temperatureContainer) {
+                el_temperatureContainer.style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
+            }
+            // === VÁLTOZTATÁS VÉGE (JS LOGIKA) ===
             
             if (el_discreetRainGauge) {
                 el_discreetRainGauge.classList.toggle('has-rained-today', hasRainBeenDetectedToday);
