@@ -463,6 +463,9 @@
         @keyframes streak-animation { 0% { transform: translateY(-110%); opacity: 0; } 10% { transform: translateY(110%); opacity: 0.7; } 11% { opacity: 0; } 100% { opacity: 0; } }
         .rain-visual.is-raining-actively .rain-streak { display: block; animation: streak-animation 60s linear infinite; }
 
+        .night-sky-info-section { transition: opacity 0.4s ease-in-out; }
+        .night-sky-info-section.is-fading { opacity: 0; }
+
         .night-sky-visual { text-align: center; }
         .night-sky-visual i { font-size: 48px; margin-bottom: 8px; color: var(--current-text-muted-color); transition: color 0.6s; }
         #planet-info .night-sky-visual i.fa-ring { color: #E3D4A8; text-shadow: 0 0 10px #E3D4A8; }
@@ -470,6 +473,7 @@
         #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; } /* Jupiter */
         #planet-info .night-sky-visual i.fa-dot-circle { color: #a7b3c2; text-shadow: 0 0 12px #cdd8e6; } /* Galaxis */
         #planet-info .night-sky-visual i.fa-meteor { color: #facc15; text-shadow: 0 0 12px #fef08a; } /* Meteor */
+        #planet-info .night-sky-visual i.fa-star { color: #fefce8; text-shadow: 0 0 12px #fef9c3; } /* Star */
         #iss-info .night-sky-visual i.fa-satellite { color: #B0B0B0; text-shadow: 0 0 8px #FFFFFF;}
 
         #constellation-svg-container { width: 100px; height: 80px; margin: 0 auto; }
@@ -807,153 +811,123 @@
 
         // === VÁLTOZTATÁS KEZDETE: Éjszakai égbolt dinamikus vezérlése ===
         let nightSkyRotationInterval = null;
-        let lastDisplayedNightSkyObjectId = null;
+        let recentlyShownSkyObjects = new Map();
         const NIGHT_SKY_ROTATION_INTERVAL_MS = 60 * 1000; // 1 perc
+        const NIGHT_SKY_OBJECT_COOLDOWN_MS = 10 * 60 * 1000; // 10 perc
         const NIGHT_SKY_OBJECTS = [
             // === Bolygók ===
-            {
-                id: 'venus_evening', type: 'planet', name: 'Vénusz (Esthajnalcsillag)', icon: 'far fa-circle',
-                status: 'Napnyugta után a nyugati égen ragyog',
-                details: 'Rendkívül fényes, vakító jelenség. Fázisai távcsővel megfigyelhetők.',
-                visibilityCheck: (m, h) => (m >= 3 && m <= 7) && (h >= 18 && h <= 21)
-            },
-            {
-                id: 'venus_morning', type: 'planet', name: 'Vénusz (Hajnalcsillag)', icon: 'far fa-circle',
-                status: 'Napkelte előtt keleten tündököl',
-                details: 'Az égbolt legfényesebb bolygója a Hold után. Nem lehet eltéveszteni.',
-                visibilityCheck: (m, h) => (m >= 9 && m <= 12 || m <= 2) && (h >= 4 && h <= 7)
-            },
-            {
-                id: 'mars', type: 'planet', name: 'Mars', icon: 'fas fa-circle',
-                status: 'Vöröses fénypont, éjfél körül magasan',
-                details: 'A "vörös bolygó" jellegzetes színéről könnyen azonosítható. Fényessége nagyban változik.',
-                visibilityCheck: (m, h) => (m >= 1 && m <= 3 || m >= 11) && (h >= 20 || h <= 4)
-            },
-            {
-                id: 'jupiter', type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe',
-                status: 'Hajnalban a keleti égbolton uralkodik',
-                details: 'Fényes, uralkodó jelenség. Négy nagy holdja (Galilei-holdak) kézitávcsővel is látható.',
-                visibilityCheck: (m, h) => (m >= 4 && m <= 10) && (h >= 1 && h <= 5)
-            },
-            {
-                id: 'jupiter_winter', type: 'planet', name: 'Jupiter', icon: 'fas fa-globe-europe',
-                status: 'Este feltűnően fényes a déli égen',
-                details: 'Az őszi és téli esték királya. Nem lehet eltéveszteni.',
-                visibilityCheck: (m, h) => (m >= 10 || m <= 2) && (h >= 18 && h <= 24)
-            },
-            {
-                id: 'saturn', type: 'planet', name: 'Szaturnusz', icon: 'fas fa-ring',
-                status: 'Nyári estéken, a déli égbolton keresd',
-                details: 'Gyűrűi már egy kisebb távcsővel is gyönyörűen látszanak. Sárgás, nyugodt fényű.',
-                visibilityCheck: (m, h) => (m >= 6 && m <= 10) && (h >= 21 || h <= 3)
-            },
+            {id:'venus_evening',type:'planet',name:'Vénusz (Esthajnalcsillag)',icon:'far fa-circle',status:'Napnyugta után a nyugati égen ragyog',details:'Rendkívül fényes, vakító jelenség. Fázisai távcsővel megfigyelhetők.',visibilityCheck:(m,h)=>(m>=3&&m<=7)&&(h>=18&&h<=21)},
+            {id:'venus_morning',type:'planet',name:'Vénusz (Hajnalcsillag)',icon:'far fa-circle',status:'Napkelte előtt keleten tündököl',details:'Az égbolt legfényesebb bolygója a Hold után. Nem lehet eltéveszteni.',visibilityCheck:(m,h)=>(m>=9&&m<=12||m<=2)&&(h>=4&&h<=7)},
+            {id:'mars',type:'planet',name:'Mars',icon:'fas fa-circle',status:'Vöröses fénypont, éjfél körül magasan',details:'A "vörös bolygó" jellegzetes színéről könnyen azonosítható. Fényessége nagyban változik.',visibilityCheck:(m,h)=>(m>=1&&m<=4||m>=10)&&(h>=20||h<=4)},
+            {id:'jupiter',type:'planet',name:'Jupiter',icon:'fas fa-globe-europe',status:'Fényes, uralkodó jelenség az égen',details:'A Naprendszer legnagyobb bolygója. Négy nagy holdja (Galilei-holdak) kézitávcsővel is látható.',visibilityCheck:(m,h)=>(m>=5&&m<=12)&&(h>=20||h<=5)},
+            {id:'saturn',type:'planet',name:'Szaturnusz',icon:'fas fa-ring',status:'Nyári-őszi estéken, a déli égbolton',details:'Gyűrűi már egy kisebb távcsővel is gyönyörűen látszanak. Sárgás, nyugodt fényű.',visibilityCheck:(m,h)=>(m>=6&&m<=11)&&(h>=21||h<=3)},
+            {id:'uranus',type:'planet',name:'Uránusz (Távcsöves)',icon:'fas fa-circle',status:'Késő este, magasan az égen',details:'Távcsővel keresendő, halvány, kékeszöld fénypont. Szabad szemmel nem látható.',visibilityCheck:(m,h)=>(m>=9||m<=2)&&(h>=22||h<=4)},
+            {id:'neptune',type:'planet',name:'Neptunusz (Távcsöves)',icon:'fas fa-circle',status:'Este a déli égbolt felé',details:'Nagyobb távcsővel látható csak, mint egy halvány kék csillag. Megtalálása kihívást jelent.',visibilityCheck:(m,h)=>(m>=8&&m<=12)&&(h>=21||h<=2)},
+
+            // === Fényes Csillagok ===
+            {id:'sirius',type:'star',name:'Szíriusz',icon:'fas fa-star',status:'A téli égbolt legfényesebb csillaga',details:'A Nagy Kutya csillagkép főcsillaga. Feltűnően sziporkázik, gyakran változtatja színét a légköri turbulencia miatt.',visibilityCheck:(m,h)=>(m>=11||m<=4)&&(h>=20||h<=5)},
+            {id:'arcturus',type:'star',name:'Arcturus',icon:'fas fa-star',status:'Tavaszi-nyári esték narancsos csillaga',details:'Az északi égbolt legfényesebb csillaga. A Göncölszekér rúdjának ívét követve könnyen megtalálható.',visibilityCheck:(m,h)=>(m>=3&&m<=8)&&(h>=20||h<=2)},
+            {id:'vega',type:'star',name:'Vega',icon:'fas fa-star',status:'A nyári égbolt egyik csúcsa',details:'A Lant (Lyra) csillagkép legfényesebb, kékesfehér csillaga. A Nyári Háromszög egyik tagja.',visibilityCheck:(m,h)=>(m>=5&&m<=10)&&(h>=21||h<=4)},
+            {id:'capella',type:'star',name:'Capella',icon:'fas fa-star',status:'A téli égbolt fényes, sárgás csillaga',details:'Az Auriga (Szekeres) csillagkép főcsillaga. Valójában két, egymáshoz közeli csillagból álló rendszer.',visibilityCheck:(m,h)=>(m>=10||m<=4)&&(h>=19||h<=6)},
+            {id:'rigel',type:'star',name:'Rigel',icon:'fas fa-star',status:'Az Orion jobb alsó, kékesfehér csillaga',details:'Egy rendkívül forró és fényes szuperóriás, az égbolt egyik legfényesebb csillaga.',visibilityCheck:(m,h)=>(m>=11||m<=3)&&(h>=19||h<=5)},
+            {id:'procyon',type:'star',name:'Procyon',icon:'fas fa-star',status:'A téli égbolt egyik fényes pontja',details:'A Kis Kutya csillagkép legfényesebb tagja. A Szíriusszal és a Betelgeuse-zal alkotja a Téli Háromszöget.',visibilityCheck:(m,h)=>(m>=12||m<=4)&&(h>=20||h<=5)},
+            {id:'betelgeuse',type:'star',name:'Betelgeuse',icon:'fas fa-star',status:'Az Orion bal felső, vöröses csillaga',details:'Egy vörös szuperóriás, melynek fényessége változó. Életének vége felé jár, bármikor szupernóvává válhat.',visibilityCheck:(m,h)=>(m>=11||m<=3)&&(h>=19||h<=5)},
+            {id:'altair',type:'star',name:'Altair',icon:'fas fa-star',status:'A Sas csillagkép és a Nyári Háromszög tagja',details:'A Sas (Aquila) legfényesebb csillaga, a Naphoz viszonylag közeli, gyorsan forgó csillag.',visibilityCheck:(m,h)=>(m>=6&&m<=10)&&(h>=21||h<=3)},
+            {id:'deneb',type:'star',name:'Deneb',icon:'fas fa-star',status:'A Hattyú farka, a Nyári Háromszög tagja',details:'A Hattyú (Cygnus) csillagkép legfényesebb csillaga. Egy távoli, de rendkívül nagy fényerejű szuperóriás.',visibilityCheck:(m,h)=>(m>=6&&m<=11)&&(h>=20||h<=5)},
+            {id:'spica',type:'star',name:'Spica',icon:'fas fa-star',status:'A Szűz csillagkép kékesfehér csillaga',details:'A Szűz (Virgo) legfényesebb csillaga, egy szoros kettőscsillag, tavaszi éjszakákon látható.',visibilityCheck:(m,h)=>(m>=3&&m<=7)&&(h>=21||h<=2)},
+            {id:'antares',type:'star',name:'Antares',icon:'fas fa-star',status:'A Skorpió vörös szíve',details:'Hatalmas vörös szuperóriás, a Skorpió (Scorpius) csillagkép legfényesebb csillaga. Nevének jelentése "Mars-rivális".',visibilityCheck:(m,h)=>(m>=6&&m<=8)&&(h>=22||h<=1)},
+            {id:'polaris',type:'star',name:'Sarkcsillag (Polaris)',icon:'fas fa-star',status:'Az északi égi pólushoz közeli csillag',details:'A Kis Medve (Ursa Minor) rúdjának végén található. Látszólagos mozdulatlansága miatt segít az északi irány meghatározásában.',visibilityCheck:(m,h)=>true},
+            {id:'mizar_alcor',type:'star',name:'Mizar és Alcor',icon:'fas fa-star-half-alt',status:'A Göncölszekér rúdjának középső csillaga',details:'Híres vizuális kettőscsillag, a "Lovas és Kocsija". Jó szemmel, sötét égen a Mizar mellett egy halványabb csillag (Alcor) is látható.',visibilityCheck:(m,h)=>true},
+            {id:'pollux',type:'star',name:'Pollux',icon:'fas fa-star',status:'Az Ikrek fényesebb csillaga',details:'Narancssárga óriáscsillag, a Gemini csillagkép legfényesebb tagja. Tőle nem messze látható "testvére", a Castor.',visibilityCheck:(m,h)=>(m>=11||m<=4)&&(h>=20||h<=6)},
+            {id:'fomalhaut',type:'star',name:'Fomalhaut',icon:'fas fa-star',status:'Az őszi égbolt magányos csillaga',details:'A Déli Hal (Piscis Austrinus) legfényesebb csillaga. Az égbolt egy csillagszegény területén ragyog, ezért könnyű észrevenni.',visibilityCheck:(m,h)=>(m>=9&&m<=11)&&(h>=19||h<=24)},
+            {id:'rasalhague',type:'star',name:'Rasalhague',icon:'fas fa-star',status:'A Kígyótartó feje',details:'A Kígyótartó (Ophiuchus) csillagkép legfényesebb csillaga.',visibilityCheck:(m,h)=>(m>=6&&m<=9)&&(h>=22||h<=2)},
+            {id:'castor',type:'star',name:'Castor',icon:'fas fa-star-half-alt',status:'Az Ikrek halványabbik "feje"',details:'Bár halványabb mint a Pollux, a Castor egy lenyűgöző, többszörös csillagrendszer, mely távcsővel bontható.',visibilityCheck:(m,h)=>(m>=11||m<=4)&&(h>=20||h<=6)},
+            {id:'algol',type:'star',name:'Algol, a démoncsillag',icon:'fas fa-star',status:'A Perseus csillagképben',details:'Híres fedési változócsillag. Fényessége kb. 3 naponta láthatóan lecsökken, ahogy egy halványabb társa elhalad előtte.',visibilityCheck:(m,h)=>(m>=9||m<=3)&&(h>=19||h<=6)},
+            {id:'mira',type:'star',name:'Mira, a csodálatos',icon:'fas fa-star',status:'A Cet (Cetus) csillagképben',details:'Hosszú periódusú változócsillag, melynek fényessége több száz nap alatt változik a láthatatlanság és a könnyű észlelhetőség között.',visibilityCheck:(m,h)=>(m>=10||m<=1)&&(h>=20||h<=3)},
             
             // === Csillagképek (Constellations) ===
-            // Cirkumpoláris (egész évben látható)
-            {
-                id: 'ursa_major', type: 'constellation', name: 'Nagy Medve (Göncölszekér)',
-                svg: `<svg viewBox="0 0 100 80"><path class="const-line" d="M10,60 L30,45 L50,50 L70,40 L90,20" /><path class="const-line" d="M70,40 L68,58" /><circle cx="10" cy="60" r="2.2" class="star"></circle><circle cx="30" cy="45" r="2.2" class="star"></circle><circle cx="50" cy="50" r="2.2" class="star"></circle><circle cx="70" cy="40" r="2.5" class="star bright"></circle><circle cx="90" cy="20" r="2" class="star"></circle><circle cx="68" cy="58" r="2" class="star"></circle><circle cx="48" cy="25" r="1.8" class="star"></circle></svg>`,
-                details: 'A legismertebb csillagkép, segít megtalálni a Sarkcsillagot (Polaris). Rúdja az égi pólus felé mutat.',
-                visibilityCheck: (m, h) => true
-            },
-            {
-                id: 'ursa_minor', type: 'constellation', name: 'Kis Medve (Kis Göncöl)',
-                svg: `<svg viewBox="0 0 100 80"><g transform="translate(50 40) scale(0.8)"><path class="const-line" d="M0,0 L20,10 L35,25 L45,10 L65,20 L80,5" /><circle cx="0" cy="0" r="3.5" class="star bright"></circle><circle cx="20" cy="10" r="2"></circle><circle cx="35" cy="25" r="2"></circle><circle cx="45" cy="10" r="2.5"></circle><circle cx="65" cy="20" r="2.5"></circle><circle cx="80" cy="5" r="2"></circle></g></svg>`,
-                details: 'A Sarkcsillag (Polaris) a "rúdjának" végén található, mutatja az északi irányt.',
-                visibilityCheck: (m, h) => true
-            },
-            {
-                id: 'cassiopeia', type: 'constellation', name: 'Kassziopeia',
-                svg: `<svg viewBox="0 0 100 80"><path d="M15,50 L35,25 L55,45 L75,20 L95,40" class="const-line" fill="none"/><circle class="star" cx="15" cy="50" r="2.5"></circle><circle class="star" cx="35" cy="25" r="2.5"></circle><circle class="star bright" cx="55" cy="45" r="3"></circle><circle class="star" cx="75" cy="20" r="2.5"></circle><circle class="star" cx="95" cy="40" r="2"></circle></svg>`,
-                details: 'Jellegzetes "W" vagy "M" alakú csillagkép a Tejúton, a Nagy Göncöllel szemben helyezkedik el.',
-                visibilityCheck: (m, h) => true
-            },
-            // Tavaszi csillagképek
-            {
-                id: 'leo', type: 'constellation', name: 'Oroszlán (Leo)',
-                svg: `<svg viewBox="0 0 100 80"><path d="M80,20 Q60,20 50,35 T45,60 L20,65" class="const-line" fill="none"/><circle class="star bright" cx="80" cy="20" r="2.8"></circle><circle class="star" cx="65" cy="22" r="2"></circle><circle class="star" cx="50" cy="35" r="2.2"></circle><circle class="star" cx="48" cy="48" r="1.8"></circle><circle class="star" cx="45" cy="60" r="2.5"></circle><circle class="star" cx="20" cy="65" r="2.5"></circle></svg>`,
-                details: 'Tavaszi csillagkép, melynek feje egy sarlóra vagy fordított kérdőjelre hasonlít. Főcsillaga a Regulus.',
-                visibilityCheck: (m, h) => (m >= 2 && m <= 6) && (h >= 20 || h <= 3)
-            },
-             // Nyári csillagképek
-            {
-                id: 'summer_triangle', type: 'constellation', name: 'Nyári Háromszög',
-                svg: `<svg viewBox="0 0 100 80"><path d="M50,10 L85,70 L15,70 Z" class="const-line" stroke-width="0.5" fill="none"/><circle class="star bright" cx="50" cy="10" r="3" /><circle class="star bright" cx="85" cy="70" r="2.5" /><circle class="star bright" cx="15" cy="70" r="2.8" /></svg>`,
-                details: 'A Vega (Lant), Deneb (Hattyú) és Altair (Sas) csillagok alkotják, nyáron magasan látható a zenit közelében.',
-                visibilityCheck: (m, h) => (m >= 6 && m <= 10) && (h >= 21 || h <= 4)
-            },
-            {
-                id: 'scorpius', type: 'constellation', name: 'Skorpió (Scorpius)',
-                svg: `<svg viewBox="0 0 100 80"><path d="M80,20 L60,25 L50,40 Q45,65 60,70" class="const-line" fill="none"/><circle class="star bright" cx="80" cy="20" r="3"></circle><circle class="star" cx="60" cy="25" r="2.2"></circle><circle class="star" cx="50" cy="40" r="2.5"></circle><circle class="star" cx="46" cy="55" r="2"></circle><circle class="star" cx="60" cy="70" r="2.5"></circle></svg>`,
-                details: 'Fényes nyári csillagkép a déli horizont közelében. Főcsillaga a vörös Antares ("Mars riválisa").',
-                visibilityCheck: (m, h) => (m >= 6 && m <= 8) && (h >= 22 || h <= 1)
-            },
-            // Őszi csillagképek
-            {
-                id: 'pegasus', type: 'constellation', name: 'Pegazus (Nagy Négyszög)',
-                svg: `<svg viewBox="0 0 100 80"><path d="M30,20 L70,20 L80,60 L40,60 L30,20" class="const-line" /><circle cx="30" cy="20" r="2.5" class="star"></circle><circle cx="70"cy="20" r="2.5" class="star"></circle><circle cx="80" cy="60" r="2.5" class="star"></circle><circle cx="40" cy="60" r="2.5" class="star"></circle></svg>`,
-                details: 'Az őszi égbolt jellegzetes alakzata, a "Nagy Négyszög" könnyen felismerhető.',
-                visibilityCheck: (m, h) => (m >= 8 && m <= 12) && (h >= 19 || h <= 4)
-            },
-            // Téli csillagképek
-            {
-                id: 'orion', type: 'constellation', name: 'Orion',
-                svg: `<svg viewBox="0 0 100 80"><line class="const-line" x1="25" y1="15" x2="45" y2="40"/><line class="const-line" x1="75" y1="15" x2="55" y2="40"/><line class="const-line" x1="25" y1="65" x2="45" y2="40"/><line class="const-line" x1="75" y1="65" x2="55" y2="40"/><line class="const-line" x1="45" y1="40" x2="55" y2="40"/><circle class="star bright" cx="25" cy="15" r="3"></circle><circle class="star bright" cx="75" cy="15" r="2.5"></circle><circle class="star bright" cx="25" cy="65" r="2.8"></circle><circle class="star bright" cx="75" cy="65" r="3"></circle><circle class="star" cx="45" cy="40" r="2"></circle><circle class="star" cx="50" cy="40" r="2"></circle><circle class="star" cx="55" cy="40" r="2"></circle></svg>`,
-                details: 'A téli égbolt leglátványosabb csillagképe, övével és fényes csillagaival (Betelgeuse, Rigel).',
-                visibilityCheck: (m, h) => (m >= 11 || m <= 3) && (h >= 19 || h <= 5)
-            },
-            {
-                id: 'taurus', type: 'constellation', name: 'Bika (Taurus)',
-                svg: `<svg viewBox="0 0 100 80"><path d="M70,50 L50,40 L30,50" class="const-line" /><path d="M50,40 L10,20" class="const-line" /><path d="M50,40 L20,70" class="const-line" /><circle cx="50" cy="40" r="3" class="star bright"></circle><circle cx="70" cy="50" r="2"></circle><circle cx="30" cy="50" r="2"></circle><circle cx="10" cy="20" r="2"></circle><circle cx="20" cy="70" r="2"></circle></svg>`,
-                details: 'Téli csillagkép, melynek jellegzetes "V" alakja a Hyadok nyílthalmaz. Főcsillaga a vörös Aldebaran.',
-                visibilityCheck: (m, h) => (m >= 11 || m <= 3) && (h >= 19 || h <= 5)
-            },
-
-            // === Mélyég-objektumok (DSO) és Nyílthalmazok ===
-            {
-                id: 'pleiades', type: 'deep_sky_object', name: 'Fiastyúk (Pleiades)', icon: 'fas fa-braille',
-                status: 'Télen magasan az égen, a Bika mellett',
-                details: 'Egy gyönyörű nyílthalmaz (M45), "Hetes" néven is ismert. Szabad szemmel is látványos, apró "üst".',
-                visibilityCheck: (m, h) => (m >= 10 || m <= 4) && (h >= 19 || h <= 5)
-            },
-            {
-                id: 'andromeda', type: 'deep_sky_object', name: 'Androméda-galaxis', icon: 'far fa-dot-circle',
-                status: 'Ősszel este keresd a Kassziopeia alatt',
-                details: 'A hozzánk legközelebbi nagy galaxis (M31). Fényszennyezés-mentes égen halvány, elmosódott foltként látszik.',
-                visibilityCheck: (m, h) => (m >= 8 && m <= 1) && (h >= 20 || h <= 4)
-            },
-            {
-                id: 'orion_nebula', type: 'deep_sky_object', name: 'Orion-köd', icon: 'fas fa-atom',
-                status: 'Az Orion "kardjában" található',
-                details: 'Csillagbölcső, ahol új csillagok születnek (M42). Távcsővel és sötét égen már látványos.',
-                visibilityCheck: (m, h) => (m >= 11 || m <= 3) && (h >= 21 || h <= 5)
-            },
-            {
-                id: 'hercules_cluster', type: 'deep_sky_object', name: 'Herkules-gömbhalmaz', icon: 'fas fa-compact-disc',
-                status: 'Nyári éjszakákon, a Herkules csillagképben',
-                details: 'Az északi égbolt legfényesebb gömbhalmaza (M13). Távcsőben több százezer csillag alkotja.',
-                visibilityCheck: (m, h) => (m >= 5 && m <= 9) && (h >= 22 || h <= 3)
-            },
+            {id:'ursa_major',type:'constellation',name:'Nagy Medve (Göncölszekér)',svg:`<svg viewBox="0 0 100 80"><path class="const-line" d="M10,60 L30,45 L50,50 L70,40 L90,20" /><path class="const-line" d="M70,40 L68,58" /><circle cx="10" cy="60" r="2.2" class="star"></circle><circle cx="30" cy="45" r="2.2" class="star"></circle><circle cx="50" cy="50" r="2.2" class="star"></circle><circle cx="70" cy="40" r="2.5" class="star bright"></circle><circle cx="90" cy="20" r="2" class="star"></circle><circle cx="68" cy="58" r="2" class="star"></circle><circle cx="48" cy="25" r="1.8" class="star"></circle></svg>`,details:'A legismertebb csillagkép, segít megtalálni a Sarkcsillagot. Rúdja az égi pólus felé mutat.',visibilityCheck:(m,h)=>true},
+            {id:'ursa_minor',type:'constellation',name:'Kis Medve (Kis Göncöl)',svg:`<svg viewBox="0 0 100 80"><g transform="translate(50 40) scale(0.8)"><path class="const-line" d="M0,0 L20,10 L35,25 L45,10 L65,20 L80,5" /><circle cx="0" cy="0" r="3.5" class="star bright"></circle><circle cx="20" cy="10" r="2"></circle><circle cx="35" cy="25" r="2"></circle><circle cx="45" cy="10" r="2.5"></circle><circle cx="65" cy="20" r="2.5"></circle><circle cx="80" cy="5" r="2"></circle></g></svg>`,details:'A Sarkcsillag (Polaris) a "rúdjának" végén található, mutatja az északi irányt.',visibilityCheck:(m,h)=>true},
+            {id:'cassiopeia',type:'constellation',name:'Kassziopeia',svg:`<svg viewBox="0 0 100 80"><path d="M15,50 L35,25 L55,45 L75,20 L95,40" class="const-line" fill="none"/><circle class="star" cx="15" cy="50" r="2.5"></circle><circle cx="35" cy="25" r="2.5"></circle><circle class="star bright" cx="55" cy="45" r="3"></circle><circle cx="75" cy="20" r="2.5"></circle><circle cx="95" cy="40" r="2"></circle></svg>`,details:'Jellegzetes "W" vagy "M" alakú csillagkép a Tejúton, a Nagy Göncöllel szemben helyezkedik el.',visibilityCheck:(m,h)=>true},
+            {id:'orion',type:'constellation',name:'Orion',svg:`<svg viewBox="0 0 100 80"><line class="const-line" x1="25" y1="15" x2="45" y2="40"/><line class="const-line" x1="75" y1="15" x2="55" y2="40"/><line class="const-line" x1="25" y1="65" x2="45" y2="40"/><line class="const-line" x1="75" y1="65" x2="55" y2="40"/><line class="const-line" x1="45" y1="40" x2="55" y2="40"/><circle class="star bright" cx="25" cy="15" r="3"></circle><circle class="star bright" cx="75" cy="15" r="2.5"></circle><circle class="star bright" cx="25" cy="65" r="2.8"></circle><circle class="star bright" cx="75" cy="65" r="3"></circle><circle class="star" cx="45" cy="40" r="2"></circle><circle class="star" cx="50" cy="40" r="2"></circle><circle class="star" cx="55" cy="40" r="2"></circle></svg>`,details:'A téli égbolt leglátványosabb csillagképe, övével és fényes csillagaival (Betelgeuse, Rigel).',visibilityCheck:(m,h)=>(m>=10||m<=3)&&(h>=19||h<=5)},
+            {id:'cygnus',type:'constellation',name:'Hattyú (Cygnus)',svg:`<svg viewBox="0 0 100 80"><path d="M50,10 L50,70" class="const-line" /><path d="M20,40 L80,40" class="const-line" /><circle cx="50" cy="10" r="3" class="star bright"></circle><circle cx="50" cy="70" r="2.5" class="star"></circle><circle cx="20" cy="40" r="2"></circle><circle cx="80" cy="40" r="2"></circle><circle cx="50" cy="40" r="2.2"></circle></svg>`,details:'Más néven az Északi Kereszt. A Tejút síkjában fekszik, tele van csillaghalmazokkal. Főcsillaga a Deneb.',visibilityCheck:(m,h)=>(m>=6&&m<=11)&&(h>=20||h<=5)},
+            {id:'leo',type:'constellation',name:'Oroszlán (Leo)',svg:`<svg viewBox="0 0 100 80"><path d="M80,20 Q60,20 50,35 T45,60 L20,65" class="const-line" fill="none"/><circle class="star bright" cx="80" cy="20" r="2.8"></circle><circle class="star" cx="65" cy="22" r="2"></circle><circle class="star" cx="50" cy="35" r="2.2"></circle><circle class="star" cx="48" cy="48" r="1.8"></circle><circle class="star" cx="45" cy="60" r="2.5"></circle><circle class="star" cx="20" cy="65" r="2.5"></circle></svg>`,details:'Tavaszi csillagkép, feje egy sarlóra hasonlít. Főcsillaga a Regulus.',visibilityCheck:(m,h)=>(m>=2&&m<=6)&&(h>=20||h<=3)},
+            {id:'scorpius',type:'constellation',name:'Skorpió (Scorpius)',svg:`<svg viewBox="0 0 100 80"><path d="M80,20 L60,25 L50,40 Q45,65 60,70" class="const-line" fill="none"/><circle class="star bright" cx="80" cy="20" r="3"></circle><circle class="star" cx="60" cy="25" r="2.2"></circle><circle class="star" cx="50" cy="40" r="2.5"></circle><circle class="star" cx="46" cy="55" r="2"></circle><circle cx="60" cy="70" r="2.5"></circle></svg>`,details:'Fényes nyári csillagkép a déli horizont közelében. Főcsillaga a vörös Antares.',visibilityCheck:(m,h)=>(m>=5&&m<=8)&&(h>=22||h<=1)},
+            {id:'taurus',type:'constellation',name:'Bika (Taurus)',svg:`<svg viewBox="0 0 100 80"><path d="M70,50 L50,40 L30,50" class="const-line" /><path d="M50,40 L10,20" class="const-line" /><path d="M50,40 L20,70" class="const-line" /><circle cx="50" cy="40" r="3" class="star bright"></circle><circle cx="70" cy="50" r="2"></circle><circle cx="30" cy="50" r="2"></circle><circle cx="10" cy="20" r="2"></circle><circle cx="20" cy="70" r="2"></circle></svg>`,details:'Téli csillagkép, "V" alakja a Hyadok nyílthalmaz. Főcsillaga a vörös Aldebaran.',visibilityCheck:(m,h)=>(m>=10||m<=3)&&(h>=19||h<=5)},
+            {id:'pegasus',type:'constellation',name:'Pegazus',svg:`<svg viewBox="0 0 100 80"><path d="M30,20 L70,20 L80,60 L40,60 L30,20" class="const-line" /><circle cx="30" cy="20" r="2.5" class="star"></circle><circle cx="70"cy="20" r="2.5" class="star"></circle><circle cx="80" cy="60" r="2.5" class="star"></circle><circle cx="40" cy="60" r="2.5" class="star"></circle></svg>`,details:'Az őszi égbolt jellegzetes alakzata, a "Nagy Négyszög" könnyen felismerhető.',visibilityCheck:(m,h)=>(m>=8&&m<=1)&&(h>=19||h<=4)},
+            {id:'lyra',type:'constellation',name:'Lant (Lyra)',svg:`<svg viewBox="0 0 100 80"><path d="M50,10 L40,40 L60,40 Z" class="const-line" /><circle cx="50" cy="10" r="3.5" class="star bright"></circle><circle cx="40" cy="40" r="2"></circle><circle cx="60" cy="40" r="2"></circle><circle cx="35" cy="45" r="1.8"></circle><circle cx="65" cy="45" r="1.8"></circle></svg>`,details:'Kis, de jellegzetes, paralelogramma alakú nyári csillagkép. Legfényesebb csillaga a ragyogó Vega.',visibilityCheck:(m,h)=>(m>=5&&m<=10)&&(h>=21||h<=4)},
+            {id:'aquila',type:'constellation',name:'Sas (Aquila)',svg:`<svg viewBox="0 0 100 80"><path d="M50,40 L20,30 L80,30 Z M50,40 L50,70" class="const-line" /><circle cx="50" cy="40" r="3" class="star bright"></circle><circle cx="20" cy="30" r="2.2"></circle><circle cx="80" cy="30" r="2.2"></circle><circle cx="50" cy="70" r="2.5"></circle></svg>`,details:'A Tejútban fekvő nyári csillagkép, legfényesebb csillaga az Altair, a Nyári Háromszög harmadik tagja.',visibilityCheck:(m,h)=>(m>=6&&m<=10)&&(h>=21||h<=3)},
+            {id:'bootes',type:'constellation',name:'Ökörhajcsár (Bootes)',svg:`<svg viewBox="0 0 100 80"><path d="M50,10 L35,35 L65,35 Z M50,10 L50,70" class="const-line" /><circle cx="50" cy="10" r="3" class="star bright"></circle><circle cx="35" cy="35" r="2"></circle><circle cx="65" cy="35" r="2"></circle><circle cx="50" cy="70" r="2.5" class="star"></circle></svg>`,details:'Papírsárkányra emlékeztető tavaszi csillagkép. Főcsillaga a narancssárga Arcturus.',visibilityCheck:(m,h)=>(m>=3&&m<=7)&&(h>=20||h<=4)},
+            {id:'gemini',type:'constellation',name:'Ikrek (Gemini)',svg:`<svg viewBox="0 0 100 80"><path d="M40,20 L45,60 M60,20 L55,60" class="const-line" /><circle cx="40" cy="20" r="3" class="star bright"></circle><circle cx="60" cy="20" r="2.8" class="star bright"></circle><circle cx="45" cy="60" r="2.2"></circle><circle cx="55" cy="60" r="2.2"></circle></svg>`,details:'Jellegzetes téli csillagkép, két fő csillaga a Castor és a Pollux. A Geminidák meteorraj radiánsa.',visibilityCheck:(m,h)=>(m>=11||m<=4)&&(h>=20||h<=6)},
+            {id:'auriga',type:'constellation',name:'Szekeres (Auriga)',svg:`<svg viewBox="0 0 100 80"><path d="M50,10 L30,30 L35,60 L65,60 L70,30 Z" class="const-line" /><circle cx="50" cy="10" r="3.5" class="star bright"></circle><circle cx="30" cy="30" r="2.5"></circle><circle cx="70" cy="30" r="2.5"></circle><circle cx="35" cy="60" r="2.2"></circle><circle cx="65" cy="60" r="2.2"></circle></svg>`,details:'Ötszög alakú, fényes téli csillagkép. Főcsillaga a sárgás Capella.',visibilityCheck:(m,h)=>(m>=10||m<=4)&&(h>=19||h<=6)},
+            {id:'virgo',type:'constellation',name:'Szűz (Virgo)',svg: `<svg viewBox="0 0 100 80"><path d="M20,70 L40,50 L60,60 L80,20" class="const-line" /><circle cx="20" cy="70" r="2"></circle><circle cx="40" cy="50" r="2.2"></circle><circle cx="60" cy="60" r="2"></circle><circle cx="80" cy="20" r="3" class="star bright"></circle></svg>`,details:'Nagy kiterjedésű tavaszi, állatövi csillagkép. Főcsillaga a Spica.',visibilityCheck:(m,h)=>(m>=3&&m<=7)&&(h>=21||h<=2)},
+            {id:'hercules',type:'constellation',name:'Herkules',svg: `<svg viewBox="0 0 100 80"><path d="M30,20 L40,50 L60,50 L70,20 M40,50 L30,80 M60,50 L70,80" class="const-line" /><circle cx="30" cy="20" r="2"></circle><circle cx="70" cy="20" r="2"></circle><circle cx="30" cy="80" r="2.2"></circle><circle cx="70" cy="80" r="2.2"></circle></svg>`,details:'Nagy, de halványabb nyári csillagkép. Híres az M13 gömbhalmazról, mely a "trapéz" egyik oldalánál található.',visibilityCheck:(m,h)=>(m>=5&&m<=9)&&(h>=22||h<=3)},
+            {id:'ophiuchus',type:'constellation',name:'Kígyótartó (Ophiuchus)',svg: `<svg viewBox="0 0 100 80"><path d="M50,20 L30,40 L35,70 L65,70 L70,40 Z" class="const-line" /><circle cx="50" cy="20" r="2.5" class="star bright"></circle><circle cx="30" cy="40" r="2"></circle><circle cx="70" cy="40" r="2"></circle></svg>`,details:'A 13. állatövi csillagkép, melyen a Nap is áthalad. A Skorpió és a Nyilas között helyezkedik el.',visibilityCheck:(m,h)=>(m>=6&&m<=9)&&(h>=22||h<=2)},
+            {id:'sagittarius',type:'constellation',name:'Nyilas (Sagittarius)',svg: `<svg viewBox="0 0 100 80"><path d="M30,70 L50,50 L70,60 L65,40 L50,50" class="const-line" /><circle cx="30" cy="70" r="2"></circle><circle cx="50" cy="50" r="2.5" class="star"></circle><circle cx="70" cy="60" r="2"></circle><circle cx="65" cy="40" r="2.2"></circle></svg>`,details:'A Tejút centruma felé található, jellegzetes "Teáskanna" alakzatot formázó nyári csillagkép.',visibilityCheck:(m,h)=>(m>=6&&m<=9)&&(h>=22||h<=1)},
+            {id:'capricornus',type:'constellation',name:'Bak (Capricornus)',svg: `<svg viewBox="0 0 100 80"><path d="M70,20 L50,30 L20,60" class="const-line" /><circle cx="70" cy="20" r="2.5" class="star"></circle><circle cx="50" cy="30" r="2.2"></circle><circle cx="20" cy="60" r="2.5"></circle></svg>`,details:'Halvány csillagokból álló őszi, állatövi csillagkép.',visibilityCheck:(m,h)=>(m>=8&&m<=10)&&(h>=21||h<=1)},
+            {id:'aquarius',type:'constellation',name:'Vízöntő (Aquarius)',svg: `<svg viewBox="0 0 100 80"><path d="M50,30 L40,40 L55,50 L45,60" class="const-line" /><circle cx="50" cy="30" r="2.2"></circle><circle cx="40" cy="40" r="2"></circle><circle cx="55" cy="50" r="2.2"></circle><circle cx="45" cy="60" r="2"></circle></svg>`,details:'Nagy, de halvány őszi, állatövi csillagkép.',visibilityCheck:(m,h)=>(m>=8&&m<=11)&&(h>=20||h<=2)},
+            {id:'pisces',type:'constellation',name:'Halak (Pisces)',svg: `<svg viewBox="0 0 100 80"><path d="M30,60 L50,50 L80,20" class="const-line" /><circle cx="30" cy="60" r="2.2"></circle><circle cx="50" cy="50" r="2"></circle><circle cx="80" cy="20" r="2.2"></circle></svg>`,details:'Halvány őszi, állatövi csillagkép, a tavaszpont jelenleg itt található.',visibilityCheck:(m,h)=>(m>=9||m<=1)&&(h>=20||h<=3)},
+            {id:'aries',type:'constellation',name:'Kos (Aries)',svg: `<svg viewBox="0 0 100 80"><path d="M50,30 L60,40 L70,50" class="const-line" /><circle cx="50" cy="30" r="2.5" class="star"></circle><circle cx="60" cy="40" r="2.2"></circle><circle cx="70" cy="50" r="2.8" class="star bright"></circle></svg>`,details:'Kicsi, de jellegzetes őszi-téli, állatövi csillagkép.',visibilityCheck:(m,h)=>(m>=9||m<=2)&&(h>=20||h<=4)},
+            {id:'draco',type:'constellation',name:'Sárkány (Draco)',svg: `<svg viewBox="0 0 100 80"><path d="M20,20 L40,30 L60,25 L75,40 L70,60 L50,70" class="const-line" /><circle cx="20" cy="20" r="2.5"></circle></svg>`,details:'A Kis Medve köré tekeredő, hosszú, cirkumpoláris csillagkép.',visibilityCheck:(m,h)=>true},
+            {id:'delphinus',type:'constellation',name:'Delfin (Delphinus)',svg: `<svg viewBox="0 0 100 80"><path d="M50,40 L60,45 L55,55 L45,55 Z M55,55 L70,70" class="const-line" /><circle cx="50" cy="40" r="2.2"></circle></svg>`,details:'Apró, de jellegzetes, rombusz alakú nyári csillagkép a Sas mellett.',visibilityCheck:(m,h)=>(m>=7&&m<=10)&&(h>=21||h<=2)},
+            {id:'camelopardalis',type:'constellation',name:'Zsiráf (Camelopardalis)',svg: `<svg viewBox="0 0 100 80"><path d="M30,20 L50,50 L70,30" class="const-line"/><circle cx="30" cy="20" r="1.8"></circle></svg>`,details:'Nagy, de rendkívül halvány, csillagszegény cirkumpoláris csillagkép a Sarkcsillag közelében.',visibilityCheck:(m,h)=>true},
+            {id:'libra',type:'constellation',name:'Mérleg (Libra)',svg: `<svg viewBox="0 0 100 80"><path d="M20,50 L50,20 L80,50" class="const-line"/><circle cx="20" cy="50" r="2.2"></circle><circle cx="50" cy="20" r="2.5"></circle><circle cx="80" cy="50" r="2.2"></circle></svg>`,details:'Az egyetlen élettelen tárgyat ábrázoló állatövi csillagkép. Tavaszi-nyári éjszakákon látható.',visibilityCheck:(m,h)=>(m>=4&&m<=7)&&(h>=22||h<=1)},
+            {id:'canis_major',type:'constellation',name:'Nagy Kutya (Canis Major)',svg: `<svg viewBox="0 0 100 80"><path d="M50,20 L40,40 L50,60 L70,50" class="const-line"/><circle cx="50" cy="20" r="3.5" class="star bright"></circle></svg>`,details:'Feltűnő téli csillagkép, melynek legfényesebb csillaga a Szíriusz, az éjszakai égbolt legfényesebb csillaga.',visibilityCheck:(m,h)=>(m>=12||m<=3)&&(h>=20||h<=4)},
+            {id:'canis_minor',type:'constellation',name:'Kis Kutya (Canis Minor)',svg: `<svg viewBox="0 0 100 80"><path d="M40,40 L60,40" class="const-line"/><circle cx="40" cy="40" r="3" class="star bright"></circle><circle cx="60" cy="40" r="2"></circle></svg>`,details:'Kicsi, mindössze két fényesebb csillagból álló téli csillagkép. Főcsillaga a Procyon.',visibilityCheck:(m,h)=>(m>=12||m<=4)&&(h>=20||h<=5)},
+            {id:'cepheus',type:'constellation',name:'Cefeusz',svg: `<svg viewBox="0 0 100 80"><path d="M50,20 L30,40 L40,70 L60,70 L70,40 Z" class="const-line"/><circle cx="50" cy="20" r="2.5"></circle></svg>`,details:'A Kassziopeia melletti, házikóra emlékeztető cirkumpoláris csillagkép.',visibilityCheck:(m,h)=>true},
+            {id:'perseus',type:'constellation',name:'Perseus',svg: `<svg viewBox="0 0 100 80"><path d="M50,10 L40,40 L60,50 L50,80" class="const-line"/><circle cx="50" cy="10" r="2.8" class="star bright"></circle></svg>`,details:'Fényes őszi-téli csillagkép, mely a Kassziopeia és a Bika között található. Híres az Ikerhalmazról.',visibilityCheck:(m,h)=>(m>=9||m<=3)&&(h>=19||h<=6)},
+            {id:'andromeda',type:'constellation',name:'Androméda',svg: `<svg viewBox="0 0 100 80"><path d="M20,60 L50,40 L80,20" class="const-line"/><circle cx="20" cy="60" r="2.5" class="star bright"></circle></svg>`,details:'Hosszú, ívelt csillagkép a Pegazus mellett. Híres a benne található Androméda-galaxisról (M31).',visibilityCheck:(m,h)=>(m>=8&&m<=2)&&(h>=19||h<=4)},
             
+            // === Mélyég-objektumok (DSO) és Nyílthalmazok ===
+            {id:'pleiades',type:'deep_sky_object',name:'Fiastyúk (Pleiades)',icon:'fas fa-braille',status:'Télen magasan az égen, a Bika mellett',details:'Gyönyörű nyílthalmaz (M45), "Hetes" néven is ismert. Szabad szemmel is látványos, apró "üst".',visibilityCheck:(m,h)=>(m>=10||m<=4)&&(h>=19||h<=5)},
+            {id:'andromeda_galaxy',type:'deep_sky_object',name:'Androméda-galaxis',icon:'far fa-dot-circle',status:'Ősszel este keresd a Pegazus mellett',details:'A hozzánk legközelebbi nagy galaxis (M31). Sötét égen halvány, elmosódott foltként látszik szabad szemmel is.',visibilityCheck:(m,h)=>(m>=8&&m<=2)&&(h>=20||h<=4)},
+            {id:'orion_nebula',type:'deep_sky_object',name:'Orion-köd',icon:'fas fa-atom',status:'Az Orion "kardjában" található',details:'Csillagbölcső, ahol új csillagok születnek (M42). Távcsővel és sötét égen már látványos, halvány folt.',visibilityCheck:(m,h)=>(m>=11||m<=3)&&(h>=21||h<=5)},
+            {id:'hercules_cluster',type:'deep_sky_object',name:'Herkules-gömbhalmaz',icon:'fas fa-compact-disc',status:'Nyári éjszakákon, a Herkulesben',details:'Az északi égbolt legfényesebb gömbhalmaza (M13). Távcsőben több százezer csillag alkot egy apró, gömb alakú halmazt.',visibilityCheck:(m,h)=>(m>=5&&m<=9)&&(h>=22||h<=3)},
+            {id:'ring_nebula',type:'deep_sky_object',name:'Gyűrűs-köd (M57)',icon:'far fa-circle',status:'A Lant (Lyra) csillagképben',details:'Egy meghalt csillag maradványa, planetáris köd. Távcsővel egy apró, halvány füstkarikára hasonlít.',visibilityCheck:(m,h)=>(m>=6&&m<=9)&&(h>=22||h<=4)},
+            {id:'bode_galaxy',type:'deep_sky_object',name:'Bode- és Szivar-galaxis',icon:'fas fa-atom',status:'A Nagy Medve közelében',details:'Látványos galaxispár (M81/M82). Távcsővel egy látómezőben figyelhetők meg, egy spirál- és egy szabálytalan galaxis.',visibilityCheck:(m,h)=>true},
+            {id:'beehive_cluster',type:'deep_sky_object',name:'Méhkas-halmaz (Praesepe)',icon:'fas fa-braille',status:'A Rák (Cancer) csillagképben',details:'Nagy, fényes nyílthalmaz (M44). Sötét égen szabad szemmel is látható, mint egy elmosódott folt.',visibilityCheck:(m,h)=>(m>=1&&m<=5)&&(h>=21||h<=4)},
+            {id:'double_cluster',type:'deep_sky_object',name:'Ikerhalmaz (Perseus)',icon:'fas fa-braille',status:'A Perseus és Kassziopeia között',details:'Látványos kettős nyílthalmaz (NGC 869/884). Már kézitávcsővel is gyönyörű, két sűrű csillagcsoportot mutat.',visibilityCheck:(m,h)=>(m>=9||m<=3)&&(h>=19||h<=6)},
+            {id:'wild_duck_cluster',type:'deep_sky_object',name:'Vadkacsa-halmaz (M11)',icon:'fas fa-braille',status:'A Pajzs (Scutum) csillagképben',details:'A Tejút egyik leggazdagabb nyílthalmaza. Távcsőben egy repülő vadkacsacsapatra emlékeztet.',visibilityCheck:(m,h)=>(m>=7&&m<=9)&&(h>=22||h<=2)},
+            {id:'dumbbell_nebula',type:'deep_sky_object',name:'Súlyzó-köd (M27)',icon:'fas fa-atom',status:'A Kis Rókában (Vulpecula), a Hattyú közelében',details:'Az egyik legfényesebb planetáris köd. Kézitávcsővel is megpillantható, mint egy halvány folt.',visibilityCheck:(m,h)=>(m>=7&&m<=10)&&(h>=21||h<=3)},
+            {id:'m2_cluster',type:'deep_sky_object',name:'M2 gömbhalmaz',icon:'fas fa-compact-disc',status:'A Vízöntő (Aquarius) csillagképben',details:'Fényes, sűrű gömbhalmaz, melyet már kisebb távcsővel is meg lehet figyelni.',visibilityCheck:(m,h)=>(m>=8&&m<=11)&&(h>=21||h<=2)},
+            {id:'m3_cluster',type:'deep_sky_object',name:'M3 gömbhalmaz',icon:'fas fa-compact-disc',status:'A Vadászebek (Canes Venatici) csillagképben',details:'Az egyik legnagyobb és legfényesebb gömbhalmaz, több mint félmillió csillag otthona. Tavasszal látható.',visibilityCheck:(m,h)=>(m>=3&&m<=6)&&(h>=21||h<=3)},
+            {id:'m4_cluster',type:'deep_sky_object',name:'M4 gömbhalmaz',icon:'fas fa-compact-disc',status:'A Skorpió csillagképben, az Antares mellett',details:'A Naphoz egyik legközelebbi gömbhalmaz. Laza szerkezete miatt távcsőben könnyen csillagokra bontható.',visibilityCheck:(m,h)=>(m>=5&&m<=8)&&(h>=22||h<=1)},
+            {id:'m5_cluster',type:'deep_sky_object',name:'M5 gömbhalmaz',icon:'fas fa-compact-disc',status:'A Kígyó (Serpens) csillagképben',details:'Látványos, nagy gömbhalmaz, melyet a Herkules és a Kígyótartó között találunk meg nyáron.',visibilityCheck:(m,h)=>(m>=5&&m<=8)&&(h>=22||h<=2)},
+            {id:'m6_butterfly',type:'deep_sky_object',name:'Pillangó-halmaz (M6)',icon:'fas fa-braille',status:'A Skorpió "fullánkja" felett',details:'Fényes nyílthalmaz, melynek csillagai egy pillangó szárnyaira emlékeztetnek. Kézitávcsővel is látványos.',visibilityCheck:(m,h)=>(m>=6&&m<=8)&&(h>=22||h<=1)},
+            {id:'m7_ptolemy',type:'deep_sky_object',name:'Ptolemaiosz-halmaz (M7)',icon:'fas fa-braille',status:'A Skorpió "fullánkja" alatt',details:'Az égbolt egyik legdélebbi Messier-objektuma, de sötét nyári égen szabad szemmel is észrevehető folt.',visibilityCheck:(m,h)=>(m>=6&&m<=8)&&(h>=22||h<=1)},
+            {id:'m8_lagoon',type:'deep_sky_object',name:'Lagúna-köd (M8)',icon:'fas fa-atom',status:'A Nyilas csillagképben',details:'Fényes csillagközi köd és nyílthalmaz. Sötét égen kézitávcsővel már látható, mint egy fényesebb folt a Tejútban.',visibilityCheck:(m,h)=>(m>=6&&m<=9)&&(h>=22||h<=1)},
+            {id:'m15_cluster',type:'deep_sky_object',name:'M15 gömbhalmaz',icon:'fas fa-compact-disc',status:'A Pegazus csillagképben',details:'Egy másik látványos gömbhalmaz, melynek magja rendkívül sűrű.',visibilityCheck:(m,h)=>(m>=8&&m<=1)&&(h>=20||h<=4)},
+            {id:'m17_omega',type:'deep_sky_object',name:'Omega-köd (M17)',icon:'fas fa-atom',status:'A Nyilas csillagképben',details:'Hattyú-ködként is ismert, fényes csillagkeletkezési régió. Kézitávcsővel is megfigyelhető.',visibilityCheck:(m,h)=>(m>=7&&m<=9)&&(h>=22||h<=1)},
+            {id:'m22_cluster',type:'deep_sky_object',name:'M22 gömbhalmaz',icon:'fas fa-compact-disc',status:'A Nyilas csillagképben',details:'Az egyik legfényesebb, szabad szemmel is sejthető gömbhalmaz, látványos célpont kézitávcsőben és távcsőben egyaránt.',visibilityCheck:(m,h)=>(m>=7&&m<=9)&&(h>=22||h<=1)},
+            {id:'m35_cluster',type:'deep_sky_object',name:'M35 nyílthalmaz',icon:'fas fa-braille',status:'Az Ikrek (Gemini) csillagképben',details:'Nagy és fényes nyílthalmaz az Ikrek "lábánál", melyet kisebb távcsővel már csillagokra lehet bontani.',visibilityCheck:(m,h)=>(m>=11||m<=3)&&(h>=20||h<=5)},
+            {id:'m37_cluster',type:'deep_sky_object',name:'M37 nyílthalmaz',icon:'fas fa-braille',status:'A Szekeres (Auriga) csillagképben',details:'Az Auriga leggazdagabb és legfényesebb nyílthalmaza, mely több száz csillagot tartalmaz.',visibilityCheck:(m,h)=>(m>=11||m<=3)&&(h>=20||h<=5)},
+            {id:'m51_whirlpool',type:'deep_sky_object',name:'Örvény-galaxis (M51)',icon:'fas fa-atom',status:'A Nagy Medve "rúdjának" végénél',details:'Klasszikus, szemből látszó spirálgalaxis, mely egy kisebb kísérőgalaxissal áll kölcsönhatásban. Távcsöves célpont.',visibilityCheck:(m,h)=>true},
+            {id:'m64_blackeye',type:'deep_sky_object',name:'Feketeszem-galaxis (M64)',icon:'far fa-dot-circle',status:'A Bereniké Haja csillagképben',details:'Nevét a magja előtti sötét porsávról kapta. Távcsővel, tavaszi éjszakákon kereshető.',visibilityCheck:(m,h)=>(m>=3&&m<=6)&&(h>=21||h<=3)},
+            {id:'m101_pinwheel',type:'deep_sky_object',name:'Szélkerék-galaxis (M101)',icon:'far fa-dot-circle',status:'A Nagy Medve "rúdjánál"',details:'Nagy, szemből látszó, de halvány felszíni fényességű spirálgalaxis. Sötét égbolt és nagyobb távcső szükséges hozzá.',visibilityCheck:(m,h)=>true},
+            {id:'sombrero_galaxy',type:'deep_sky_object',name:'Sombrero-galaxis (M104)',icon:'far fa-dot-circle',status:'Tavasszal, a Holló és Szűz között',details:'Éléről látszó spirálgalaxis, melynek sötét porsávja egy sombreróra emlékeztet. Nagyobb távcsövet igényel.',visibilityCheck:(m,h)=>(m>=3&&m<=5)&&(h>=23||h<=2)},
+            {id:'ngc7000_nebula',type:'deep_sky_object',name:'Észak-Amerika-köd',icon:'fas fa-atom',status:'A Hattyú csillagképben, a Deneb mellett',details:'Kiterjedt, diffúz köd, melynek alakja Észak-Amerika kontinensére emlékeztet. Fényképeken látványos, vizuálisan nehéz.',visibilityCheck:(m,h)=>(m>=7&&m<=10)&&(h>=21||h<=4)},
+            {id:'ngc6992_veil',type:'deep_sky_object',name:'Fátyol-köd',icon:'fas fa-atom',status:'A Hattyú csillagképben',details:'Egy felrobbant csillag (szupernóva) maradványa. Kiterjedt, halvány, szálas szerkezetű köd, melynek megfigyeléséhez speciális szűrő ajánlott.',visibilityCheck:(m,h)=>(m>=7&&m<=10)&&(h>=21||h<=4)},
+
             // === Meteorrajok ===
-            {
-                id: 'perseids', type: 'meteor_shower', name: 'Perseidák meteorraj', icon: 'fas fa-meteor',
-                status: 'Maximuma augusztus 12-13 körül várható',
-                details: '"Szent Lőrinc könnyeiként" is ismert. A Perseus csillagképből sugárzódnak szét a meteorok.',
-                visibilityCheck: (m, h) => m === 8 && (h >= 22 || h <= 4)
-            },
-            {
-                id: 'geminids', type: 'meteor_shower', name: 'Geminidák meteorraj', icon: 'fas fa-meteor',
-                status: 'Maximuma december 13-14 körül esedékes',
-                details: 'Az év egyik leglátványosabb, legmegbízhatóbb meteorraja. Az Ikrek (Gemini) csillagkép a radiánsa.',
-                visibilityCheck: (m, h) => m === 12 && (h >= 20 || h <= 5)
-            },
-            {
-                id: 'quadrantids', type: 'meteor_shower', name: 'Quadrantidák meteorraj', icon: 'fas fa-meteor',
-                status: 'Maximuma január 3-4 körül van',
-                details: 'Éles, de rövid maximummal rendelkező meteorraj a tél közepén.',
-                visibilityCheck: (m, h) => m === 1 && (h >= 23 || h <= 5)
-            }
+            {id:'quadrantids',type:'meteor_shower',name:'Quadrantidák meteorraj',icon:'fas fa-meteor',status:'Maximuma január 3-4 körül van',details:'Éles, de rövid maximummal rendelkező, aktív meteorraj a tél közepén.',visibilityCheck:(m,h)=>m===1&&(h>=23||h<=5)},
+            {id:'lyrids',type:'meteor_shower',name:'Liridák meteorraj',icon:'fas fa-meteor',status:'Maximuma április 22-23 körül várható',details:'Közepes aktivitású tavaszi meteorraj, melynek radiánsa a Lant (Lyra) csillagképben van.',visibilityCheck:(m,h)=>m===4&&(h>=23||h<=4)},
+            {id:'perseids',type:'meteor_shower',name:'Perseidák meteorraj',icon:'fas fa-meteor',status:'Maximuma augusztus 12-13 körül várható',details:'"Szent Lőrinc könnyeiként" is ismert. Az év egyik leglátványosabb, legnépszerűbb meteorraja.',visibilityCheck:(m,h)=>m===8&&(h>=22||h<=4)},
+            {id:'orionids',type:'meteor_shower',name:'Orionidák meteorraj',icon:'fas fa-meteor',status:'Maximuma október 21-22 körül van',details:'A Halley-üstökös törmelékéből származó, gyors meteorokat produkáló őszi raj.',visibilityCheck:(m,h)=>m===10&&(h>=23||h<=5)},
+            {id:'leonids',type:'meteor_shower',name:'Leonidák meteorraj',icon:'fas fa-meteor',status:'Maximuma november 17-18 körül van',details:'Híres a 33 évenkénti kitöréseiről, de normál években is produkál fényes, gyors meteorokat.',visibilityCheck:(m,h)=>m===11&&(h>=23||h<=6)},
+            {id:'geminids',type:'meteor_shower',name:'Geminidák meteorraj',icon:'fas fa-meteor',status:'Maximuma december 13-14 körül esedékes',details:'Az év egyik legaktívabb és legmegbízhatóbb meteorraja. Az Ikrek (Gemini) csillagkép a radiánsa.',visibilityCheck:(m,h)=>m===12&&(h>=20||h<=5)},
+
+            // === Általános érdekességek ===
+            {id:'milky_way_summer',type:'info',name:'A Tejút nyáron',icon:'fas fa-water',status:'Nyári estéken déli irányban a leglátványosabb',details:'A saját galaxisunk síkja. Nyáron a galaktikus centrum felé látunk, ezért a Tejút itt a legfényesebb és legsűrűbb.',visibilityCheck:(m,h)=>(m>=6&&m<=9)&&(h>=22||h<=3)},
+            {id:'milky_way_winter',type:'info',name:'A Tejút télen',icon:'fas fa-water',status:'Téli estéken magasan az égen ível át',details:'Télen a galaxisunk külső tartományai felé látunk, ezért a Tejút halványabb és kevésbé sűrű, mint nyáron.',visibilityCheck:(m,h)=>(m>=11||m<=2)&&(h>=20||h<=4)},
+            {id:'light_pollution',type:'info',name:'Fényszennyezés',icon:'fas fa-lightbulb',status:'A mesterséges fények csökkentik a láthatóságot',details:'A városi fények elnyomják a halványabb csillagok és a Tejút fényét. A legjobb észlelőhelyek a lakott területektől távol vannak.',visibilityCheck:(m,h)=>true},
+            {id:'zenith',type:'info',name:'Zenit',icon:'fas fa-arrows-alt-v',status:'A pont pontosa a fejed felett',details:'A zenit az éggömb legmagasabb pontja, 90°-os magasságban. Az itt áthaladó objektumokat a legkevésbé torzítja a légkör.',visibilityCheck:(m,h)=>true},
+            {id:'summer_triangle',type:'constellation',name:'Nyári Háromszög',svg:`<svg viewBox="0 0 100 80"><path d="M50,10 L85,70 L15,70 Z" class="const-line" stroke-width="0.5" fill="none"/><circle class="star bright" cx="50" cy="10" r="3" /><circle class="star bright" cx="85" cy="70" r="2.5" /><circle class="star bright" cx="15" cy="70" r="2.8" /></svg>`,details:'Nem hivatalos csillagkép, hanem egy aszterizmus. A Vega, Deneb és Altair csillagok alkotják, nyáron magasan látható.',visibilityCheck:(m,h)=>(m>=6&&m<=10)&&(h>=21||h<=4)},
+            {id:'winter_hexagon',type:'constellation',name:'Téli Hatszög',svg:`<svg viewBox="0 0 100 80"><path d="M50,10 L80,30 L70,70 L30,70 L20,30 Z" class="const-line"/><circle class="star bright" cx="50" cy="10" r="3"/><circle class="star bright" cx="80" cy="30" r="2.8"/><circle class="star bright" cx="70" cy="70" r="3.2"/><circle class="star bright" cx="30" cy="70" r="2.5"/><circle class="star bright" cx="20" cy="30" r="2.8"/><circle class="star bright" cx="45" cy="45" r="3.1"/></svg>`,details:'Egy aszterizmus, melyet a téli égbolt legfényesebb csillagai alkotnak: Rigel, Aldebaran, Capella, Pollux, Procyon és Szíriusz.',visibilityCheck:(m,h)=>(m>=11||m<=3)&&(h>=20||h<=5)},
+            {id:'albireo',type:'star',name:'Albireo - A legszebb kettőscsillag',icon:'fas fa-star-half-alt',status:'A Hattyú fejénél található',details:'Távcsővel nézve egy aranysárga és egy kék csillagra bomlik. Látványos kontrasztja miatt az egyik legkedveltebb távcsöves célpont.',visibilityCheck:(m,h)=>(m>=6&&m<=11)&&(h>=21||h<=4)},
+            {id:'magnitude',type:'info',name:'Magnitúdó (fényesség)',icon:'fas fa-adjust',status:'Minél kisebb a szám, annál fényesebb',details:'A csillagászati fényességet magnitúdóban mérik. A negatív értékek a legfényesebbek (pl. Vénusz: -4.5), a halvány csillagok értéke 6 feletti.',visibilityCheck:(m,h)=>true},
+            {id:'ecliptic',type:'info',name:'Ekliptika',icon:'fas fa-globe',status:'A bolygók és a Nap útja az égen',details:'Az ekliptika a Naprendszer síkja. A bolygók, a Hold és a Nap mindig e sáv mentén mozognak az állatövi csillagképeken keresztül.',visibilityCheck:(m,h)=>true},
+            {id:'circumpolar',type:'info',name:'Cirkumpoláris csillagképek',icon:'fas fa-sync-alt',status:'Soha nem nyugszanak le',details:'Ezek a csillagképek (pl. Göncölszekér, Kassziopeia) olyan közel vannak az Északi Égi Pólushoz, hogy a mi szélességünkről nézve soha nem kerülnek a horizont alá.',visibilityCheck:(m,h)=>true},
+            {id:'light_year',type:'info',name:'Fényév',icon:'fas fa-ruler-horizontal',status:'Csillagászati távolság mértékegysége',details:'Egy fényév az a távolság, amit a fény egy év alatt megtesz, ez kb. 9.5 billió kilométer. A legközelebbi csillag is több mint 4 fényévre van.',visibilityCheck:(m,h)=>true}
         ];
         // === VÁLTOZTATÁS VÉGE ===
 
@@ -1099,7 +1073,10 @@
 
         async function fetchAdvancedSunCalcData(lat, lon) {
             const now = new Date();
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+            
             const sunTimesToday = SunCalc.getTimes(now, lat, lon);
+            const sunTimesYesterday = SunCalc.getTimes(yesterday, lat, lon);
 
             const sunriseDate = sunTimesToday.sunrise;
             const sunsetDate = sunTimesToday.sunset;
@@ -1170,122 +1147,128 @@
 
                 moonAltitude: moonPos.altitude * 180 / Math.PI, moonTrend: moonTrend, moonStatus: moonStatus,
                 phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonDistance: moonPos.distance,
-                astronomicalTwilightStart: sunTimesToday.night,
-                astronomicalTwilightEnd: sunTimesToday.nightEnd,
+                astronomicalTwilightStart: sunTimesToday.nightEnd,
+                astronomicalTwilightEnd: sunTimesYesterday.night,
             };
         }
         
         function updateNightSkyDisplay() {
-            if (!el_nightSkyInfoSection || el_nightSkyInfoSection.classList.contains('is-hidden')) {
-                stopNightSkyRotation();
-                return;
-            }
-
-            const now = new Date();
-            const month = now.getMonth() + 1;
-            const hour = now.getHours();
-
-            let visibleObjects = NIGHT_SKY_OBJECTS.filter(obj => obj.visibilityCheck(month, hour));
-
-            if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0) {
-                const nextPass = cachedData.issPasses[0];
-                if (nextPass.startUTC > now) {
-                    visibleObjects.unshift({
-                        id: 'iss', type: 'iss', passData: nextPass
-                    });
+            if (!el_nightSkyInfoSection) return;
+            
+            const now = Date.now();
+            for (const [id, timestamp] of recentlyShownSkyObjects.entries()) {
+                if (now - timestamp > NIGHT_SKY_OBJECT_COOLDOWN_MS) {
+                    recentlyShownSkyObjects.delete(id);
                 }
             }
 
-            if (visibleObjects.length === 0) {
-                visibleObjects.push(NIGHT_SKY_OBJECTS.find(o => o.id === 'ursa_major')); // Fallback to a default
-            }
+            el_nightSkyInfoSection.classList.add('is-fading');
 
-            let objectToDisplay;
-            if (visibleObjects.length === 1) {
-                objectToDisplay = visibleObjects[0];
-            } else {
-                const eligibleObjects = visibleObjects.filter(o => o.id !== lastDisplayedNightSkyObjectId);
-                const selectionPool = eligibleObjects.length > 0 ? eligibleObjects : visibleObjects;
-                objectToDisplay = selectionPool[Math.floor(Math.random() * selectionPool.length)];
-            }
-            lastDisplayedNightSkyObjectId = objectToDisplay.id;
+            setTimeout(() => {
+                const currentMonth = new Date().getMonth() + 1;
+                const currentHour = new Date().getHours();
+                
+                let visibleObjects = NIGHT_SKY_OBJECTS.filter(obj => obj.visibilityCheck(currentMonth, currentHour));
+                let eligibleObjects = visibleObjects.filter(obj => !recentlyShownSkyObjects.has(obj.id));
+                
+                if (eligibleObjects.length === 0) {
+                    recentlyShownSkyObjects.clear();
+                    eligibleObjects = visibleObjects;
+                }
 
-            if(el_issInfo) el_issInfo.classList.add('is-hidden');
-            if(el_planetInfo) el_planetInfo.classList.add('is-hidden');
-            if(el_constellationInfo) el_constellationInfo.classList.add('is-hidden');
-
-            const sunCalcData = cachedData.sunCalc;
-            let astroDarknessText = null;
-            if (sunCalcData && sunCalcData.astronomicalTwilightStart && sunCalcData.astronomicalTwilightEnd) {
-                 const nowMs = now.getTime();
-                 const astroNightStartObj = new Date(sunCalcData.astronomicalTwilightStart);
-                 const astroNightEndObj = new Date(sunCalcData.astronomicalTwilightEnd);
-                 if (!isNaN(astroNightStartObj.getTime()) && !isNaN(astroNightEndObj.getTime())) {
-                    if (nowMs > astroNightStartObj.getTime() || nowMs < astroNightEndObj.getTime()) {
-                        astroDarknessText = `Csill. sötét: ${formatTime(astroNightStartObj)} - ${formatTime(astroNightEndObj)}`;
+                if (ENABLE_ISS_TRACKING && cachedData.issPasses && cachedData.issPasses.length > 0) {
+                    const nextPass = cachedData.issPasses[0];
+                    if (!recentlyShownSkyObjects.has('iss') && (nextPass.startUTC.getTime() - now < 6 * 60 * 60 * 1000)) {
+                         eligibleObjects.unshift({
+                            id: 'iss', type: 'iss', passData: nextPass
+                        });
                     }
-                 }
-            }
+                }
 
-            switch(objectToDisplay.type) {
-                case 'iss':
-                    if(el_issInfo) {
-                        const nextPass = objectToDisplay.passData;
-                        if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
-                        if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
-                        if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
-                        if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
-                        if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
-                        if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass}, Max: ${nextPass.maxAzCompass}, Vége: ${nextPass.endAzCompass}`;
-                        el_issInfo.classList.remove('is-hidden');
-                    }
-                    break;
-                case 'meteor_shower':
-                case 'deep_sky_object':
-                case 'planet':
-                    if(el_planetInfo) {
-                        if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = objectToDisplay.icon;
-                        if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = objectToDisplay.name;
-                        if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = objectToDisplay.status;
-                        if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = objectToDisplay.details || '';
-
-                        if(astroDarknessText && el_nightSkyAstroDarknessPlanet && el_nightSkyAstroDarknessItemPlanet) {
-                            el_nightSkyAstroDarknessPlanet.textContent = astroDarknessText;
-                            el_nightSkyAstroDarknessItemPlanet.classList.remove('is-hidden');
-                        } else if (el_nightSkyAstroDarknessItemPlanet) {
-                             el_nightSkyAstroDarknessItemPlanet.classList.add('is-hidden');
+                if (eligibleObjects.length === 0) {
+                     eligibleObjects.push(NIGHT_SKY_OBJECTS.find(o => o.id === 'ursa_major'));
+                }
+                
+                const objectToDisplay = eligibleObjects[Math.floor(Math.random() * eligibleObjects.length)];
+                recentlyShownSkyObjects.set(objectToDisplay.id, now);
+                
+                if(el_issInfo) el_issInfo.classList.add('is-hidden');
+                if(el_planetInfo) el_planetInfo.classList.add('is-hidden');
+                if(el_constellationInfo) el_constellationInfo.classList.add('is-hidden');
+                
+                const sunCalcData = cachedData.sunCalc;
+                let astroDarknessText = null;
+                if (sunCalcData && sunCalcData.astronomicalTwilightStart && sunCalcData.astronomicalTwilightEnd) {
+                     const nowMs = now;
+                     const astroNightStartObj = new Date(sunCalcData.astronomicalTwilightEnd); // Evening start
+                     const astroNightEndObj = new Date(sunCalcData.astronomicalTwilightStart); // Morning end
+                     if (!isNaN(astroNightStartObj.getTime()) && !isNaN(astroNightEndObj.getTime())) {
+                        if (nowMs > astroNightStartObj.getTime() || nowMs < astroNightEndObj.getTime()) {
+                             astroDarknessText = `${formatTime(astroNightStartObj)} - ${formatTime(astroNightEndObj)}`;
                         }
-                        el_planetInfo.classList.remove('is-hidden');
+                     }
+                }
+                
+                const displaySection = (sectionEl, astroItemEl, astroTextEl) => {
+                    const labelEl = astroItemEl ? astroItemEl.querySelector('.night-sky-detail-label') : null;
+                    if (astroDarknessText && astroItemEl && astroTextEl && labelEl) {
+                        labelEl.innerHTML = '<i class="far fa-moon"></i>Csillagászati sötétség:';
+                        astroTextEl.textContent = astroDarknessText;
+                        astroItemEl.classList.remove('is-hidden');
+                    } else if (astroItemEl) {
+                        astroItemEl.classList.add('is-hidden');
                     }
-                    break;
-                case 'constellation':
-                     if(el_constellationInfo) {
-                        if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = objectToDisplay.svg || '';
-                        if(el_constellationName) el_constellationName.textContent = objectToDisplay.name;
-                        if(el_constellationDetails) el_constellationDetails.textContent = objectToDisplay.details || '';
-                        if(astroDarknessText && el_constellationAstroDarknessConst && el_constellationAstroDarknessItemConst) {
-                            el_constellationAstroDarknessConst.textContent = astroDarknessText;
-                            el_constellationAstroDarknessItemConst.classList.remove('is-hidden');
-                        } else if (el_constellationAstroDarknessItemConst) {
-                             el_constellationAstroDarknessItemConst.classList.add('is-hidden');
+                    sectionEl.classList.remove('is-hidden');
+                };
+
+                switch(objectToDisplay.type) {
+                    case 'iss':
+                        if(el_issInfo) {
+                            const nextPass = objectToDisplay.passData;
+                            if(el_issVisualIcon) el_issVisualIcon.className = 'fas fa-satellite';
+                            if(el_issNextPassTime) el_issNextPassTime.textContent = `${formatTime(nextPass.startUTC)} - ${formatTime(nextPass.endUTC)}`;
+                            if(el_issMaxElevation) el_issMaxElevation.textContent = `${formatValue(nextPass.maxEl, '°', 0)}`;
+                            if(el_issDuration) el_issDuration.textContent = `${Math.round(nextPass.duration / 60)} perc`;
+                            if(el_issBrightness) el_issBrightness.textContent = `${formatValue(nextPass.mag, ' mag')}`;
+                            if(el_issPathDetails) el_issPathDetails.textContent = `Indul: ${nextPass.startAzCompass}, Max: ${nextPass.maxAzCompass}, Vége: ${nextPass.endAzCompass}`;
+                            el_issInfo.classList.remove('is-hidden');
                         }
-                        el_constellationInfo.classList.remove('is-hidden');
-                    }
-                    break;
-            }
+                        break;
+                    case 'meteor_shower': case 'deep_sky_object': case 'planet': case 'star': case 'info':
+                        if(el_planetInfo) {
+                            if(el_nightSkyVisualIcon) el_nightSkyVisualIcon.className = objectToDisplay.icon;
+                            if(el_nightSkyObjectName) el_nightSkyObjectName.textContent = objectToDisplay.name;
+                            if(el_nightSkyObjectStatus) el_nightSkyObjectStatus.textContent = objectToDisplay.status;
+                            if(el_nightSkyObjectDetails) el_nightSkyObjectDetails.textContent = objectToDisplay.details || '';
+                            displaySection(el_planetInfo, el_nightSkyAstroDarknessItemPlanet, el_nightSkyAstroDarknessPlanet);
+                        }
+                        break;
+                    case 'constellation':
+                         if(el_constellationInfo) {
+                            if(el_constellationSvgContainer) el_constellationSvgContainer.innerHTML = objectToDisplay.svg || '';
+                            if(el_constellationName) el_constellationName.textContent = objectToDisplay.name;
+                            if(el_constellationDetails) el_constellationDetails.textContent = objectToDisplay.details || '';
+                            displaySection(el_constellationInfo, el_constellationAstroDarknessItemConst, el_constellationAstroDarknessConst);
+                        }
+                        break;
+                }
+                el_nightSkyInfoSection.classList.remove('is-fading');
+            }, 400);
         }
 
         function startNightSkyRotation() {
             if (nightSkyRotationInterval) return;
+            console.log("Starting night sky rotation (1 min interval).");
             updateNightSkyDisplay();
             nightSkyRotationInterval = setInterval(updateNightSkyDisplay, NIGHT_SKY_ROTATION_INTERVAL_MS);
         }
 
         function stopNightSkyRotation() {
             if (nightSkyRotationInterval) {
+                console.log("Stopping night sky rotation.");
                 clearInterval(nightSkyRotationInterval);
                 nightSkyRotationInterval = null;
-                lastDisplayedNightSkyObjectId = null;
+                recentlyShownSkyObjects.clear();
             }
         }
 
@@ -1551,7 +1534,7 @@
                             <div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-satellite-dish"></i>Objektum</span><span class="night-sky-detail-value" id="night-sky-object-name"></span></div>
                             <div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-eye"></i></span><span class="night-sky-detail-value long-text" id="night-sky-object-status"></span></div>
                             <div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span><span class="night-sky-detail-value long-text" id="night-sky-object-details"></span></div>
-                            <div class="night-sky-detail-item is-hidden" id="night-sky-astro-darkness-item-planet"><span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span><span class="night-sky-detail-value long-text" id="night-sky-astro-darkness-planet"></span></div>
+                            <div class="night-sky-detail-item is-hidden" id="night-sky-astro-darkness-item-planet"><span class="night-sky-detail-label"></span><span class="night-sky-detail-value long-text" id="night-sky-astro-darkness-planet"></span></div>
                         </div>
                     </div>
                     <div id="constellation-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
@@ -1559,7 +1542,7 @@
                         <div class="night-sky-text-details">
                             <div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-star"></i>Csillagkép</span><span class="night-sky-detail-value" id="constellation-name"></span></div>
                             <div class="night-sky-detail-item"><span class="night-sky-detail-label"><i class="fas fa-info-circle"></i></span><span class="night-sky-detail-value long-text" id="constellation-details"></span></div>
-                            <div class="night-sky-detail-item is-hidden" id="constellation-astro-darkness-item-const"><span class="night-sky-detail-label"><i class="far fa-moon"></i>Sötétség</span><span class="night-sky-detail-value long-text" id="constellation-astro-darkness-const"></span></div>
+                            <div class="night-sky-detail-item is-hidden" id="constellation-astro-darkness-item-const"><span class="night-sky-detail-label"></span><span class="night-sky-detail-value long-text" id="constellation-astro-darkness-const"></span></div>
                         </div>
                     </div>
                 </div>
@@ -1813,23 +1796,9 @@
             if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.add('is-hidden');
             if (el_mainRainVisual) el_mainRainVisual.classList.remove('is-raining-actively');
 
-            stopNightSkyRotation();
-
             if (isRainingNow) {
                 if (el_rainInfoSection) el_rainInfoSection.classList.remove('is-hidden');
                 if (el_mainRainVisual) el_mainRainVisual.classList.add('is-raining-actively');
-                updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el_mainRainGaugeValue, totalValueEl: el_mainRainVisualTotal });
-                if (el_rainCurrentlyRainingValue) el_rainCurrentlyRainingValue.textContent = "Igen";
-                if (el_rainIntensityValue) el_rainIntensityValue.textContent = formatValue(obs.precipRate, ' mm/h', 2);
-                if (el_rainExpectedTodayValue) el_rainExpectedTodayValue.textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
-
-                const nextEventInRainSection = findNextPrecipitationEvent(cachedData.hourlyForecast);
-                if (nextEventInRainSection && el_nextPrecipItem && el_nextPrecipValue) {
-                    el_nextPrecipValue.textContent = `${nextEventInRainSection.type} ~${formatTime(nextEventInRainSection.time)} (${formatValue(nextEventInRainSection.chance, '%', 0)})`;
-                    el_nextPrecipItem.classList.remove('is-hidden');
-                } else if (el_nextPrecipItem) {
-                    el_nextPrecipItem.classList.add('is-hidden');
-                }
             } else {
                 if (isDayTime) {
                     if (el_sunInfoSection) el_sunInfoSection.classList.remove('is-hidden');
@@ -1837,8 +1806,20 @@
                     if (el_moonInfoSection) el_moonInfoSection.classList.remove('is-hidden');
                 } else {
                     if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.remove('is-hidden');
-                    startNightSkyRotation();
                 }
+            }
+
+            updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el_mainRainGaugeValue, totalValueEl: el_mainRainVisualTotal });
+            if (el_rainCurrentlyRainingValue) el_rainCurrentlyRainingValue.textContent = isRainingNow ? "Igen" : "Nem";
+            if (el_rainIntensityValue) el_rainIntensityValue.textContent = formatValue(obs.precipRate, ' mm/h', 2);
+            if (el_rainExpectedTodayValue) el_rainExpectedTodayValue.textContent = formatValue(cachedData.expectedRainToday_gauge, ' mm', 1);
+
+            const nextEventInRainSection = findNextPrecipitationEvent(cachedData.hourlyForecast);
+            if (nextEventInRainSection && el_nextPrecipItem && el_nextPrecipValue) {
+                el_nextPrecipValue.textContent = `${nextEventInRainSection.type} ~${formatTime(nextEventInRainSection.time)} (${formatValue(nextEventInRainSection.chance, '%', 0)})`;
+                el_nextPrecipItem.classList.remove('is-hidden');
+            } else if (el_nextPrecipItem) {
+                el_nextPrecipItem.classList.add('is-hidden');
             }
 
             const sunPathElements = { iconEl: el_sunPathIcon, mainArcEl: el_sunPathArcMain, nowMarkerEl: el_sunPathNowMarker };
@@ -2091,6 +2072,18 @@
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             const anyStationOnline = Object.values(STATIONS).some(s => s.isOnline);
 
+            if (cachedData.sunCalc && cachedData.displayPws) {
+                const isRainingNow = cachedData.displayPws.precipRate > 0;
+                const isDayTime = cachedData.sunCalc.sunAltitude > -0.83;
+                
+                if (!isRainingNow && !isDayTime) {
+                    startNightSkyRotation();
+                } else {
+                    stopNightSkyRotation();
+                }
+            }
+
+
             if (anyStationOnline && STATIONS[activeDisplayStationKey].data && cachedData.generalConditions && cachedData.generalConditions.skyCoverPhrase !== undefined && cachedData.sunCalc) {
                 compileAndRenderDisplayData();
             } else {
@@ -2131,10 +2124,11 @@
                     cachedData.displayPws.windSpeed = newPwsData.metric.windSpeed;
                     cachedData.displayPws.windGust = newPwsData.metric.windGust;
                     cachedData.displayPws.obsTimeLocal = newPwsData.obsTimeLocal;
+                    
                     renderWeatherData();
                 }
             } catch (error) {
-                // Hiba már naplózva
+                // Hiba már naplózva van a fetchPwsStationData-ban
             }
         }
 
@@ -2225,9 +2219,6 @@
                             .then(passes => {
                                 cachedData.issPasses = passes;
                                 lastApiCallTimes.issPasses = Date.now();
-                                if (cachedData.displayPws) {
-                                    renderWeatherData();
-                                }
                             })
                             .catch(e => console.error("Éjféli ISS adatfrissítési hiba:", e));
                         }
