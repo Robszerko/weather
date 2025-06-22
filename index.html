@@ -247,7 +247,7 @@
         
         .precipitation-forecast-info {
             margin: 12px auto 0 auto;
-            padding: 8px 16px;
+            padding: 10px 16px;
             background-color: rgba(0, 0, 0, 0.15);
             border-radius: 10px;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
@@ -263,6 +263,19 @@
         }
         #next-precipitation-info-text strong {
             font-weight: 700;
+            color: var(--current-text-color);
+        }
+        /* VÁLTOZTATÁS: Az új részletező szöveg stílusa */
+        #next-precipitation-details-text {
+            color: var(--current-text-muted-color);
+            font-size: 11.5px;
+            font-weight: 500;
+            margin-top: 4px;
+            transition: color 0.6s;
+            font-style: italic;
+        }
+        #next-precipitation-details-text strong {
+            font-weight: 600;
             color: var(--current-text-color);
         }
 
@@ -954,7 +967,7 @@
             el_windGustItem, el_mainWindGustValue,
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
-            el_precipitationForecastBar, el_nextPrecipitationInfoText,
+            el_precipitationForecastBar, el_nextPrecipitationInfoText, el_nextPrecipitationDetailsText,
             el_tempTongueContainer, el_tempTongueValue, el_rainTongueContainer, el_rainTongueValue;
 
 
@@ -1478,6 +1491,7 @@
             } catch (error) { console.warn(`Órás előrejelzés hiba: ${error.message}`); throw error; }
         }
 
+        // VÁLTOZTATÁS: A függvény most a teljes eseményt adja vissza a leírással együtt
         function findNextPrecipitationEvent(hourlyData) {
             if (!hourlyData || hourlyData.length === 0) return null;
             const stormKeywords = ['vihar', 'zivatar']; const rainKeywords = ['eső', 'zápor']; const snowKeywords = ['hó', 'havazás', 'hózápor'];
@@ -1487,7 +1501,7 @@
                 if (hour.precipChance >= PRECIP_THRESHOLD) {
                     const phrase = (hour.wxPhraseShort || '').toLowerCase(); let type = 'Csapadék';
                     if (stormKeywords.some(keyword => phrase.includes(keyword))) { type = 'Vihar'; } else if (rainKeywords.some(keyword => phrase.includes(keyword))) { type = 'Eső'; } else if (snowKeywords.some(keyword => phrase.includes(keyword))) { type = 'Hó'; }
-                    return { time: hour.time, chance: hour.precipChance, type: type };
+                    return { time: hour.time, chance: hour.precipChance, type: type, phrase: hour.wxPhraseShort };
                 }
             } return null;
         }
@@ -1496,6 +1510,7 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             
+            // VÁLTOZTATÁS: HTML struktúra frissítése a csapadék részletező sornak
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1584,7 +1599,8 @@
                 </div>
             </div>
             <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar">
-                <span id="next-precipitation-info-text">Csapadék előrejelzés betöltése...</span>
+                <div id="next-precipitation-info-text"></div>
+                <div id="next-precipitation-details-text" class="is-hidden"></div>
             </div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
             
@@ -1678,6 +1694,7 @@
 
             el_precipitationForecastBar = document.getElementById('precipitation-forecast-bar');
             el_nextPrecipitationInfoText = document.getElementById('next-precipitation-info-text');
+            el_nextPrecipitationDetailsText = document.getElementById('next-precipitation-details-text');
 
             el_tempTongueContainer = document.getElementById('temp-tongue-container');
             el_tempTongueValue = document.getElementById('temp-tongue-value');
@@ -1764,20 +1781,39 @@
             }
         }
 
+        // VÁLTOZTATÁS: A renderelő függvény frissítése az új részletező sorhoz
         function renderPrecipitationForecastInfo() {
-            if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText) return;
+            if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText || !el_nextPrecipitationDetailsText) return;
 
             const nextEvent = findNextPrecipitationEvent(cachedData.hourlyForecast);
 
             if (nextEvent) {
                 el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
+                
+                let detailsHTML = '';
+                if (nextEvent.phrase) {
+                    detailsHTML = `Jelleg: <strong>${nextEvent.phrase}</strong>`;
+                } else {
+                    if (nextEvent.chance >= 75) {
+                        detailsHTML = "Intenzitás: Valószínűleg erős.";
+                    } else if (nextEvent.chance >= 50) {
+                        detailsHTML = "Intenzitás: Mérsékelt.";
+                    } else {
+                        detailsHTML = "Intenzitás: Gyenge, futó.";
+                    }
+                }
+                el_nextPrecipitationDetailsText.innerHTML = detailsHTML;
+                el_nextPrecipitationDetailsText.classList.remove('is-hidden');
+
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
-                el_nextPrecipitationInfoText.textContent = "A következő 48 órában nem várható jelentős csapadék.";
+                el_nextPrecipitationInfoText.textContent = "A következő 72 órában nem várható jelentős csapadék.";
+                el_nextPrecipitationDetailsText.classList.add('is-hidden');
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else {
                  el_precipitationForecastBar.classList.add('is-hidden');
                  el_nextPrecipitationInfoText.textContent = "Csapadék előrejelzés jelenleg nem elérhető.";
+                 el_nextPrecipitationDetailsText.classList.add('is-hidden');
             }
         }
 
@@ -1920,7 +1956,6 @@
             renderPrecipitationForecastInfo();
         }
         
-        // VÁLTOZTATÁS: Új függvények a dinamikus színezéshez
         function getTemperatureColorVar(temp) { if (temp === null || isNaN(temp)) return 'var(--mild)'; if (temp >= 35) return 'var(--hot)'; if (temp >= 25) return 'var(--warm)'; if (temp >= 10) return 'var(--mild)'; if (temp >= 0) return 'var(--cool)'; return 'var(--cold)'; }
         function getWindColorVar(speed) { if (speed === null || isNaN(speed)) return 'rgba(0,0,0,0.15)'; if (speed > 40) return 'var(--hot)'; if (speed > 25) return 'var(--warm)'; if (speed > 10) return 'var(--mild)'; return 'var(--cool)'; }
 
