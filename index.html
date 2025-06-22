@@ -829,13 +829,12 @@
         const NO_DATA_STRING = 'N/A';
         const PRECIP_THRESHOLD = 30;
 
-        // VÁLTOZTATÁS: Időzítők összevonása
         let masterTickCounter = 0;
 
         let nightSkyRotationInterval = null;
         let recentlyShownSkyObjects = new Map();
         const NIGHT_SKY_ROTATION_INTERVAL_MS = 60 * 1000;
-        const NIGHT_SKY_OBJECT_COOLDOWN_MS = 60 * 60 * 1000; // <-- MÓDOSÍTVA 60 PERCRE
+        const NIGHT_SKY_OBJECT_COOLDOWN_MS = 60 * 60 * 1000; // 60 perc
 
         // =================================================================================
         // === ÓRIÁS CSILLAGÁSZATI ADATBÁZIS (150+ ELEM) =====================================
@@ -935,7 +934,7 @@
             {id:'light_pollution',type:'concept',name:'Fényszennyezés',icon:'fas fa-lightbulb',status:'A csillagos égbolt ellensége',details:'A városok mesterséges fényei által okozott jelenség, ami elhalványítja a csillagokat és a Tejút látványát. A legjobb észlelőhelyek távol esnek a lakott területektől.',visibilityCheck:(m,h)=>true},
             {id:'ecliptic',type:'concept',name:'Ekliptika',icon:'fas fa-sun',status:'A Naprendszer "főútvonala"',details:'A Nap látszólagos éves útja az égbolton a csillagokhoz képest. A bolygók és a Hold is mindig ennek a sávnak a közelében tartózkodnak. A Zodiákus csillagképei is itt helyezkednek el.',visibilityCheck:(m,h)=>true},
             {id:'circumpolar',type:'concept',name:'Cirkumpoláris csillagképek',icon:'fas fa-sync-alt',status:'Soha nem nyugszanak le',details:'Ezek a csillagképek (pl. Göncölszekér, Kis Medve, Kassziopeia) olyan közel vannak az Északi Égi Pólushoz, hogy a mi földrajzi szélességünkről nézve soha nem kerülnek a horizont alá.',visibilityCheck:(m,h)=>true},
-            {id:'zodiacal_light',type:'concept',name:'Állatövi fény',icon:'fas-fa-triangle',status:'Halvány derengés a horizonton',details:'A bolygóközi porról visszaverődő napfény. Sötét, fényszennyezésmentes helyről, tavasszal napnyugta után nyugaton, ősszel napkelte előtt keleten látható, mint egy halvány, felfelé mutató fénypiramis.',visibilityCheck:(m,h)=>(m>=2&&m<=4&&h>=19&&h<=21)||(m>=9&&m<=11&&h>=4&&h<=6)},
+            {id:'zodiacal_light',type:'concept',name:'Állatövi fény',icon:'fas fa-triangle',status:'Halvány derengés a horizonton',details:'A bolygóközi porról visszaverődő napfény. Sötét, fényszennyezésmentes helyről, tavasszal napnyugta után nyugaton, ősszel napkelte előtt keleten látható, mint egy halvány, felfelé mutató fénypiramis.',visibilityCheck:(m,h)=>(m>=2&&m<=4&&h>=19&&h<=21)||(m>=9&&m<=11&&h>=4&&h<=6)},
             {id:'telescope',type:'concept',name:'Távcső',icon:'fas fa-binoculars',status:'Ablak a Világegyetemre',details:'A csillagászati távcsövek összegyűjtik a halvány objektumok fényét, így sokkal többet láthatunk velük, mint szabad szemmel. Már egy kisebb távcső is megmutatja a Szaturnusz gyűrűjét vagy a Jupiter holdjait.',visibilityCheck:(m,h)=>true},
             {id:'binoculars',type:'concept',name:'Binokulár (Látcső)',icon:'fas fa-binoculars',status:'A kezdő csillagász legjobb barátja',details:'Egy jó minőségű binokulár (pl. 7x50 vagy 10x50) csodákat tár fel. Tökéletes a Tejút, a Fiastyúk, az Androméda-galaxis vagy a Hold krátereinek fürkészésére.',visibilityCheck:(m,h)=>true},
             {id:'star_chart',type:'concept',name:'Forgatható csillagtérkép',icon:'far fa-map',status:'Navigáció az éjszakai égbolton',details:'Egy egyszerű, de zseniális eszköz, mely megmutatja, hogy egy adott napon és időpontban mely csillagképek láthatók az égen. Nagy segítség a tájékozódásban.',visibilityCheck:(m,h)=>true}
