@@ -207,11 +207,20 @@
             padding: 8px 12px;
             background-color: rgba(0, 0, 0, 0.15);
             border-radius: 10px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.6s;
             min-width: 80px;
             text-align: center;
+            border: 1px solid transparent; /* Alapértelmezett láthatatlan keret */
         }
+        
+        /* VÁLTOZTATÁS: Színes keret hozzáadása a hőmérsékletfüggő háttérhez */
+        .info-bar-item[style*="background-color: var(--hot)"] { border-color: rgba(255,255,255,0.2); }
+        .info-bar-item[style*="background-color: var(--warm)"] { border-color: rgba(255,255,255,0.18); }
+        .info-bar-item[style*="background-color: var(--mild)"] { border-color: rgba(255,255,255,0.15); }
+        .info-bar-item[style*="background-color: var(--cool)"] { border-color: rgba(255,255,255,0.15); }
+        .info-bar-item[style*="background-color: var(--cold)"] { border-color: rgba(255,255,255,0.2); }
+
 
         .info-bar-label {
             font-size: 10px;
@@ -1445,9 +1454,8 @@
             } catch (error) { console.warn(`Napi előrejelzés hiba: ${error.message}`); throw error; }
         }
 
-        // VÁLTOZTATÁS: Órás előrejelzés kibővítése 72 órára
         async function fetchHourlyForecastData(lat, lon) {
-            const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
+            const url = `https://api.weather.com/v3/wx/forecast/hourly/2day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
                 const response = await fetch(url); if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`); const data = await response.json(); if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); }
                 lastApiCallTimes.hourlyForecast = Date.now();
@@ -1463,8 +1471,7 @@
                      }
                 }
 
-                // VÁLTOZTATÁS: Ciklus kiterjesztése 72 órára
-                for (let i = startIndex; i < startIndex + 72 && i < data.validTimeLocal.length; i++) {
+                for (let i = startIndex; i < startIndex + 48 && i < data.validTimeLocal.length; i++) {
                     hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], uvIndex: data.uvIndex[i], wxPhraseShort: data.wxPhraseShort[i] });
                 }
                 return hourlyForecasts;
@@ -1757,7 +1764,6 @@
             }
         }
 
-        // VÁLTOZTATÁS: Információs szöveg frissítése
         function renderPrecipitationForecastInfo() {
             if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText) return;
 
@@ -1767,7 +1773,7 @@
                 el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
-                el_nextPrecipitationInfoText.textContent = "A következő 72 órában nem várható jelentős csapadék.";
+                el_nextPrecipitationInfoText.textContent = "A következő 48 órában nem várható jelentős csapadék.";
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else {
                  el_precipitationForecastBar.classList.add('is-hidden');
@@ -1870,6 +1876,7 @@
             if (obs.heatIndex != null && el_heatIndexItem && el_mainHeatIndexValue) {
                 el_heatIndexItem.classList.remove('is-hidden');
                 updateAnimatedValue(el_mainHeatIndexValue, formatValue(obs.heatIndex, '', 1));
+                el_heatIndexItem.style.backgroundColor = getTemperatureColorVar(obs.heatIndex);
             } else if (el_heatIndexItem) {
                 el_heatIndexItem.classList.add('is-hidden');
             }
@@ -1880,6 +1887,7 @@
                  if(el_mainWindDirText) el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir);
                  if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir);
                  updateAnimatedValue(el_mainWindSpeedValue, formatValue(obs.windSpeed, '', 1));
+                 el_windSpeedItem.style.backgroundColor = getWindColorVar(obs.windSpeed);
             } else if (el_windSpeedItem){
                  el_windSpeedItem.classList.add('is-hidden');
             }
@@ -1887,6 +1895,7 @@
             if (obs.windGust > 0 && el_windGustItem && el_mainWindGustValue) {
                  el_windGustItem.classList.remove('is-hidden');
                  updateAnimatedValue(el_mainWindGustValue, formatValue(obs.windGust, '', 1));
+                 el_windGustItem.style.backgroundColor = getWindColorVar(obs.windGust);
             } else if (el_windGustItem) {
                  el_windGustItem.classList.add('is-hidden');
             }
@@ -1910,8 +1919,11 @@
 
             renderPrecipitationForecastInfo();
         }
-
+        
+        // VÁLTOZTATÁS: Új függvények a dinamikus színezéshez
         function getTemperatureColorVar(temp) { if (temp === null || isNaN(temp)) return 'var(--mild)'; if (temp >= 35) return 'var(--hot)'; if (temp >= 25) return 'var(--warm)'; if (temp >= 10) return 'var(--mild)'; if (temp >= 0) return 'var(--cool)'; return 'var(--cold)'; }
+        function getWindColorVar(speed) { if (speed === null || isNaN(speed)) return 'rgba(0,0,0,0.15)'; if (speed > 40) return 'var(--hot)'; if (speed > 25) return 'var(--warm)'; if (speed > 10) return 'var(--mild)'; return 'var(--cool)'; }
+
 
         function mapTwcIconToFontAwesome(iconCode, dayOrNight) {
             const isDay = dayOrNight === 'D'; const iconMap = { 32: 'fas fa-sun', 36: 'fas fa-sun', 31: 'fas fa-moon', 33: 'fas fa-moon', 34: isDay ? 'fas fa-sun' : 'fas fa-cloud-moon', 29: isDay ? 'fas fa-cloud-sun' : 'fas fa-cloud-moon', 30: isDay ? 'fas fa-cloud-sun' : 'fas fa-cloud-moon', 27: 'fas fa-cloud', 28: 'fas fa-cloud', 26: 'fas fa-cloud', 11: 'fas fa-cloud-showers-heavy', 12: 'fas fa-cloud-showers-heavy', 40: 'fas fa-cloud-showers-heavy', 39: isDay ? 'fas fa-cloud-sun-rain' : 'fas fa-cloud-moon-rain', 45: isDay ? 'fas fa-cloud-sun-rain' : 'fas fa-cloud-moon-rain', 3: 'fas fa-cloud-bolt', 4: 'fas fa-cloud-bolt', 37: 'fas fa-cloud-bolt', 38: 'fas fa-cloud-bolt', 47: 'fas fa-cloud-bolt', 5: 'fas fa-snowflake', 6: 'fas fa-snowflake', 7: 'fas fa-snowflake', 8: 'fas fa-snowflake', 10: 'fas fa-cloud-sleet', 18: 'fas fa-smog', 13: 'fas fa-snowflake', 14: 'fas fa-snowflake', 15: 'fas fa-snowflake', 16: 'fas fa-snowflake', 41: 'fas fa-snowflake', 42: 'fas fa-snowflake', 43: 'fas fa-snowflake', 46: 'fas fa-snowflake', 9: 'fas fa-cloud-rain', 19: 'fas fa-smog', 20: 'fas fa-smog', 21: 'fas fa-smog', 22: 'fas fa-smog', 23: 'fas fa-wind', 24: 'fas fa-wind' };
