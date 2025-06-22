@@ -214,7 +214,6 @@
             border: 1px solid transparent; /* Alapértelmezett láthatatlan keret */
         }
         
-        /* VÁLTOZTATÁS: Színes keret hozzáadása a hőmérsékletfüggő háttérhez */
         .info-bar-item[style*="background-color: var(--hot)"] { border-color: rgba(255,255,255,0.2); }
         .info-bar-item[style*="background-color: var(--warm)"] { border-color: rgba(255,255,255,0.18); }
         .info-bar-item[style*="background-color: var(--mild)"] { border-color: rgba(255,255,255,0.15); }
@@ -265,7 +264,6 @@
             font-weight: 700;
             color: var(--current-text-color);
         }
-        /* VÁLTOZTATÁS: Az új részletező szöveg stílusa */
         #next-precipitation-details-text {
             color: var(--current-text-muted-color);
             font-size: 11.5px;
@@ -973,6 +971,34 @@
 
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
+        
+        // VÁLTOZTATÁS: Új segédfüggvény a relatív dátum formázásához
+        function formatPrecipitationDate(isoDateString) {
+            if (!isoDateString) return '';
+            try {
+                const eventDate = new Date(isoDateString);
+                if (isNaN(eventDate.getTime())) return '';
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
+
+                const eventDateDay = new Date(eventDate);
+                eventDateDay.setHours(0, 0, 0, 0);
+
+                if (eventDateDay.getTime() === today.getTime()) {
+                    return 'ma';
+                }
+                if (eventDateDay.getTime() === tomorrow.getTime()) {
+                    return 'holnap';
+                }
+                return eventDate.toLocaleDateString('hu-HU', { month: 'short', day: 'numeric' });
+            } catch (e) {
+                return '';
+            }
+        }
 
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
@@ -1491,7 +1517,6 @@
             } catch (error) { console.warn(`Órás előrejelzés hiba: ${error.message}`); throw error; }
         }
 
-        // VÁLTOZTATÁS: A függvény most a teljes eseményt adja vissza a leírással együtt
         function findNextPrecipitationEvent(hourlyData) {
             if (!hourlyData || hourlyData.length === 0) return null;
             const stormKeywords = ['vihar', 'zivatar']; const rainKeywords = ['eső', 'zápor']; const snowKeywords = ['hó', 'havazás', 'hózápor'];
@@ -1501,7 +1526,7 @@
                 if (hour.precipChance >= PRECIP_THRESHOLD) {
                     const phrase = (hour.wxPhraseShort || '').toLowerCase(); let type = 'Csapadék';
                     if (stormKeywords.some(keyword => phrase.includes(keyword))) { type = 'Vihar'; } else if (rainKeywords.some(keyword => phrase.includes(keyword))) { type = 'Eső'; } else if (snowKeywords.some(keyword => phrase.includes(keyword))) { type = 'Hó'; }
-                    return { time: hour.time, chance: hour.precipChance, type: type, phrase: hour.wxPhraseShort };
+                    return { time: hour.time, chance: hour.precipChance, type: type };
                 }
             } return null;
         }
@@ -1510,7 +1535,6 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             
-            // VÁLTOZTATÁS: HTML struktúra frissítése a csapadék részletező sornak
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1781,14 +1805,17 @@
             }
         }
 
-        // VÁLTOZTATÁS: A renderelő függvény frissítése az új részletező sorhoz
+        // VÁLTOZTATÁS: A renderelő függvény frissítése a dátum és a részletek megjelenítéséhez
         function renderPrecipitationForecastInfo() {
             if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText || !el_nextPrecipitationDetailsText) return;
 
             const nextEvent = findNextPrecipitationEvent(cachedData.hourlyForecast);
 
             if (nextEvent) {
-                el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
+                const dateText = formatPrecipitationDate(nextEvent.time);
+                const timeText = formatTime(nextEvent.time);
+
+                el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${dateText} ${timeText}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
                 
                 let detailsHTML = '';
                 if (nextEvent.phrase) {
