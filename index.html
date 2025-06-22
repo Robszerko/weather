@@ -935,7 +935,7 @@
             el_rainInfoSection, el_mainRainVisual, el_sunInfoSection, el_moonInfoSection, el_nightSkyInfoSection,
             el_gridSunriseItem, el_gridSunsetItem, el_gridMoonriseItem, el_gridMoonsetItem,
             el_mainRainGaugeValue, el_mainRainVisualTotal, el_rainCurrentlyRainingValue, el_rainIntensityValue, el_rainExpectedTodayValue, el_nextPrecipItem, el_nextPrecipValue,
-            el_sunPathIcon, el_sunPathArcMain, el_sunPathNowMarker, el_sunInfoAltitude, el_sunInfoAltitudeNode, el_sunInfoTrend, el_sunInfoNoon, el_sunInfoRemaining, el_sunPathSunriseTime, el_sunPathSunsetTime, el_sunPathRefreshBtn,
+            el_sunPathIcon, el_sunPathArcMain, el_sunPathNowMarker, el_sunInfoAltitude, el_sunInfoAltitudeNode, el_sunInfoAzimuth, el_sunInfoTrend, el_sunInfoNoon, el_sunInfoRemaining, el_sunPathSunriseTime, el_sunPathSunsetTime, el_sunPathRefreshBtn,
             el_moonPathIcon, el_moonPathArcMain, el_moonPathNowMarker, el_moonriseTimeLabel, el_moonsetTimeLabel, el_moonInfoAltitude, el_moonInfoAltitudeNode, el_moonInfoTrend, el_moonInfoPhasename, el_moonInfoIllumination, el_moonPathRefreshBtn,
             el_issInfo, el_planetInfo, el_constellationInfo,
             el_issVisualIcon, el_issNextPassTime, el_issMaxElevation, el_issDuration, el_issBrightness, el_issPathDetails,
@@ -1083,6 +1083,10 @@
             const solarNoonDate = sunTimesToday.solarNoon;
 
             const sunPos = SunCalc.getPosition(now, lat, lon);
+            // Azimut konverzió: SunCalc délről számolja az azimutot (0° = D), ezért korrigáljuk, hogy észak legyen a 0°.
+            const sunAzimuthDegrees = (sunPos.azimuth * 180 / Math.PI + 180) % 360; 
+            const sunAzimuthCompass = degreesToCompass(sunAzimuthDegrees);
+
             const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
             const pastSunPos = SunCalc.getPosition(tenMinutesAgo, lat, lon);
             let sunTrend = sunPos.altitude > 0 ? (sunPos.altitude > pastSunPos.altitude ? 'Emelkedik' : 'Süllyed') : null;
@@ -1136,17 +1140,23 @@
                 solarNoon: formatTime(solarNoonDate),
                 sunriseDateForPath: sunriseDate,
                 sunsetDateForPath: sunsetDate,
-
-                sunAltitude: sunPos.altitude * 180 / Math.PI, sunTrend: sunTrend, sunStatus: sunStatus, remainingDaylight: remainingDaylightText,
-
+                sunAltitude: sunPos.altitude * 180 / Math.PI,
+                sunAzimuthDegrees: sunAzimuthDegrees,
+                sunAzimuthCompass: sunAzimuthCompass,
+                sunTrend: sunTrend,
+                sunStatus: sunStatus,
+                remainingDaylight: remainingDaylightText,
                 isUp: comprehensiveMoonData.isUp,
                 moonrise: formatTime(comprehensiveMoonData.nextRise),
                 moonset: formatTime(comprehensiveMoonData.nextSet),
                 moonRiseDateForPath: comprehensiveMoonData.pathRise,
                 moonSetDateForPath: comprehensiveMoonData.pathSet,
-
-                moonAltitude: moonPos.altitude * 180 / Math.PI, moonTrend: moonTrend, moonStatus: moonStatus,
-                phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonDistance: moonPos.distance,
+                moonAltitude: moonPos.altitude * 180 / Math.PI,
+                moonTrend: moonTrend,
+                moonStatus: moonStatus,
+                phaseValue: (moonIllumination.fraction * 100),
+                phaseName: phaseName,
+                moonDistance: moonPos.distance,
                 astronomicalTwilightStart: sunTimesToday.nightEnd,
                 astronomicalTwilightEnd: sunTimesYesterday.night,
             };
@@ -1435,8 +1445,9 @@
             } catch (error) { console.warn(`Napi előrejelzés hiba: ${error.message}`); throw error; }
         }
 
+        // VÁLTOZTATÁS: Órás előrejelzés kibővítése 72 órára
         async function fetchHourlyForecastData(lat, lon) {
-            const url = `https://api.weather.com/v3/wx/forecast/hourly/2day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
+            const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
                 const response = await fetch(url); if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`); const data = await response.json(); if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); }
                 lastApiCallTimes.hourlyForecast = Date.now();
@@ -1452,7 +1463,8 @@
                      }
                 }
 
-                for (let i = startIndex; i < startIndex + 48 && i < data.validTimeLocal.length; i++) {
+                // VÁLTOZTATÁS: Ciklus kiterjesztése 72 órára
+                for (let i = startIndex; i < startIndex + 72 && i < data.validTimeLocal.length; i++) {
                     hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], uvIndex: data.uvIndex[i], wxPhraseShort: data.wxPhraseShort[i] });
                 }
                 return hourlyForecasts;
@@ -1513,7 +1525,7 @@
             </div>
 
             <div class="main-info-wrapper">
-                <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
+                <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="far fa-compass"></i>Irány</span><span id="sun-info-azimuth" class="sun-detail-value">--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
                 <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
                 <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
                 <div class="night-sky-info-section is-hidden" id="night-sky-info-section">
@@ -1593,6 +1605,7 @@
             el_sunPathNowMarker = document.getElementById('sun-path-now-marker');
             el_sunInfoAltitude = document.getElementById('sun-info-altitude');
             if (el_sunInfoAltitude) el_sunInfoAltitudeNode = el_sunInfoAltitude.childNodes[0];
+            el_sunInfoAzimuth = document.getElementById('sun-info-azimuth');
             el_sunInfoTrend = document.getElementById('sun-info-trend');
             el_sunInfoNoon = document.getElementById('sun-info-noon');
             el_sunInfoRemaining = document.getElementById('sun-info-remaining');
@@ -1744,6 +1757,7 @@
             }
         }
 
+        // VÁLTOZTATÁS: Információs szöveg frissítése
         function renderPrecipitationForecastInfo() {
             if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText) return;
 
@@ -1753,7 +1767,7 @@
                 el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${formatTime(nextEvent.time)}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
-                el_nextPrecipitationInfoText.textContent = "A következő 48 órában nem várható jelentős csapadék.";
+                el_nextPrecipitationInfoText.textContent = "A következő 72 órában nem várható jelentős csapadék.";
                 el_precipitationForecastBar.classList.remove('is-hidden');
             } else {
                  el_precipitationForecastBar.classList.add('is-hidden');
@@ -1825,6 +1839,7 @@
             const sunPathElements = { iconEl: el_sunPathIcon, mainArcEl: el_sunPathArcMain, nowMarkerEl: el_sunPathNowMarker };
             updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements);
             if (el_sunInfoAltitudeNode) el_sunInfoAltitudeNode.nodeValue = formatValue(sunCalcData.sunAltitude, '°', 1) + ' ';
+            if (el_sunInfoAzimuth) el_sunInfoAzimuth.textContent = `${sunCalcData.sunAzimuthCompass} (${formatValue(sunCalcData.sunAzimuthDegrees, '°', 0)})`;
             if (el_sunInfoTrend) el_sunInfoTrend.textContent = `(${sunCalcData.sunTrend || sunCalcData.sunStatus})`;
             if (el_sunInfoNoon) el_sunInfoNoon.textContent = sunCalcData.solarNoon;
             if (el_sunInfoRemaining) el_sunInfoRemaining.textContent = sunCalcData.remainingDaylight;
