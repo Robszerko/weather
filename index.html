@@ -205,26 +205,28 @@
             align-items: center;
             gap: 2px;
             padding: 8px 12px;
-            background-color: rgba(0, 0, 0, 0.15);
+            background-color: rgba(0, 0, 0, 0.15); /* Alapértelmezett háttérszín */
             border-radius: 10px;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
             transition: all 0.6s;
             min-width: 80px;
             text-align: center;
-            border: 1px solid transparent; /* Alapértelmezett láthatatlan keret */
+            border: 1px solid transparent; /* Alapértelmezett keret */
         }
         
+        /* Törölve a dinamikus keretszínek, mert a háttérszín már nem változik ezeknél az elemeknél */
+        /*
         .info-bar-item[style*="background-color: var(--hot)"] { border-color: rgba(255,255,255,0.2); }
         .info-bar-item[style*="background-color: var(--warm)"] { border-color: rgba(255,255,255,0.18); }
         .info-bar-item[style*="background-color: var(--mild)"] { border-color: rgba(255,255,255,0.15); }
         .info-bar-item[style*="background-color: var(--cool)"] { border-color: rgba(255,255,255,0.15); }
         .info-bar-item[style*="background-color: var(--cold)"] { border-color: rgba(255,255,255,0.2); }
-
+        */
 
         .info-bar-label {
             font-size: 10px;
             font-weight: 600;
-            color: var(--current-text-muted-color);
+            color: var(--current-text-muted-color); /* Jól olvasható az alap háttérszínen */
             text-transform: uppercase;
             letter-spacing: 0.3px;
         }
@@ -232,7 +234,7 @@
         .info-bar-value {
             font-size: 15px;
             font-weight: 700;
-            color: var(--current-text-color);
+            color: var(--current-text-color); /* Jól olvasható az alap háttérszínen */
             display: flex;
             align-items: center;
             gap: 4px;
@@ -1846,7 +1848,8 @@
             if (obs.heatIndex != null && el_heatIndexItem && el_mainHeatIndexValue) {
                 el_heatIndexItem.classList.remove('is-hidden');
                 updateAnimatedValue(el_mainHeatIndexValue, formatValue(obs.heatIndex, '', 1));
-                el_heatIndexItem.style.backgroundColor = getTemperatureColorVar(obs.heatIndex);
+                // MODIFICATION: Removed dynamic background color
+                // el_heatIndexItem.style.backgroundColor = getTemperatureColorVar(obs.heatIndex);
             } else if (el_heatIndexItem) {
                 el_heatIndexItem.classList.add('is-hidden');
             }
@@ -1857,7 +1860,8 @@
                  if(el_mainWindDirText) el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir);
                  if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir);
                  updateAnimatedValue(el_mainWindSpeedValue, formatValue(obs.windSpeed, '', 1));
-                 el_windSpeedItem.style.backgroundColor = getWindColorVar(obs.windSpeed);
+                 // MODIFICATION: Removed dynamic background color
+                 // el_windSpeedItem.style.backgroundColor = getWindColorVar(obs.windSpeed);
             } else if (el_windSpeedItem){
                  el_windSpeedItem.classList.add('is-hidden');
             }
@@ -1865,7 +1869,8 @@
             if (obs.windGust > 0 && el_windGustItem && el_mainWindGustValue) {
                  el_windGustItem.classList.remove('is-hidden');
                  updateAnimatedValue(el_mainWindGustValue, formatValue(obs.windGust, '', 1));
-                 el_windGustItem.style.backgroundColor = getWindColorVar(obs.windGust);
+                 // MODIFICATION: Removed dynamic background color
+                 // el_windGustItem.style.backgroundColor = getWindColorVar(obs.windGust);
             } else if (el_windGustItem) {
                  el_windGustItem.classList.add('is-hidden');
             }
@@ -1891,6 +1896,7 @@
         }
         
         function getTemperatureColorVar(temp) { if (temp === null || isNaN(temp)) return 'var(--mild)'; if (temp >= 35) return 'var(--hot)'; if (temp >= 25) return 'var(--warm)'; if (temp >= 10) return 'var(--mild)'; if (temp >= 0) return 'var(--cool)'; return 'var(--cold)'; }
+        // getWindColorVar is no longer used for background colors, but might be useful for other things later.
         function getWindColorVar(speed) { if (speed === null || isNaN(speed)) return 'rgba(0,0,0,0.15)'; if (speed > 40) return 'var(--hot)'; if (speed > 25) return 'var(--warm)'; if (speed > 10) return 'var(--mild)'; return 'var(--cool)'; }
 
 
