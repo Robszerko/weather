@@ -15,22 +15,18 @@
             --text-secondary-night: #A0B0C0;
             --bg-widget-night: rgba(15, 23, 42, 0.88);
             --border-widget-night: rgba(56, 189, 248, 0.2);
-            /* === MÓDOSÍTÁS KEZDETE === */
             --info-bar-bg-night: rgba(0, 0, 0, 0.25);
             --info-bar-shadow-night: inset 0 1px 3px rgba(0,0,0,0.4);
             --info-bar-border-night: 1px solid rgba(255, 255, 255, 0.08);
-            /* === MÓDOSÍTÁS VÉGE === */
 
             --accent-interactive-day: #007AFF;
             --text-primary-day: #111827;
             --text-secondary-day: #4B5563;
             --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.92) 0%, rgba(225, 238, 252, 0.90) 100%);
             --border-widget-day: rgba(0, 122, 255, 0.18);
-            /* === MÓDOSÍTÁS KEZDETE === */
             --info-bar-bg-day: rgba(255, 255, 255, 0.4);
             --info-bar-shadow-day: inset 0 1px 2px rgba(0,0,0,0.12);
             --info-bar-border-day: 1px solid rgba(0, 0, 0, 0.08);
-            /* === MÓDOSÍTÁS VÉGE === */
 
             /* Hőmérsékletfüggő színek */
             --hot: #EF4444;
@@ -75,18 +71,15 @@
             --current-widget-bg: var(--bg-widget-night);
             --current-widget-border: var(--border-widget-night);
             --current-container-border-color: var(--border-widget-night);
-            /* === MÓDOSÍTÁS KEZDETE === */
             --current-info-bar-bg: var(--info-bar-bg-night);
             --current-info-bar-shadow: var(--info-bar-shadow-night);
             --current-info-bar-border: var(--info-bar-border-night);
-            /* === MÓDOSÍTÁS VÉGE === */
         }
 
         .is-hidden { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 
         body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; position: relative; overflow-x: hidden; transition: background-color 1.5s ease-in-out; }
         
-        /* === MÓDOSÍTÁS KEZDETE: Téma-specifikus változók beállítása az új sávhoz === */
         body[data-theme="day"] { --current-sky-color-top: var(--sky-color-top-day); --current-sky-color-bottom: var(--sky-color-bottom-day); --current-text-color: var(--text-primary-day); --current-text-muted-color: var(--text-secondary-day); --current-icon-color: var(--accent-interactive-day); --current-widget-bg: var(--bg-widget-day); --current-widget-border: var(--border-widget-day); --current-container-border-color: rgba(203, 213, 225, 0.55); --current-info-bar-bg: var(--info-bar-bg-day); --current-info-bar-shadow: var(--info-bar-shadow-day); --current-info-bar-border: var(--info-bar-border-day); }
         body[data-theme="dawn"] { --current-sky-color-top: var(--sky-color-top-dawn); --current-sky-color-bottom: var(--sky-color-bottom-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f59e0b; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(245, 158, 11, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
         body[data-theme="dusk"] { --current-sky-color-top: var(--sky-color-top-dusk); --current-sky-color-bottom: var(--sky-color-bottom-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f472b6; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(236, 72, 153, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
@@ -99,7 +92,6 @@
         body[data-theme="sunset"] { --current-sky-color-top: var(--sky-color-top-sunset); --current-sky-color-bottom: var(--sky-color-bottom-sunset); --current-text-color: #fef2f2; --current-text-muted-color: #fecaca; --current-icon-color: #ef4444; --current-widget-bg: linear-gradient(160deg, rgba(127, 29, 29, 0.9) 0%, rgba(76, 29, 29, 0.92) 100%); --current-widget-border: rgba(239, 68, 68, 0.25); --current-container-border-color: rgba(159, 18, 57, 0.4); --current-info-bar-bg: rgba(127, 29, 29, 0.6); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: 1px solid rgba(239, 68, 68, 0.3); }
         body[data-theme="blue_hour_dusk"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dusk); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #a78bfa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(167, 139, 250, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
         body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: #d1d5db; --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
-        /* === MÓDOSÍTÁS VÉGE === */
 
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
 
@@ -210,7 +202,6 @@
             width: 100%; 
         }
 
-        /* === MÓDOSÍTOTT SZEKCIÓ KEZDETE === */
         .secondary-info-bar {
             display: flex;
             justify-content: space-around;
@@ -233,7 +224,6 @@
             align-items: center;
             gap: 2px;
             text-align: center;
-            /* Előző stílusok eltávolítva (egyedi háttér, keret, stb.) */
             background-color: transparent;
             box-shadow: none;
             border: none;
@@ -243,7 +233,7 @@
 
         .info-bar-label {
             font-size: 11px;
-            font-weight: 500; /* Kicsit vékonyabb a jobb kontrasztért */
+            font-weight: 500;
             color: var(--current-text-muted-color);
             text-transform: uppercase;
             letter-spacing: 0.4px;
@@ -251,13 +241,13 @@
 
         .info-bar-value {
             font-size: 16px;
-            font-weight: 700; /* Vastagabb az érték kiemeléséhez */
+            font-weight: 700;
             color: var(--current-text-color);
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
-            white-space: nowrap; /* Alapértelmezetten ne törjön sorba */
+            white-space: nowrap;
         }
         
         #main-wind-dir-arrow {
@@ -265,7 +255,6 @@
             opacity: 0.8;
             transition: transform 0.8s ease-out;
         }
-        /* === MÓDOSÍTOTT SZEKCIÓ VÉGE === */
         
         .precipitation-forecast-info {
             margin: 12px auto 0 auto;
@@ -417,7 +406,6 @@
             height: 8px;
             border-radius: 1.5px;
             transform: translateX(-50%);
-            transition: left 1s cubic-bezier(0.4, 0, 0.2, 1);
             opacity: 0.9;
         }
 
@@ -431,7 +419,6 @@
             box-shadow: 0 0 10px 3px gold,
                         0 0 18px 6px rgba(255, 215, 0, 0.45),
                         inset 0 0 4px rgba(255, 255, 220, 0.6);
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
             pointer-events: auto;
             cursor: help;
@@ -441,7 +428,6 @@
         .sun-path-arc-main {
             stroke: gold;
             opacity: 0.85;
-            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .sun-path-now-marker {
             background-color: gold;
@@ -456,7 +442,6 @@
             color: #E8EAF6;
             text-shadow: 0 0 7px rgba(200, 200, 255, 0.6),
                          0 0 13px rgba(150, 150, 220, 0.4);
-            transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease-in-out;
             z-index: 10;
             pointer-events: auto;
             cursor: help;
@@ -464,7 +449,6 @@
         .moon-path-arc-main {
             stroke: #A0B0C0;
             opacity: 0.8;
-            transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .moon-path-now-marker {
             background-color: #A0B0C0;
@@ -484,6 +468,55 @@
             font-weight: 700;
             color: var(--current-text-color);
             opacity: 0.9;
+        }
+
+        .rise-set-animator {
+            position: absolute;
+            left: 50%;
+            bottom: 10px;
+            width: 80px;
+            height: 40px;
+            transform: translateX(-50%);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            pointer-events: none;
+        }
+
+        .rise-set-animator-icon {
+            width: 30px;
+            height: 30px;
+            position: relative;
+        }
+        
+        .rise-set-animator-icon::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 200%;
+            height: 200%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, var(--glow-color, gold) 0%, rgba(255,215,0,0) 70%);
+            opacity: var(--glow-opacity, 0);
+        }
+        
+        .rise-set-animator-icon i {
+            font-size: 30px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        #sun-animator-icon i {
+            color: #FFD700;
+            text-shadow: 0 0 10px 3px gold, 0 0 18px 6px rgba(255, 215, 0, 0.45);
+        }
+
+        #moon-animator-icon i {
+            color: #E8EAF6;
+            text-shadow: 0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4);
         }
 
         .rain-visual { width: 130px; height: 120px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; }
@@ -768,7 +801,7 @@
             }
 
             .info-bar-value {
-                font-size: 14px; /* Kisebb betűméret mobilon */
+                font-size: 14px;
             }
             
             .hourly-forecast-card {
@@ -847,8 +880,14 @@
         let weatherDisplayEl, forecastContainerEl, forecastTitleEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
         const NO_DATA_STRING = 'N/A';
         const PRECIP_THRESHOLD = 30;
+        
+        let animationFrameId = null;
+        const ANIMATION_ALTITUDE_THRESHOLD = 1.0; // fok
+        let celestialBodyStates = {
+            sun: { mode: null }, // 'ON_PATH' vagy 'IN_ANIMATION'
+            moon: { mode: null }
+        };
 
-        // VÁLTOZTATÁS: Időzítők összevonása
         let masterTickCounter = 0;
 
         let nightSkyRotationInterval = null;
@@ -886,6 +925,7 @@
             el_mainRainGaugeValue, el_mainRainVisualTotal, el_rainCurrentlyRainingValue, el_rainIntensityValue, el_rainExpectedTodayValue, el_nextPrecipItem, el_nextPrecipValue,
             el_sunPathIcon, el_sunPathArcMain, el_sunPathNowMarker, el_sunInfoAltitude, el_sunInfoAltitudeNode, el_sunInfoAzimuth, el_sunInfoTrend, el_sunInfoNoon, el_sunInfoRemaining, el_sunPathSunriseTime, el_sunPathSunsetTime, el_sunPathRefreshBtn,
             el_moonPathIcon, el_moonPathArcMain, el_moonPathNowMarker, el_moonriseTimeLabel, el_moonsetTimeLabel, el_moonInfoAltitude, el_moonInfoAltitudeNode, el_moonInfoTrend, el_moonInfoPhasename, el_moonInfoIllumination, el_moonPathRefreshBtn,
+            el_sunAnimator, el_sunAnimatorIcon, el_moonAnimator, el_moonAnimatorIcon,
             el_issInfo, el_planetInfo, el_constellationInfo,
             el_issVisualIcon, el_issNextPassTime, el_issMaxElevation, el_issDuration, el_issBrightness, el_issPathDetails,
             el_nightSkyVisualIcon, el_nightSkyObjectName, el_nightSkyObjectStatus, el_nightSkyObjectDetails, el_nightSkyAstroDarknessItemPlanet, el_nightSkyAstroDarknessPlanet,
@@ -1019,7 +1059,7 @@
             });
 
             if (events.length === 0) {
-                return { isUp: isActuallyUp, pathRise: null, pathSet: null, nextRise: null, nextSet: null };
+                return { isUp: isActuallyUp, pathRise: null, pathSet: null, nextRise: null, nextSet: null, moonAltitude: moonPos.altitude * 180 / Math.PI };
             }
 
             events.sort((a, b) => a.time - b.time);
@@ -1043,7 +1083,8 @@
                 pathRise: pathRise,
                 pathSet: pathSet,
                 nextRise: nextRise,
-                nextSet: nextSet
+                nextSet: nextSet,
+                moonAltitude: moonPos.altitude * 180 / Math.PI
             };
         }
 
@@ -1059,6 +1100,7 @@
             const solarNoonDate = sunTimesToday.solarNoon;
 
             const sunPos = SunCalc.getPosition(now, lat, lon);
+            const sunAltitude = sunPos.altitude * 180 / Math.PI;
             const sunAzimuthDegrees = (sunPos.azimuth * 180 / Math.PI + 180) % 360; 
             const sunAzimuthCompass = degreesToCompass(sunAzimuthDegrees);
 
@@ -1115,7 +1157,7 @@
                 solarNoon: formatTime(solarNoonDate),
                 sunriseDateForPath: sunriseDate,
                 sunsetDateForPath: sunsetDate,
-                sunAltitude: sunPos.altitude * 180 / Math.PI,
+                sunAltitude: sunAltitude,
                 sunAzimuthDegrees: sunAzimuthDegrees,
                 sunAzimuthCompass: sunAzimuthCompass,
                 sunTrend: sunTrend,
@@ -1126,7 +1168,7 @@
                 moonset: formatTime(comprehensiveMoonData.nextSet),
                 moonRiseDateForPath: comprehensiveMoonData.pathRise,
                 moonSetDateForPath: comprehensiveMoonData.pathSet,
-                moonAltitude: moonPos.altitude * 180 / Math.PI,
+                moonAltitude: comprehensiveMoonData.moonAltitude,
                 moonTrend: moonTrend,
                 moonStatus: moonStatus,
                 phaseValue: (moonIllumination.fraction * 100),
@@ -1314,49 +1356,6 @@
             }
         }
 
-
-        function updatePathVisuals(startTime, endTime, elements) {
-            const { iconEl, mainArcEl, nowMarkerEl } = elements;
-            if (!startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || !iconEl || !mainArcEl || !nowMarkerEl) {
-                if(mainArcEl && mainArcEl.getTotalLength) mainArcEl.style.strokeDashoffset = mainArcEl.getTotalLength();
-                if(iconEl) iconEl.classList.add('is-hidden');
-                if(nowMarkerEl) nowMarkerEl.classList.add('is-hidden');
-                return;
-            }
-            iconEl.classList.remove('is-hidden');
-            nowMarkerEl.classList.remove('is-hidden');
-
-            const now = new Date();
-            const totalTimeInSky = endTime.getTime() - startTime.getTime();
-
-            let percentageOfPath = 0;
-            if (totalTimeInSky > 0) {
-                const elapsedTime = now.getTime() - startTime.getTime();
-                percentageOfPath = Math.max(0, Math.min(1, elapsedTime / totalTimeInSky));
-            }
-
-            const arcLength = mainArcEl.getTotalLength();
-            if (arcLength === 0) {
-                setTimeout(() => updatePathVisuals(startTime, endTime, elements), 50);
-                return;
-            }
-
-            const offset = arcLength * (1 - percentageOfPath);
-            mainArcEl.style.strokeDasharray = arcLength;
-            mainArcEl.style.strokeDashoffset = offset;
-
-            const angle = Math.PI * (1 - percentageOfPath);
-            const arcRadius = 65;
-            const centerX = 75;
-            const centerY = 75;
-
-            const svgX = centerX + arcRadius * Math.cos(angle);
-            const svgY = centerY - arcRadius * Math.sin(angle);
-
-            iconEl.style.transform = `translate(${svgX}px, ${svgY}px) translate(-50%, -50%)`;
-            nowMarkerEl.style.left = `${svgX}px`;
-        }
-
         function updatePrecipitationVisuals(precipRate, precipTotal, elements) {
             const { gaugeValueEl, totalValueEl } = elements;
             if (!gaugeValueEl || !totalValueEl) return;
@@ -1498,8 +1497,30 @@
             </div>
 
             <div class="main-info-wrapper">
-                <div class="sun-info-section is-hidden" id="sun-info-section"><div class="sun-path-visual"><svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="sun-path-horizon"></div><div class="sun-path-now-marker" id="sun-path-now-marker"></div><i id="sun-path-icon"></i><div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div><div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div></div><div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="far fa-compass"></i>Irány</span><span id="sun-info-azimuth" class="sun-detail-value">--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div></div>
-                <div class="moon-info-section is-hidden" id="moon-info-section"><div class="moon-path-visual"><svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg><div class="moon-path-horizon"></div><div class="moon-path-now-marker" id="moon-path-now-marker"></div><i class="fas fa-moon" id="moon-path-icon"></i><div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div><div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div></div><div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div></div>
+                <div class="sun-info-section is-hidden" id="sun-info-section">
+                    <div class="sun-path-visual">
+                        <svg class="sun-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
+                        <div class="sun-path-horizon"></div>
+                        <div class="sun-path-now-marker" id="sun-path-now-marker"></div>
+                        <i id="sun-path-icon"></i>
+                        <div class="rise-set-animator is-hidden" id="sun-animator"><div class="rise-set-animator-icon" id="sun-animator-icon"><i class="fas fa-sun"></i></div></div>
+                        <div class="sun-path-label sunrise-label">Napkelte<div id="sun-path-sunrise-time" class="sun-path-time">--:--</div></div>
+                        <div class="sun-path-label sunset-label">Napnyugta<div id="sun-path-sunset-time" class="sun-path-time">--:--</div></div>
+                    </div>
+                    <div class="sun-text-details"><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="sun-info-altitude" class="sun-detail-value">--°<span id="sun-info-trend" class="sun-trend-text"></span><i id="sun-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="far fa-compass"></i>Irány</span><span id="sun-info-azimuth" class="sun-detail-value">--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-clock"></i>Déli nap</span><span id="sun-info-noon" class="sun-detail-value">--:--</span></div><div class="sun-detail-item"><span class="sun-detail-label"><i class="fas fa-hourglass-half"></i>Nap útja</span><span id="sun-info-remaining" class="sun-detail-value">--</span></div></div>
+                </div>
+                <div class="moon-info-section is-hidden" id="moon-info-section">
+                    <div class="moon-path-visual">
+                        <svg class="moon-path-svg" viewBox="0 0 150 85" preserveAspectRatio="none"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
+                        <div class="moon-path-horizon"></div>
+                        <div class="moon-path-now-marker" id="moon-path-now-marker"></div>
+                        <i class="fas fa-moon" id="moon-path-icon"></i>
+                        <div class="rise-set-animator is-hidden" id="moon-animator"><div class="rise-set-animator-icon" id="moon-animator-icon"><i class="fas fa-moon"></i></div></div>
+                        <div class="moon-path-label moonrise-label">Holdkelte<div id="moonrise-time-label" class="moon-path-time">--:--</div></div>
+                        <div class="moon-path-label moonset-label">Holdnyugta<div id="moonset-time-label" class="moon-path-time">--:--</div></div>
+                    </div>
+                    <div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div>
+                </div>
                 <div class="rain-info-section is-hidden" id="rain-info-section"><div class="rain-visual" id="main-rain-visual"><div class="rain-visual-center"><i id="rain-visual-icon" class="fas fa-cloud-showers-heavy"></i><div><span id="rain-visual-total">--</span><span id="rain-visual-total-unit">mm</span></div><div class="rain-visual-label">esett ma eddig</div></div><div class="rain-streak"></div><svg class="rain-gauge-svg" viewBox="0 0 100 100"><defs><clipPath id="raindrop-clip-main"><path d="${mainRaindropPath}"></path></clipPath></defs><path class="rain-gauge-bg" d="${mainRaindropPath}"></path><path id="rain-gauge-value" class="rain-gauge-value" d="${mainRaindropPath}"></path></svg></div><div class="rain-text-details"><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-cloud-rain"></i>Most esik</span><span class="rain-detail-value" id="rain-currently-raining-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-tachometer-alt"></i>Intenzitás</span><span class="rain-detail-value" id="rain-intensity-value"></span></div><div class="rain-detail-item"><span class="rain-detail-label"><i class="fas fa-bullseye"></i>Várható</span><span class="rain-detail-value" id="rain-expected-today-value"></span></div><div class="rain-detail-item is-hidden" id="next-precip-item"><span class="rain-detail-label"><i class="fas fa-forward"></i>Következő</span><span class="rain-detail-value" id="next-precip-value"></span></div></div></div>
                 <div class="night-sky-info-section is-hidden" id="night-sky-info-section">
                     <div id="iss-info" class="is-hidden" style="display: flex; align-items: center; gap: 20px;">
@@ -1598,6 +1619,11 @@
             el_moonInfoPhasename = document.getElementById('moon-info-phasename');
             el_moonInfoIllumination = document.getElementById('moon-info-illumination');
             el_moonPathRefreshBtn = document.getElementById('moon-path-refresh-btn');
+            
+            el_sunAnimator = document.getElementById('sun-animator');
+            el_sunAnimatorIcon = document.getElementById('sun-animator-icon');
+            el_moonAnimator = document.getElementById('moon-animator');
+            el_moonAnimatorIcon = document.getElementById('moon-animator-icon');
 
             el_issInfo = document.getElementById('iss-info');
             el_planetInfo = document.getElementById('planet-info');
@@ -1788,10 +1814,10 @@
             if (el_rainTongueContainer && el_rainTongueValue) {
                 const precip = obs.precipTotal;
                 el_rainTongueValue.textContent = formatValue(precip, ' mm', 2, '--');
-                let rainColor = '#6B7280'; // Alapértelmezett szürke
-                if (precip > 0) rainColor = '#3B82F6'; // Világoskék
-                if (precip >= 5) rainColor = '#2563EB'; // Kék
-                if (precip >= 15) rainColor = '#1D4ED8'; // Sötétkék
+                let rainColor = '#6B7280';
+                if (precip > 0) rainColor = '#3B82F6';
+                if (precip >= 5) rainColor = '#2563EB';
+                if (precip >= 15) rainColor = '#1D4ED8';
                 el_rainTongueContainer.style.backgroundColor = rainColor;
             }
 
@@ -1817,7 +1843,7 @@
                     if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.remove('is-hidden');
                 }
             }
-
+            
             updatePrecipitationVisuals(obs.precipRate, obs.precipTotal, { gaugeValueEl: el_mainRainGaugeValue, totalValueEl: el_mainRainVisualTotal });
             if (el_rainCurrentlyRainingValue) el_rainCurrentlyRainingValue.textContent = isRainingNow ? "Igen" : "Nem";
             if (el_rainIntensityValue) el_rainIntensityValue.textContent = formatValue(obs.precipRate, ' mm/h', 2);
@@ -1831,8 +1857,6 @@
                 el_nextPrecipItem.classList.add('is-hidden');
             }
 
-            const sunPathElements = { iconEl: el_sunPathIcon, mainArcEl: el_sunPathArcMain, nowMarkerEl: el_sunPathNowMarker };
-            updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements);
             if (el_sunInfoAltitudeNode) el_sunInfoAltitudeNode.nodeValue = formatValue(sunCalcData.sunAltitude, '°', 1) + ' ';
             if (el_sunInfoAzimuth) el_sunInfoAzimuth.textContent = `${sunCalcData.sunAzimuthCompass} (${formatValue(sunCalcData.sunAzimuthDegrees, '°', 0)})`;
             if (el_sunInfoTrend) el_sunInfoTrend.textContent = `(${sunCalcData.sunTrend || sunCalcData.sunStatus})`;
@@ -1840,10 +1864,8 @@
             if (el_sunInfoRemaining) el_sunInfoRemaining.textContent = sunCalcData.remainingDaylight;
             if (el_sunPathSunriseTime) el_sunPathSunriseTime.textContent = sunCalcData.sunrise;
             if (el_sunPathSunsetTime) el_sunPathSunsetTime.textContent = sunCalcData.sunset;
-            if (el_sunPathRefreshBtn) el_sunPathRefreshBtn.onclick = () => { el_sunPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.sunriseDateForPath, sunCalcData.sunsetDateForPath, sunPathElements); setTimeout(() => el_sunPathRefreshBtn.classList.remove('is-refreshing'), 800); };
-
-            const moonPathElements = { iconEl: el_moonPathIcon, mainArcEl: el_moonPathArcMain, nowMarkerEl: el_moonPathNowMarker };
-            updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements);
+            if (el_sunPathRefreshBtn) el_sunPathRefreshBtn.onclick = () => { el_sunPathRefreshBtn.classList.add('is-refreshing'); setTimeout(() => el_sunPathRefreshBtn.classList.remove('is-refreshing'), 800); };
+            
             if (el_moonriseTimeLabel) el_moonriseTimeLabel.textContent = formatTime(sunCalcData.moonRiseDateForPath);
             if (el_moonsetTimeLabel) el_moonsetTimeLabel.textContent = formatTime(sunCalcData.moonSetDateForPath);
             if (el_moonInfoAltitudeNode) el_moonInfoAltitudeNode.nodeValue = formatValue(sunCalcData.moonAltitude, '°', 1) + ' ';
@@ -1855,7 +1877,7 @@
                 const maxOpacity = 1.0;
                 el_moonPathIcon.style.opacity = (minOpacity + (sunCalcData.phaseValue / 100) * (maxOpacity - minOpacity)).toFixed(2);
             }
-            if (el_moonPathRefreshBtn) el_moonPathRefreshBtn.onclick = () => { el_moonPathRefreshBtn.classList.add('is-refreshing'); updatePathVisuals(sunCalcData.moonRiseDateForPath, sunCalcData.moonSetDateForPath, moonPathElements); setTimeout(() => el_moonPathRefreshBtn.classList.remove('is-refreshing'), 800); };
+            if (el_moonPathRefreshBtn) el_moonPathRefreshBtn.onclick = () => { el_moonPathRefreshBtn.classList.add('is-refreshing'); setTimeout(() => el_moonPathRefreshBtn.classList.remove('is-refreshing'), 800); };
 
             if(el_gridSunriseItem) el_gridSunriseItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
             if(el_gridSunsetItem) el_gridSunsetItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
@@ -1873,7 +1895,6 @@
                  el_windSpeedItem.classList.remove('is-hidden');
                  if(el_mainWindDirArrow) el_mainWindDirArrow.style.transform = `rotate(${obs.winddir || 0}deg)`;
                  
-                 // === MÓDOSÍTÁS KEZDETE: Reszponzív szélirány kiírás ===
                  if(el_mainWindDirText) {
                     if (window.innerWidth < 500) {
                         el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir);
@@ -1881,7 +1902,6 @@
                         el_mainWindDirText.textContent = degreesToCompass(obs.winddir);
                     }
                  }
-                 // === MÓDOSÍTÁS VÉGE ===
 
                  if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir);
                  updateAnimatedValue(el_mainWindSpeedValue, formatValue(obs.windSpeed, '', 1));
@@ -2178,9 +2198,122 @@
                 }
             }
         }
+        
+        // === MÓDOSÍTOTT FUNKCIÓK AZ ANIMÁCIÓHOZ ===
+        function masterAnimationLoop() {
+            if (!cachedData.sunCalc) {
+                animationFrameId = requestAnimationFrame(masterAnimationLoop);
+                return;
+            }
+            
+            const now = new Date();
+            const sunPos = SunCalc.getPosition(now, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
+            const moonPos = SunCalc.getMoonPosition(now, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
 
+            const sunElements = {
+                bodyName: 'sun',
+                altitude: sunPos.altitude * 180 / Math.PI,
+                pathIcon: el_sunPathIcon,
+                pathArc: el_sunPathArcMain,
+                pathNowMarker: el_sunPathNowMarker,
+                animator: el_sunAnimator,
+                animatorIcon: el_sunAnimatorIcon,
+                pathStartTime: cachedData.sunCalc.sunriseDateForPath,
+                pathEndTime: cachedData.sunCalc.sunsetDateForPath,
+                glowColor: 'rgba(255, 215, 0, 0.7)'
+            };
+
+            const moonElements = {
+                bodyName: 'moon',
+                altitude: moonPos.altitude * 180 / Math.PI,
+                pathIcon: el_moonPathIcon,
+                pathArc: el_moonPathArcMain,
+                pathNowMarker: el_moonPathNowMarker,
+                animator: el_moonAnimator,
+                animatorIcon: el_moonAnimatorIcon,
+                pathStartTime: cachedData.sunCalc.moonRiseDateForPath,
+                pathEndTime: cachedData.sunCalc.moonSetDateForPath,
+                glowColor: 'rgba(220, 220, 255, 0.6)'
+            };
+
+            updateCelestialVisuals(sunElements);
+            updateCelestialVisuals(moonElements);
+
+            animationFrameId = requestAnimationFrame(masterAnimationLoop);
+        }
+
+        function updatePathVisuals(startTime, endTime, elements, isVisible = true) {
+            const { iconEl, mainArcEl, nowMarkerEl } = elements;
+             if (!isVisible || !startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || !iconEl || !mainArcEl || !nowMarkerEl) {
+                if(mainArcEl && mainArcEl.getTotalLength) mainArcEl.style.strokeDashoffset = mainArcEl.getTotalLength();
+                if(iconEl) iconEl.style.transform = 'translate(-100px, -100px)'; // Eltüntetjük a képernyőről
+                if(nowMarkerEl) nowMarkerEl.classList.add('is-hidden');
+                return;
+            }
+            nowMarkerEl.classList.remove('is-hidden');
+
+            const now = new Date();
+            const totalTimeInSky = endTime.getTime() - startTime.getTime();
+
+            let percentageOfPath = 0;
+            if (totalTimeInSky > 0) {
+                const elapsedTime = now.getTime() - startTime.getTime();
+                percentageOfPath = Math.max(0, Math.min(1, elapsedTime / totalTimeInSky));
+            }
+
+            const arcLength = mainArcEl.getTotalLength();
+            if (arcLength === 0) return;
+
+            mainArcEl.style.strokeDasharray = arcLength;
+            mainArcEl.style.strokeDashoffset = arcLength * (1 - percentageOfPath);
+
+            const angle = Math.PI * (1 - percentageOfPath);
+            const r = 65, cx = 75, cy = 75;
+            const x = cx + r * Math.cos(angle);
+            const y = cy - r * Math.sin(angle);
+
+            iconEl.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+            nowMarkerEl.style.left = `${x}px`;
+        }
+
+        function updateCelestialVisuals(elements) {
+            const { bodyName, altitude, pathIcon, pathArc, pathNowMarker, animator, animatorIcon, pathStartTime, pathEndTime, glowColor } = elements;
+            const state = celestialBodyStates[bodyName];
+            
+            const isInAnimationZone = Math.abs(altitude) < ANIMATION_ALTITUDE_THRESHOLD;
+
+            if (isInAnimationZone) {
+                if (state.mode !== 'IN_ANIMATION') {
+                    state.mode = 'IN_ANIMATION';
+                    pathIcon.classList.add('is-hidden');
+                    pathNowMarker.classList.add('is-hidden');
+                    animator.classList.remove('is-hidden');
+                }
+                
+                const progress = altitude / ANIMATION_ALTITUDE_THRESHOLD; // -1 (alul) to +1 (felül)
+                const iconHeight = animatorIcon.clientHeight;
+                const yPos = (iconHeight / 2) * (1 - progress);
+
+                const glowOpacity = 1 - Math.abs(progress);
+
+                animatorIcon.style.setProperty('--glow-color', glowColor);
+                animatorIcon.style.setProperty('--glow-opacity', glowOpacity);
+                animatorIcon.style.transform = `translateY(${yPos}px)`;
+
+            } else { // Pályán van
+                if (state.mode !== 'ON_PATH') {
+                    state.mode = 'ON_PATH';
+                    animator.classList.add('is-hidden');
+                    pathIcon.classList.remove('is-hidden');
+                    pathNowMarker.classList.remove('is-hidden');
+                }
+                updatePathVisuals(pathStartTime, pathEndTime, { iconEl: pathIcon, mainArcEl: pathArc, nowMarkerEl: pathNowMarker }, altitude > 0);
+            }
+        }
+        
         function startMasterLoop() {
-            console.log("Master loop elindítva (1 másodperces ütemezés).");
+            console.log("Master loop elindítva.");
+            masterAnimationLoop();
 
             const PWS_INTERVAL_S = REFRESH_INTERVAL_PWS / 1000;
             const WIND_INTERVAL_S = REFRESH_INTERVAL_WIND / 1000;
@@ -2191,16 +2324,13 @@
                 masterTickCounter++;
 
                 if (masterTickCounter % PWS_INTERVAL_S === 0) {
-                    console.log(`Master loop tick (${masterTickCounter}s): Teljes adatfrissítés.`);
                     fetchAllDataAndUpdateDisplay(false);
                 } else if (masterTickCounter % WIND_INTERVAL_S === 0) {
-                    console.log(`Master loop tick (${masterTickCounter}s): Csak a szél adatok frissítése.`);
                     fetchAndRefreshWindData();
                 }
 
                 if (masterTickCounter % SKY_UPDATE_S === 0) {
-                     if (cachedData.generalConditions && cachedData.generalConditions.sunriseTimeLocal && cachedData.generalConditions.sunsetTimeLocal) {
-                        console.log(`Master loop tick (${masterTickCounter}s): Égbolt színének frissítése.`);
+                     if (cachedData.generalConditions?.sunriseTimeLocal && cachedData.generalConditions?.sunsetTimeLocal) {
                         updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
                     }
                 }
@@ -2253,7 +2383,7 @@
                 }
 
                 scheduleHourlyForecastUpdate();
-            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); // Minimum 20 perc várakozás, ha a számítás 0-ra jön ki
+            }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000);
         }
         
         function initApp() {
@@ -2265,14 +2395,11 @@
 
             initializeWeatherDisplayDOM();
             
-            // === MÓDOSÍTÁS KEZDETE: Resize event listener a reszponzív szélirányhoz ===
             window.addEventListener('resize', () => {
-                // Csak akkor renderelünk újra, ha már vannak adatok, elkerülve a hibákat
                 if (cachedData.displayPws) {
                     renderWeatherData();
                 }
             });
-            // === MÓDOSÍTÁS VÉGE ===
 
             fetchAllDataAndUpdateDisplay(true).finally(() => {
                 console.log("Az időzített frissítések elindulnak.");
