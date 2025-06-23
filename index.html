@@ -155,15 +155,12 @@
         /* === ÚJ ADAT KÖZPONT STÍLUSOK (DATA HUB) === */
         .data-hub-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, auto);
+            grid-template-columns: 1fr 1fr;
+            grid-auto-rows: auto;
             gap: 8px;
             margin: 16px auto 12px auto;
             max-width: 480px;
             width: 100%;
-            grid-template-areas:
-                "heat temp wind"
-                "rain temp gust";
         }
         .hub-item {
             background-color: rgba(0,0,0,0.18);
@@ -178,23 +175,22 @@
             transition: all 0.4s ease;
             box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
         }
-        .hub-item.hub-center {
-            grid-area: temp;
+        #hub-temp-item {
+            grid-column: 1 / -1; /* Teljes szélességet elfoglalja a sorában */
+            order: 2; /* Középre rendezi */
             background: var(--current-temp-bg-color);
             color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            transform: scale(1.05);
-            z-index: 5;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.2);
             border-color: rgba(255,255,255,0.2);
+            width: max-content; /* A tartalomhoz igazítja a szélességet */
+            justify-self: center; /* Középre igazítja magát a blokkot */
+            padding: 10px 16px; /* Belső tér a címkének */
         }
-        .hub-item.hub-petal {
-            color: var(--current-text-color);
-        }
-        #hub-heat-index-item { grid-area: heat; }
-        #hub-wind-item { grid-area: wind; }
-        #hub-gust-item { grid-area: gust; }
-        #hub-rain-item { grid-area: rain; }
+        #hub-heat-index-item { order: 1; }
+        #hub-wind-item { order: 1; }
+        #hub-rain-item { order: 3; }
+        #hub-gust-item { order: 3; }
 
         .hub-icon {
             font-size: 18px;
@@ -202,10 +198,10 @@
             opacity: 0.7;
             color: var(--current-icon-color);
         }
-        .hub-center .hub-icon {
+        #hub-temp-item .hub-icon {
             color: white;
             opacity: 0.9;
-            font-size: 36px; /* MÉG NAGYOBB IKON */
+            font-size: 36px;
         }
 
         .hub-label {
@@ -215,11 +211,12 @@
             letter-spacing: 0.5px;
             opacity: 0.8;
             color: var(--current-text-muted-color);
-            margin-top: auto; /* Pushes label to the bottom */
+            margin-top: auto;
         }
-        .hub-center .hub-label {
+        #hub-temp-item .hub-label {
             color: rgba(255,255,255,0.8);
             font-size: 11px;
+            white-space: nowrap; /* Biztosítja, hogy ne törjön a címke */
         }
 
         .hub-value {
@@ -229,22 +226,22 @@
             margin-top: 2px;
             color: var(--current-text-color);
         }
-        #hub-wind-speed-value {
-            font-size: 16px;
-            display: block;
-        }
+        #hub-wind-item .hub-value { font-size: 16px; }
         #hub-wind-direction {
             font-size: 11px;
             font-weight: 500;
             color: var(--current-text-muted-color);
             line-height: 1.2;
+            order: 2; /* Felülírja a .hub-label-t */
+            margin-top: 4px;
         }
-        .hub-center .hub-value {
-            font-size: 56px; /* MÉG NAGYOBB ÉRTÉK */
+        #hub-temp-item .hub-value {
+            font-size: 56px;
             font-weight: 800;
             color: white;
-            letter-spacing: -2.5px; /* Igazítás a mérethez */
-            margin-top: 8px; /* Lejjebb tolás */
+            letter-spacing: -2.5px;
+            margin-top: 8px;
+            line-height: 1;
         }
         
         @keyframes pop-animation {
@@ -767,18 +764,25 @@
             }
 
             .data-hub-container {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(3, auto);
+                display: flex;
+                flex-direction: column;
                 gap: 8px;
-                grid-template-areas:
-                    "temp temp"
-                    "heat wind"
-                    "rain gust";
             }
+            .hub-item, #hub-temp-item {
+                width: auto;
+                order: 0 !important;
+                grid-column: auto;
+            }
+            #hub-temp-item { order: 1 !important; }
+            #hub-heat-index-item { order: 2 !important; }
+            #hub-wind-item { order: 3 !important; }
+            #hub-gust-item { order: 4 !important; }
+            #hub-rain-item { order: 5 !important; }
+
             .hub-value { font-size: 16px; }
-            .hub-center .hub-value { font-size: 48px; }
-            .hub-center .hub-icon { font-size: 32px; }
-            #hub-wind-speed-value { font-size: 14px; }
+            #hub-temp-item .hub-value { font-size: 48px; }
+            #hub-temp-item .hub-icon { font-size: 32px; }
+            #hub-wind-item .hub-value { font-size: 14px; }
             
             .hourly-forecast-card {
                 flex-direction: column;
@@ -1625,27 +1629,27 @@
             </div>
 
             <div class="data-hub-container">
-                <div class="hub-item hub-petal is-hidden" id="hub-heat-index-item">
+                <div class="hub-item" id="hub-heat-index-item">
                     <i class="fas fa-temperature-high hub-icon"></i>
                     <div class="hub-value" id="hub-heat-index-value">--°</div>
                     <div class="hub-label">Hőérzet</div>
                 </div>
-                <div class="hub-item hub-center" id="hub-temp-item">
+                <div class="hub-item" id="hub-temp-item">
                     <i class="fas fa-thermometer-half hub-icon"></i>
                     <div class="hub-value" id="hub-temp-value">--°</div>
                     <div class="hub-label">Hőmérséklet jelenleg</div>
                 </div>
-                <div class="hub-item hub-petal is-hidden" id="hub-wind-item">
+                <div class="hub-item" id="hub-wind-item">
                      <i class="fas fa-location-arrow hub-icon"></i>
                     <div class="hub-value" id="hub-wind-speed-value">-- km/h</div>
                     <div id="hub-wind-direction" class="hub-label">Szél</div>
                 </div>
-                <div class="hub-item hub-petal is-hidden" id="hub-gust-item">
+                <div class="hub-item" id="hub-gust-item">
                     <i class="fas fa-wind hub-icon"></i>
                     <div class="hub-value" id="hub-gust-value">-- km/h</div>
                     <div class="hub-label">Széllökés</div>
                 </div>
-                <div class="hub-item hub-petal is-hidden" id="hub-rain-item">
+                <div class="hub-item" id="hub-rain-item">
                     <i class="fas fa-tint hub-icon"></i>
                     <div class="hub-value" id="hub-rain-value">-- mm</div>
                     <div class="hub-label">Esett eddig ma</div>
