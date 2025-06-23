@@ -185,7 +185,7 @@
             border-color: rgba(255,255,255,0.2);
             width: max-content; /* A tartalomhoz igazítja a szélességet */
             justify-self: center; /* Középre igazítja magát a blokkot */
-            padding: 10px 16px; /* Belső tér a címkének */
+            padding: 8px 12px; /* Kisebb belső tér */
         }
         #hub-heat-index-item { order: 1; }
         #hub-wind-item { order: 1; }
@@ -201,7 +201,7 @@
         #hub-temp-item .hub-icon {
             color: white;
             opacity: 0.9;
-            font-size: 36px;
+            font-size: 32px; /* Kisebb ikon */
         }
 
         .hub-label {
@@ -232,15 +232,15 @@
             font-weight: 500;
             color: var(--current-text-muted-color);
             line-height: 1.2;
-            order: 2; /* Felülírja a .hub-label-t */
+            order: 2; 
             margin-top: 4px;
         }
         #hub-temp-item .hub-value {
-            font-size: 56px;
+            font-size: 48px; /* Kisebb betűméret */
             font-weight: 800;
             color: white;
-            letter-spacing: -2.5px;
-            margin-top: 8px;
+            letter-spacing: -2px;
+            margin-top: 6px;
             line-height: 1;
         }
         
@@ -301,7 +301,6 @@
             flex-basis: 130px;
         }
 
-        /* === ÚJ CSILLAGÁSZATI ELRENDEZÉS === */
         .night-sky-info-section {
             flex-direction: column;
             gap: 8px;
@@ -339,7 +338,7 @@
             border-bottom: none;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             background-color: rgba(0, 0, 0, 0.08);
-            white-space: nowrap; /* Csillagászati sötétség nem törhet */
+            white-space: nowrap; 
         }
 
         .sun-detail-item:hover, .moon-detail-item:hover, .rain-detail-item:hover, .night-sky-detail-item:hover {
@@ -381,9 +380,9 @@
             text-align: left;
             justify-content: flex-start;
         }
-        /* Specifikus felülírás a leírásokhoz */
+
         #night-sky-object-status, #night-sky-object-details, #iss-path-details, #constellation-details {
-            text-align: right; /* A leírások jobbra igazítottak maradnak */
+            text-align: right; 
         }
         .sun-trend-text, .moon-trend-text { font-size: 0.75em; font-weight: 500; opacity: 0.7; margin-left: 4px; }
         .path-refresh-btn { font-size: 0.75em; margin-left: 6px; cursor: pointer; opacity: 0.6; transition: opacity 0.3s, color 0.3s, transform 0.3s; }
@@ -459,9 +458,11 @@
             width: 18px;
             height: 18px;
             font-size: 18px;
-            color: #E8EAF6;
-            text-shadow: 0 0 7px rgba(200, 200, 255, 0.6),
-                         0 0 13px rgba(150, 150, 220, 0.4);
+            color: #F5F5FA; /* Ragyogóbb alapszín */
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.95),
+                         0 0 12px rgba(220, 220, 255, 0.85),
+                         0 0 22px rgba(180, 180, 255, 0.7),
+                         0 0 40px rgba(150, 150, 220, 0.5);
             transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s ease-in-out;
             z-index: 10;
             pointer-events: auto;
@@ -513,11 +514,11 @@
         .rain-visual.is-raining-actively .rain-streak { display: block; animation: streak-animation 60s linear infinite; }
 
         #planet-info .night-sky-visual i.fa-ring { color: #E3D4A8; text-shadow: 0 0 10px #E3D4A8; }
-        #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; } /* Vénusz, Mars */
-        #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; } /* Jupiter */
-        #planet-info .night-sky-visual i.fa-dot-circle { color: #a7b3c2; text-shadow: 0 0 12px #cdd8e6; } /* Galaxis */
-        #planet-info .night-sky-visual i.fa-meteor { color: #facc15; text-shadow: 0 0 12px #fef08a; } /* Meteor */
-        #planet-info .night-sky-visual i.fa-star { color: #fefce8; text-shadow: 0 0 12px #fef9c3; } /* Star */
+        #planet-info .night-sky-visual i.fa-circle { text-shadow: 0 0 10px #E27B58; color: #E27B58; }
+        #planet-info .night-sky-visual i.fa-globe-europe { color: #d8b89d; text-shadow: 0 0 10px #d8b89d; }
+        #planet-info .night-sky-visual i.fa-dot-circle { color: #a7b3c2; text-shadow: 0 0 12px #cdd8e6; }
+        #planet-info .night-sky-visual i.fa-meteor { color: #facc15; text-shadow: 0 0 12px #fef08a; }
+        #planet-info .night-sky-visual i.fa-star { color: #fefce8; text-shadow: 0 0 12px #fef9c3; }
         #iss-info .night-sky-visual i.fa-satellite { color: #B0B0B0; text-shadow: 0 0 8px #FFFFFF;}
 
         #constellation-svg-container { width: 100px; height: 80px; margin: 0 auto; }
