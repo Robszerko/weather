@@ -15,12 +15,22 @@
             --text-secondary-night: #A0B0C0;
             --bg-widget-night: rgba(15, 23, 42, 0.88);
             --border-widget-night: rgba(56, 189, 248, 0.2);
+            /* === MÓDOSÍTÁS KEZDETE === */
+            --info-bar-bg-night: rgba(0, 0, 0, 0.25);
+            --info-bar-shadow-night: inset 0 1px 3px rgba(0,0,0,0.4);
+            --info-bar-border-night: 1px solid rgba(255, 255, 255, 0.08);
+            /* === MÓDOSÍTÁS VÉGE === */
 
             --accent-interactive-day: #007AFF;
             --text-primary-day: #111827;
             --text-secondary-day: #4B5563;
             --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.92) 0%, rgba(225, 238, 252, 0.90) 100%);
             --border-widget-day: rgba(0, 122, 255, 0.18);
+            /* === MÓDOSÍTÁS KEZDETE === */
+            --info-bar-bg-day: rgba(255, 255, 255, 0.4);
+            --info-bar-shadow-day: inset 0 1px 2px rgba(0,0,0,0.12);
+            --info-bar-border-day: 1px solid rgba(0, 0, 0, 0.08);
+            /* === MÓDOSÍTÁS VÉGE === */
 
             /* Hőmérsékletfüggő színek */
             --hot: #EF4444;
@@ -65,24 +75,31 @@
             --current-widget-bg: var(--bg-widget-night);
             --current-widget-border: var(--border-widget-night);
             --current-container-border-color: var(--border-widget-night);
+            /* === MÓDOSÍTÁS KEZDETE === */
+            --current-info-bar-bg: var(--info-bar-bg-night);
+            --current-info-bar-shadow: var(--info-bar-shadow-night);
+            --current-info-bar-border: var(--info-bar-border-night);
+            /* === MÓDOSÍTÁS VÉGE === */
         }
 
         .is-hidden { display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; }
 
         body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; position: relative; overflow-x: hidden; transition: background-color 1.5s ease-in-out; }
-
-        body[data-theme="day"] { --current-sky-color-top: var(--sky-color-top-day); --current-sky-color-bottom: var(--sky-color-bottom-day); --current-text-color: var(--text-primary-day); --current-text-muted-color: var(--text-secondary-day); --current-icon-color: var(--accent-interactive-day); --current-widget-bg: var(--bg-widget-day); --current-widget-border: var(--border-widget-day); --current-container-border-color: rgba(203, 213, 225, 0.55); }
-        body[data-theme="dawn"] { --current-sky-color-top: var(--sky-color-top-dawn); --current-sky-color-bottom: var(--sky-color-bottom-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f59e0b; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(245, 158, 11, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="dusk"] { --current-sky-color-top: var(--sky-color-top-dusk); --current-sky-color-bottom: var(--sky-color-bottom-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f472b6; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(236, 72, 153, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-
-        body[data-theme="early_dawn"] { --current-sky-color-top: var(--sky-color-top-early-dawn); --current-sky-color-bottom: var(--sky-color-bottom-early-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: #94a3b8; --current-icon-color: #60a5fa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(96, 165, 250, 0.2); --current-container-border-color: rgba(51, 65, 85, 0.5); }
-        body[data-theme="blue_hour_dawn"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dawn); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #93c5fd; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(147, 197, 253, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="sunrise"] { --current-sky-color-top: var(--sky-color-top-sunrise); --current-sky-color-bottom: var(--sky-color-bottom-sunrise); --current-text-color: #422006; --current-text-muted-color: #7c2d12; --current-icon-color: #f97316; --current-widget-bg: linear-gradient(160deg, rgba(254, 243, 199, 0.92) 0%, rgba(253, 186, 116, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.25); --current-container-border-color: rgba(124, 45, 18, 0.4); }
-        body[data-theme="golden_hour_rise"] { --current-sky-color-top: var(--sky-color-top-golden-hour-rise); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-rise); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #f59e0b; --current-widget-bg: linear-gradient(160deg, rgba(254, 249, 231, 0.92) 0%, rgba(253, 224, 224, 0.90) 100%); --current-widget-border: rgba(245, 158, 11, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); }
-        body[data-theme="golden_hour_set"] { --current-sky-color-top: var(--sky-color-top-golden-hour-set); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-set); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #ea580c; --current-widget-bg: linear-gradient(160deg, rgba(254, 235, 202, 0.92) 0%, rgba(254, 202, 202, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); }
-        body[data-theme="sunset"] { --current-sky-color-top: var(--sky-color-top-sunset); --current-sky-color-bottom: var(--sky-color-bottom-sunset); --current-text-color: #fef2f2; --current-text-muted-color: #fecaca; --current-icon-color: #ef4444; --current-widget-bg: linear-gradient(160deg, rgba(127, 29, 29, 0.9) 0%, rgba(76, 29, 29, 0.92) 100%); --current-widget-border: rgba(239, 68, 68, 0.25); --current-container-border-color: rgba(159, 18, 57, 0.4); }
-        body[data-theme="blue_hour_dusk"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dusk); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #a78bfa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(167, 139, 250, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: #d1d5db; --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); }
+        
+        /* === MÓDOSÍTÁS KEZDETE: Téma-specifikus változók beállítása az új sávhoz === */
+        body[data-theme="day"] { --current-sky-color-top: var(--sky-color-top-day); --current-sky-color-bottom: var(--sky-color-bottom-day); --current-text-color: var(--text-primary-day); --current-text-muted-color: var(--text-secondary-day); --current-icon-color: var(--accent-interactive-day); --current-widget-bg: var(--bg-widget-day); --current-widget-border: var(--border-widget-day); --current-container-border-color: rgba(203, 213, 225, 0.55); --current-info-bar-bg: var(--info-bar-bg-day); --current-info-bar-shadow: var(--info-bar-shadow-day); --current-info-bar-border: var(--info-bar-border-day); }
+        body[data-theme="dawn"] { --current-sky-color-top: var(--sky-color-top-dawn); --current-sky-color-bottom: var(--sky-color-bottom-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f59e0b; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(245, 158, 11, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        body[data-theme="dusk"] { --current-sky-color-top: var(--sky-color-top-dusk); --current-sky-color-bottom: var(--sky-color-bottom-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f472b6; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(236, 72, 153, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        
+        body[data-theme="early_dawn"] { --current-sky-color-top: var(--sky-color-top-early-dawn); --current-sky-color-bottom: var(--sky-color-bottom-early-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: #94a3b8; --current-icon-color: #60a5fa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(96, 165, 250, 0.2); --current-container-border-color: rgba(51, 65, 85, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        body[data-theme="blue_hour_dawn"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dawn); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #93c5fd; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(147, 197, 253, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        body[data-theme="sunrise"] { --current-sky-color-top: var(--sky-color-top-sunrise); --current-sky-color-bottom: var(--sky-color-bottom-sunrise); --current-text-color: #422006; --current-text-muted-color: #7c2d12; --current-icon-color: #f97316; --current-widget-bg: linear-gradient(160deg, rgba(254, 243, 199, 0.92) 0%, rgba(253, 186, 116, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.25); --current-container-border-color: rgba(124, 45, 18, 0.4); --current-info-bar-bg: rgba(254, 243, 199, 0.5); --current-info-bar-shadow: var(--info-bar-shadow-day); --current-info-bar-border: 1px solid rgba(124, 45, 18, 0.2); }
+        body[data-theme="golden_hour_rise"] { --current-sky-color-top: var(--sky-color-top-golden-hour-rise); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-rise); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #f59e0b; --current-widget-bg: linear-gradient(160deg, rgba(254, 249, 231, 0.92) 0%, rgba(253, 224, 224, 0.90) 100%); --current-widget-border: rgba(245, 158, 11, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); --current-info-bar-bg: var(--info-bar-bg-day); --current-info-bar-shadow: var(--info-bar-shadow-day); --current-info-bar-border: var(--info-bar-border-day); }
+        body[data-theme="golden_hour_set"] { --current-sky-color-top: var(--sky-color-top-golden-hour-set); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-set); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #ea580c; --current-widget-bg: linear-gradient(160deg, rgba(254, 235, 202, 0.92) 0%, rgba(254, 202, 202, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); --current-info-bar-bg: var(--info-bar-bg-day); --current-info-bar-shadow: var(--info-bar-shadow-day); --current-info-bar-border: var(--info-bar-border-day); }
+        body[data-theme="sunset"] { --current-sky-color-top: var(--sky-color-top-sunset); --current-sky-color-bottom: var(--sky-color-bottom-sunset); --current-text-color: #fef2f2; --current-text-muted-color: #fecaca; --current-icon-color: #ef4444; --current-widget-bg: linear-gradient(160deg, rgba(127, 29, 29, 0.9) 0%, rgba(76, 29, 29, 0.92) 100%); --current-widget-border: rgba(239, 68, 68, 0.25); --current-container-border-color: rgba(159, 18, 57, 0.4); --current-info-bar-bg: rgba(127, 29, 29, 0.6); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: 1px solid rgba(239, 68, 68, 0.3); }
+        body[data-theme="blue_hour_dusk"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dusk); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #a78bfa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(167, 139, 250, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: #d1d5db; --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        /* === MÓDOSÍTÁS VÉGE === */
 
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
 
@@ -192,59 +209,63 @@
             margin-top: 12px; 
             width: 100%; 
         }
-        .secondary-info-bar { 
+
+        /* === MÓDOSÍTOTT SZEKCIÓ KEZDETE === */
+        .secondary-info-bar {
             display: flex;
-            justify-content: center;
-            gap: 10px; 
-            flex-wrap: wrap; 
+            justify-content: space-around;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            transition: all 0.6s ease-in-out;
+            margin-top: 12px;
+            background-color: var(--current-info-bar-bg);
+            box-shadow: var(--current-info-bar-shadow);
+            border: var(--current-info-bar-border);
         }
 
         .info-bar-item {
+            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 2px;
-            padding: 8px 12px;
-            background-color: rgba(0, 0, 0, 0.15); /* Alapértelmezett háttérszín */
-            border-radius: 10px;
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.6s;
-            min-width: 80px;
             text-align: center;
-            border: 1px solid transparent; /* Alapértelmezett keret */
+            /* Előző stílusok eltávolítva (egyedi háttér, keret, stb.) */
+            background-color: transparent;
+            box-shadow: none;
+            border: none;
+            padding: 0;
+            min-width: auto;
         }
-        
-        /* Törölve a dinamikus keretszínek, mert a háttérszín már nem változik ezeknél az elemeknél */
-        /*
-        .info-bar-item[style*="background-color: var(--hot)"] { border-color: rgba(255,255,255,0.2); }
-        .info-bar-item[style*="background-color: var(--warm)"] { border-color: rgba(255,255,255,0.18); }
-        .info-bar-item[style*="background-color: var(--mild)"] { border-color: rgba(255,255,255,0.15); }
-        .info-bar-item[style*="background-color: var(--cool)"] { border-color: rgba(255,255,255,0.15); }
-        .info-bar-item[style*="background-color: var(--cold)"] { border-color: rgba(255,255,255,0.2); }
-        */
 
         .info-bar-label {
-            font-size: 10px;
-            font-weight: 600;
-            color: var(--current-text-muted-color); /* Jól olvasható az alap háttérszínen */
+            font-size: 11px;
+            font-weight: 500; /* Kicsit vékonyabb a jobb kontrasztért */
+            color: var(--current-text-muted-color);
             text-transform: uppercase;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.4px;
         }
 
         .info-bar-value {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--current-text-color); /* Jól olvasható az alap háttérszínen */
+            font-size: 16px;
+            font-weight: 700; /* Vastagabb az érték kiemeléséhez */
+            color: var(--current-text-color);
             display: flex;
             align-items: center;
-            gap: 4px;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap; /* Alapértelmezetten ne törjön sorba */
         }
-
+        
         #main-wind-dir-arrow {
             font-size: 0.8em;
             opacity: 0.8;
             transition: transform 0.8s ease-out;
         }
+        /* === MÓDOSÍTOTT SZEKCIÓ VÉGE === */
         
         .precipitation-forecast-info {
             margin: 12px auto 0 auto;
@@ -746,12 +767,8 @@
                 padding: 6px 18px;
             }
 
-            .info-bar-item {
-                padding: 6px 10px;
-                min-width: 70px;
-            }
             .info-bar-value {
-                font-size: 14px;
+                font-size: 14px; /* Kisebb betűméret mobilon */
             }
             
             .hourly-forecast-card {
@@ -1848,8 +1865,6 @@
             if (obs.heatIndex != null && el_heatIndexItem && el_mainHeatIndexValue) {
                 el_heatIndexItem.classList.remove('is-hidden');
                 updateAnimatedValue(el_mainHeatIndexValue, formatValue(obs.heatIndex, '', 1));
-                // MODIFICATION: Removed dynamic background color
-                // el_heatIndexItem.style.backgroundColor = getTemperatureColorVar(obs.heatIndex);
             } else if (el_heatIndexItem) {
                 el_heatIndexItem.classList.add('is-hidden');
             }
@@ -1857,11 +1872,19 @@
             if (obs.windSpeed != null && obs.windSpeed >= 0 && el_windSpeedItem) {
                  el_windSpeedItem.classList.remove('is-hidden');
                  if(el_mainWindDirArrow) el_mainWindDirArrow.style.transform = `rotate(${obs.winddir || 0}deg)`;
-                 if(el_mainWindDirText) el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir);
+                 
+                 // === MÓDOSÍTÁS KEZDETE: Reszponzív szélirány kiírás ===
+                 if(el_mainWindDirText) {
+                    if (window.innerWidth < 500) {
+                        el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir);
+                    } else {
+                        el_mainWindDirText.textContent = degreesToCompass(obs.winddir);
+                    }
+                 }
+                 // === MÓDOSÍTÁS VÉGE ===
+
                  if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir);
                  updateAnimatedValue(el_mainWindSpeedValue, formatValue(obs.windSpeed, '', 1));
-                 // MODIFICATION: Removed dynamic background color
-                 // el_windSpeedItem.style.backgroundColor = getWindColorVar(obs.windSpeed);
             } else if (el_windSpeedItem){
                  el_windSpeedItem.classList.add('is-hidden');
             }
@@ -1869,8 +1892,6 @@
             if (obs.windGust > 0 && el_windGustItem && el_mainWindGustValue) {
                  el_windGustItem.classList.remove('is-hidden');
                  updateAnimatedValue(el_mainWindGustValue, formatValue(obs.windGust, '', 1));
-                 // MODIFICATION: Removed dynamic background color
-                 // el_windGustItem.style.backgroundColor = getWindColorVar(obs.windGust);
             } else if (el_windGustItem) {
                  el_windGustItem.classList.add('is-hidden');
             }
@@ -1896,7 +1917,6 @@
         }
         
         function getTemperatureColorVar(temp) { if (temp === null || isNaN(temp)) return 'var(--mild)'; if (temp >= 35) return 'var(--hot)'; if (temp >= 25) return 'var(--warm)'; if (temp >= 10) return 'var(--mild)'; if (temp >= 0) return 'var(--cool)'; return 'var(--cold)'; }
-        // getWindColorVar is no longer used for background colors, but might be useful for other things later.
         function getWindColorVar(speed) { if (speed === null || isNaN(speed)) return 'rgba(0,0,0,0.15)'; if (speed > 40) return 'var(--hot)'; if (speed > 25) return 'var(--warm)'; if (speed > 10) return 'var(--mild)'; return 'var(--cool)'; }
 
 
@@ -2159,7 +2179,6 @@
             }
         }
 
-        // VÁLTOZTATÁS: Az új, összevont időzítő
         function startMasterLoop() {
             console.log("Master loop elindítva (1 másodperces ütemezés).");
 
@@ -2237,7 +2256,6 @@
             }, delayInMs > 0 ? delayInMs : 20 * 60 * 1000); // Minimum 20 perc várakozás, ha a számítás 0-ra jön ki
         }
         
-        // VÁLTOZTATÁS: Az initApp() frissítve az új master loop hívására
         function initApp() {
             weatherDisplayEl = document.getElementById('weather-display');
             forecastContainerEl = document.getElementById('forecast-container');
@@ -2246,13 +2264,21 @@
             hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
 
             initializeWeatherDisplayDOM();
+            
+            // === MÓDOSÍTÁS KEZDETE: Resize event listener a reszponzív szélirányhoz ===
+            window.addEventListener('resize', () => {
+                // Csak akkor renderelünk újra, ha már vannak adatok, elkerülve a hibákat
+                if (cachedData.displayPws) {
+                    renderWeatherData();
+                }
+            });
+            // === MÓDOSÍTÁS VÉGE ===
 
             fetchAllDataAndUpdateDisplay(true).finally(() => {
                 console.log("Az időzített frissítések elindulnak.");
                 
                 startMasterLoop();
                 scheduleHourlyForecastUpdate();
-                // A régi, különálló setInterval hívások eltávolítva
             });
         }
 
