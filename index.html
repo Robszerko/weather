@@ -425,9 +425,9 @@
             width: 100%; height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end;
             align-items: center;
-            padding-bottom: 20px;
+            padding-bottom: 25px; /* Igazítás a horizonthoz */
             box-sizing: border-box;
             text-align: center;
             opacity: 0;
@@ -2270,43 +2270,50 @@
             eventContainerEl.classList.toggle('is-hidden', !isEventActive);
             iconEl.style.opacity = 1;
             
-            const horizonY = 75; // a vizuális konténer alja
-            const iconSize = (bodyName === 'sun') ? 20 : 18;
+            // === ÚJ LOGIKA A FOLYAMATOS MOZGÁSHOZ ===
+            const setIconPositionForEvent = (alt) => {
+                const maxVisibleAlt = 1.5; // Hány fok magasságig tartson ez a nézet
+                const progress = Math.max(-1, Math.min(1, alt / maxVisibleAlt)); // Normalizálás -1 és 1 között
+                const visualHeight = 40; // A mozgás függőleges területe pixelben
+                const horizonY = 75; // A horizont pozíciója
+                const iconSize = (bodyName === 'sun') ? 20 : 18;
+                
+                const yPos = horizonY - (progress * (visualHeight / 2)) - (iconSize / 2);
+                iconEl.style.transform = `translate(75px, ${yPos}px) translate(-50%, -50%)`;
+            };
             
+            // Az üzenetek és a visszaszámláló kezelése
+            eventCountdownEl.classList.add('is-hidden'); // Alapból rejtett
             switch (state) {
                 case 'AWAITING_RISE':
                     eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan felkelek, jó reggelt!' : 'Hamarosan felkelek!';
                     eventCountdownEl.textContent = formatCountdown(eventTime - Date.now()) + ' múlva';
                     eventCountdownEl.classList.remove('is-hidden');
-                    iconEl.style.transform = `translate(75px, ${horizonY + iconSize/2}px) translate(-50%, -50%)`;
+                    setIconPositionForEvent(altitude);
                     break;
                 case 'RISING':
                      eventMessageEl.textContent = (bodyName === 'sun') ? 'Felkeltem és követem az utam!' : 'Felkeltem!';
-                    eventCountdownEl.classList.add('is-hidden');
-                    iconEl.style.transform = `translate(75px, ${horizonY - iconSize}px) translate(-50%, -50%)`;
+                     setIconPositionForEvent(altitude);
                     break;
                 case 'AWAITING_SET':
                      eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan lenyugszom!' : 'Hamarosan lenyugszom!';
                      eventCountdownEl.textContent = formatCountdown(eventTime - Date.now()) + ' múlva';
                      eventCountdownEl.classList.remove('is-hidden');
-                     iconEl.style.transform = `translate(75px, ${horizonY - iconSize}px) translate(-50%, -50%)`;
+                     setIconPositionForEvent(altitude);
                     break;
                 case 'SETTING':
-                     // === MÓDOSÍTOTT LOGIKA A DINAMIKUS ÜZENETHEZ ===
                      let settingMessage = '';
                      if (bodyName === 'sun') {
-                        // Ellenőrizzük, hogy a Hold fent van-e, vagy épp kel-e.
                         if (otherBodyState && ['AWAITING_RISE', 'RISING', 'ON_PATH'].includes(otherBodyState)) {
                             settingMessage = 'Lenyugodtam. Most jön a Hold élőben!';
                         } else {
                             settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
                         }
-                     } else { // A Holdnak egyszerű üzenet
+                     } else {
                         settingMessage = 'Lenyugodtam.';
                      }
                      eventMessageEl.textContent = settingMessage;
-                     eventCountdownEl.classList.add('is-hidden');
-                     iconEl.style.transform = `translate(75px, ${horizonY + iconSize/2}px) translate(-50%, -50%)`;
+                     setIconPositionForEvent(altitude);
                     break;
                 case 'ON_PATH':
                     updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, altitude > 0);
