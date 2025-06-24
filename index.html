@@ -891,9 +891,10 @@
         
         let animationFrameId = null;
         
-        // ÚJ: Állapotkezelés az égitest animációkhoz
-        const CELESTIAL_EVENT_WINDOW_MS = 30 * 60 * 1000; // 30 perc az esemény előtt
-        const CELESTIAL_TRANSITION_WINDOW_MS = 15 * 60 * 1000; // 15 perc az esemény után
+        // === MÓDOSÍTOTT IDŐZÍTÉS A KÉRÉS ALAPJÁN ===
+        const CELESTIAL_EVENT_WINDOW_MS = 15 * 60 * 1000; // 15 perc az esemény előtt
+        const CELESTIAL_TRANSITION_WINDOW_MS = 5 * 60 * 1000; // 5 perc az esemény után
+        
         let celestialBodyStates = {
             sun: { currentState: 'UNKNOWN' },
             moon: { currentState: 'UNKNOWN' }
@@ -2291,9 +2292,17 @@
                      iconEl.style.transform = `translate(75px, ${horizonY - iconSize}px) translate(-50%, -50%)`;
                     break;
                 case 'SETTING':
-                     let settingMessage = (bodyName === 'sun') ? 'Lenyugodtam, most jönnek a csillagok!' : 'Lenyugodtam.';
-                     if(bodyName === 'sun' && otherBodyState && ['AWAITING_RISE', 'RISING'].includes(otherBodyState)) {
-                        settingMessage = 'Lenyugodtam. Most jön a Hold élőben!';
+                     // === MÓDOSÍTOTT LOGIKA A DINAMIKUS ÜZENETHEZ ===
+                     let settingMessage = '';
+                     if (bodyName === 'sun') {
+                        // Ellenőrizzük, hogy a Hold fent van-e, vagy épp kel-e.
+                        if (otherBodyState && ['AWAITING_RISE', 'RISING', 'ON_PATH'].includes(otherBodyState)) {
+                            settingMessage = 'Lenyugodtam. Most jön a Hold élőben!';
+                        } else {
+                            settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
+                        }
+                     } else { // A Holdnak egyszerű üzenet
+                        settingMessage = 'Lenyugodtam.';
                      }
                      eventMessageEl.textContent = settingMessage;
                      eventCountdownEl.classList.add('is-hidden');
@@ -2375,8 +2384,8 @@
                 eventContainerEl: el_moonEventContainer, eventMessageEl: el_moonEventMessage, eventCountdownEl: el_moonEventCountdown,
                 altitude: moonPos.altitude * 180 / Math.PI,
                 pathStartTime: cachedData.sunCalc.moonRiseDateForPath, pathEndTime: cachedData.sunCalc.moonSetDateForPath,
-                eventTime: (moonState === 'AWAITING_RISE') ? cachedData.sunCalc.moonRiseDateForPath?.getTime() : cachedData.sunCalc.moonSetDateForPath?.getTime(),
-                 otherBodyState: sunState
+                eventTime: (moonState === 'AWAITING_RISE' && cachedData.sunCalc.moonRiseDateForPath) ? cachedData.sunCalc.moonRiseDateForPath.getTime() : (cachedData.sunCalc.moonSetDateForPath ? cachedData.sunCalc.moonSetDateForPath.getTime() : 0),
+                otherBodyState: sunState
             };
             
             renderCelestialState('sun', sunState, sunElements);
