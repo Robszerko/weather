@@ -11,8 +11,8 @@
         :root {
             /* Színpaletta Alapok */
             --accent-interactive-night: #00BFFF;
-            --text-primary-night: #FFFFFF; 
-            --text-secondary-night: #D1D5DB;
+            --text-primary-night: #EAEAEA;
+            --text-secondary-night: #A0B0C0;
             --bg-widget-night: rgba(15, 23, 42, 0.88);
             --border-widget-night: rgba(56, 189, 248, 0.2);
             --info-bar-bg-night: rgba(0, 0, 0, 0.25);
@@ -91,7 +91,7 @@
         body[data-theme="golden_hour_set"] { --current-sky-color-top: var(--sky-color-top-golden-hour-set); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-set); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #ea580c; --current-widget-bg: linear-gradient(160deg, rgba(254, 235, 202, 0.92) 0%, rgba(254, 202, 202, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); --current-info-bar-bg: var(--info-bar-bg-day); --current-info-bar-shadow: var(--info-bar-shadow-day); --current-info-bar-border: var(--info-bar-border-day); }
         body[data-theme="sunset"] { --current-sky-color-top: var(--sky-color-top-sunset); --current-sky-color-bottom: var(--sky-color-bottom-sunset); --current-text-color: #fef2f2; --current-text-muted-color: #fecaca; --current-icon-color: #ef4444; --current-widget-bg: linear-gradient(160deg, rgba(127, 29, 29, 0.9) 0%, rgba(76, 29, 29, 0.92) 100%); --current-widget-border: rgba(239, 68, 68, 0.25); --current-container-border-color: rgba(159, 18, 57, 0.4); --current-info-bar-bg: rgba(127, 29, 29, 0.6); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: 1px solid rgba(239, 68, 68, 0.3); }
         body[data-theme="blue_hour_dusk"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dusk); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #a78bfa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(167, 139, 250, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
-        body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
+        body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: #d1d5db; --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); --current-info-bar-bg: var(--info-bar-bg-night); --current-info-bar-shadow: var(--info-bar-shadow-night); --current-info-bar-border: var(--info-bar-border-night); }
 
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
 
@@ -117,7 +117,7 @@
             flex-direction: column;
             align-items: center;
             padding: 8px 16px;
-            color: #FFFFFF; /* MÓDOSÍTVA: Fix fehér szín */
+            color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.4);
             font-family: 'Inter', sans-serif;
             text-align: center;
@@ -126,7 +126,7 @@
             transition: background-color 0.6s ease;
             border-radius: 12px;
         }
-
+        
         .tongue-label {
             font-size: 10px;
             font-weight: 600;
@@ -142,20 +142,26 @@
             line-height: 1;
         }
 
+        /* === JAVÍTOTT RÉSZ KEZDETE === */
         .tongue-description {
             font-size: 11.5px;
             font-weight: 500;
-            color: #E0E0E0; /* MÓDOSÍTVA: Fix világosszürke szín */
+            color: var(--current-text-color); /* Jobb olvashatóság */
+            opacity: 0.85; /* Hierarchia megőrzése */
             margin-top: 6px;
             line-height: 1.3;
+            transition: all 0.6s;
             font-style: italic;
+            max-width: 200px; 
         }
         
         .tongue-description strong {
-            font-weight: 600;
-            color: #FFFFFF; /* MÓDOSÍTVA: Fix fehér szín */
+            font-weight: 700; /* Legyen kicsit vastagabb */
+            color: var(--current-text-color);
+            opacity: 1; /* A kiemelt rész legyen teljesen látható */
             font-style: normal;
         }
+        /* === JAVÍTOTT RÉSZ VÉGE === */
 
         .top-info-tongues-container {
             display: flex;
@@ -272,6 +278,48 @@
             font-size: 0.8em;
             opacity: 0.8;
             transition: transform 0.8s ease-out;
+        }
+
+        .imminent-rain-alert {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            margin: 12px auto 0 auto;
+            border-radius: 12px;
+            max-width: 450px;
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.5), rgba(30, 64, 175, 0.6));
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        body[data-theme="day"] .imminent-rain-alert {
+             background: linear-gradient(135deg, rgba(224, 231, 255, 0.8), rgba(239, 246, 255, 0.9));
+             border: 1px solid rgba(165, 180, 252, 0.5);
+        }
+
+        .imminent-rain-alert i {
+            font-size: 22px;
+            color: var(--current-text-color);
+            animation: pulse-icon 2s infinite ease-in-out;
+        }
+        
+        #imminent-rain-text {
+            color: var(--current-text-color);
+            font-size: 13px;
+            font-weight: 500;
+            text-align: left;
+            line-height: 1.4;
+        }
+
+        #imminent-rain-text strong {
+             font-weight: 800;
+        }
+
+        @keyframes pulse-icon {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
         }
         
         .precipitation-forecast-info {
@@ -826,6 +874,21 @@
                 padding: 6px 18px;
             }
 
+            .top-info-tongues-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .info-tongue {
+                width: 100%;
+                max-width: 280px;
+                box-sizing: border-box;
+            }
+
+            .tongue-description {
+                max-width: none;
+            }
+            
             .info-bar-value {
                 font-size: 14px;
             }
@@ -870,6 +933,7 @@
         const REFRESH_INTERVAL_PWS = 30 * 1000;
         const REFRESH_INTERVAL_WIND = 15 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 5 * 60 * 1000;
+        const REFRESH_INTERVAL_MINUTELY = 5 * 60 * 1000; // 5 percenként
         const REFRESH_INTERVAL_HISTORICAL_RAIN = 12 * 60 * 60 * 1000; // 12 óránként
         const REFRESH_INTERVAL_FORECAST = 6 * 60 * 60 * 1000;
         const SKY_COLOR_UPDATE_INTERVAL = 1 * 60 * 1000;
@@ -888,10 +952,11 @@
         };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT';
 
-        let lastApiCallTimes = { generalConditions: 0, historicalPrecip: 0, forecast: 0, hourlyForecast: 0, issPasses: 0 };
+        let lastApiCallTimes = { generalConditions: 0, minutely: 0, historicalPrecip: 0, forecast: 0, hourlyForecast: 0, issPasses: 0 };
         let cachedData = {
             displayPws: null,
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null },
+            imminentRainEvent: null,
             last30DaysPrecipitation: null,
             forecastDays: [],
             hourlyForecast: [],
@@ -966,6 +1031,7 @@
             el_windGustItem, el_mainWindGustValue,
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
+            el_imminentRainAlert, el_imminentRainText,
             el_precipitationForecastBar, el_nextPrecipitationInfoText, el_nextPrecipitationDetailsText,
             el_tempTongueContainer, el_tempTongueValue, el_rainTongueContainer, el_rainTongueValue,
             el_tempTongueDescription, el_rainTongueDescription;
@@ -1438,6 +1504,34 @@
 
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba (Ált. időjárás): ${response.status}`); } const data = await response.json(); lastApiCallTimes.generalConditions = Date.now(); return { skyCoverPhrase: data.cloudCoverPhrase || data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null }; }
         
+        async function fetchMinutelyForecast(lat, lon) {
+             const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&minutely_15=precipitation&timezone=auto`;
+             try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Open-Meteo 15-perces API hiba: ${response.status}`);
+                const data = await response.json();
+                lastApiCallTimes.minutely = Date.now();
+
+                if (data?.minutely_15?.time && data?.minutely_15?.precipitation) {
+                    const now = new Date();
+                    for (let i = 0; i < data.minutely_15.time.length; i++) {
+                        const eventTime = new Date(data.minutely_15.time[i]);
+                        const precipValue = data.minutely_15.precipitation[i];
+                        if (eventTime > now && precipValue > 0.05) { // 0.05mm a küszöb, hogy a jelentékteleneket kiszűrje
+                             return {
+                                time: eventTime,
+                                intensity: precipValue
+                            };
+                        }
+                    }
+                }
+                return null; // Nincs közelgő eső
+             } catch (e) {
+                console.warn(`Hiba a 15-perces előrejelzés lekérésekor: ${e.message}`);
+                return null;
+             }
+        }
+
         async function fetchHistoricalPrecipitation(lat, lon, days = 30) {
             const endDate = new Date();
             const startDate = new Date();
@@ -1638,6 +1732,10 @@
                         <div class="tongue-description" id="rain-tongue-description">Csapadékhelyzet</div>
                     </div>
                 </div>
+                 <div class="imminent-rain-alert is-hidden" id="imminent-rain-alert">
+                    <i class="fas fa-cloud-showers-heavy"></i>
+                    <div id="imminent-rain-text"></div>
+                </div>
                 <div class="secondary-info-bar">
                     <div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value">--</span>°C</div></div>
                     <div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text">--</span><span id="main-wind-speed-value">--</span> km/h</div></div>
@@ -1748,6 +1846,8 @@
             el_moonriseValue = document.getElementById('moonrise-value');
             el_moonsetValue = document.getElementById('moonset-value');
 
+            el_imminentRainAlert = document.getElementById('imminent-rain-alert');
+            el_imminentRainText = document.getElementById('imminent-rain-text');
             el_precipitationForecastBar = document.getElementById('precipitation-forecast-bar');
             el_nextPrecipitationInfoText = document.getElementById('next-precipitation-info-text');
             el_nextPrecipitationDetailsText = document.getElementById('next-precipitation-details-text');
@@ -1816,7 +1916,10 @@
             cachedData.displayPws.precipTotal = precipStationData?.metric?.precipTotal;
             cachedData.displayPws.precipRate = precipStationData?.metric?.precipRate;
 
-            renderWeatherData(); renderHourlyForecastData(); renderForecastData();
+            renderWeatherData(); 
+            renderImminentRainAlert();
+            renderHourlyForecastData(); 
+            renderForecastData();
         }
 
         function updateAnimatedValue(element, newValue) {
@@ -1850,15 +1953,37 @@
         }
 
         function getDroughtDescription(precipSumLast30Days) {
-            const formattedSum = formatValue(precipSumLast30Days, ' mm/hó', 0);
             if (precipSumLast30Days === null || typeof precipSumLast30Days === 'undefined' || isNaN(precipSumLast30Days)) {
                 return 'Csapadékhelyzet elemzése...';
             }
-            if (precipSumLast30Days < 15) return `Súlyos aszály (${formattedSum}),<br><strong>sok eső</strong> szükséges.`;
-            if (precipSumLast30Days < 30) return `Mérsékelt aszály (${formattedSum}),<br><strong>jelentős eső</strong> szükséges.`;
-            if (precipSumLast30Days < 45) return `Enyhe szárazság (${formattedSum}),<br><strong>kiadós eső</strong> kellene.`;
-            if (precipSumLast30Days > 70) return `A talaj vízzel telített (${formattedSum}).`;
-            return `A talaj nedvessége megfelelő (${formattedSum}).`;
+            
+            const precipVal = `<strong>${formatValue(precipSumLast30Days, 'mm', 0)}</strong>`;
+            
+            if (precipSumLast30Days < 15) return `Súlyos aszály. ${precipVal} esett az elmúlt 30 napban. Sok esőre lenne szükség.`;
+            if (precipSumLast30Days < 30) return `Mérsékelt aszály. ${precipVal} esett az elmúlt 30 napban. Jelentős esőre lenne szükség.`;
+            if (precipSumLast30Days < 45) return `Enyhe szárazság. ${precipVal} esett az elmúlt 30 napban. Kiadós eső kellene.`;
+            if (precipSumLast30Days > 70) return `A talaj vízzel telített. ${precipVal} esett az elmúlt 30 napban.`;
+            return `A talaj nedvessége megfelelő. ${precipVal} esett az elmúlt 30 napban.`;
+        }
+        
+        function renderImminentRainAlert() {
+            if (!el_imminentRainAlert || !el_imminentRainText) return;
+            
+            const rainEvent = cachedData.imminentRainEvent;
+            
+            if (rainEvent && rainEvent.time > new Date()) {
+                const now = new Date();
+                const minutesUntil = Math.round((rainEvent.time.getTime() - now.getTime()) / 60000);
+                
+                if (minutesUntil <= 0) {
+                     el_imminentRainText.innerHTML = `<strong>Most kezdődik az eső!</strong>`;
+                } else {
+                     el_imminentRainText.innerHTML = `Közeledő eső! Kb. <strong>${minutesUntil} perc</strong> múlva érkezhet.`;
+                }
+                el_imminentRainAlert.classList.remove('is-hidden');
+            } else {
+                 el_imminentRainAlert.classList.add('is-hidden');
+            }
         }
 
         function renderPrecipitationForecastInfo() {
@@ -2173,6 +2298,9 @@
             if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) {
                 independentPromises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => console.warn("Ált. kondíciók lekérési hiba:", e.message)));
             }
+            if (isInitialLoad || now - lastApiCallTimes.minutely > REFRESH_INTERVAL_MINUTELY) {
+                independentPromises.push(fetchMinutelyForecast(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.imminentRainEvent = data; }).catch(e => console.warn("15 perces előrejelzés hiba:", e.message)));
+            }
             if (isInitialLoad || now - lastApiCallTimes.historicalPrecip > REFRESH_INTERVAL_HISTORICAL_RAIN) {
                 independentPromises.push(fetchHistoricalPrecipitation(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.last30DaysPrecipitation = data; }).catch(e => console.warn("Archív csapadék lekérési hiba:", e.message)));
             }
@@ -2414,7 +2542,7 @@
                 case 'POST_SET_TRANSITION':
                     let settingMessage = '';
                     if (bodyName === 'sun') {
-                       if (otherBodyState && ['ON_PATH', 'RISING', 'AWAITING_RISE', 'POST_RISE_TRANSITION'].includes(otherBodyState)) {
+                       if (otherBodyState && ['ON_PATH', 'RISING', 'AWAITING_RISE'].includes(otherBodyState)) {
                            settingMessage = 'Lenyugodtam. Most jön a Hold!';
                        } else {
                            settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
