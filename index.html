@@ -737,61 +737,52 @@
             width: 100%; 
             max-width: 800px; 
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 6px; 
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px; 
             padding: 4px; 
             box-sizing: border-box; 
             margin: 0 auto;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: var(--current-text-muted-color) transparent;
         }
         
         .hourly-forecast-card { 
             display: flex; 
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 4px; 
-            padding: 8px 4px;
+            flex-direction: column; 
+            align-items: stretch;
+            gap: 10px; 
+            padding: 10px;
             border-radius: 12px; 
             background: var(--current-widget-bg); 
             border: 1px solid var(--current-widget-border); 
             box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
             color: var(--current-text-color); 
-            transition: all 0.6s; 
-            min-width: 75px;
+            transition: all 0.6s;
         }
         
         .hourly-primary-info { 
             display: flex; 
-            flex-direction: column;
+            flex-direction: row; 
             align-items: center; 
-            gap: 4px; 
-            flex-grow: 1; 
+            justify-content: space-around;
+            gap: 8px; 
         }
 
         .hourly-time { 
-            font-size: 12px; 
-            font-weight: 600; 
-            min-width: unset; 
-            text-align: center; 
+            font-size: 13px; 
+            font-weight: 700; 
+            flex-shrink: 0;
         }
 
         .hourly-icon-and-condition { 
-            display: contents;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
         }
 
         .hourly-icon { 
-            font-size: 22px;
+            font-size: 24px;
             color: var(--current-icon-color); 
             transition: color 0.6s; 
-        }
-
-        .hourly-temp { 
-            font-size: 14px;
-            font-weight: 700; 
         }
         
         .hourly-condition-text { 
@@ -802,44 +793,39 @@
             text-align: center; 
         }
 
-        .hourly-secondary-details { 
-            display: none;
+        .hourly-temp { 
+            font-size: 18px;
+            font-weight: 700; 
+            flex-shrink: 0;
         }
         
-        @media (min-width: 769px) {
-            .hourly-forecast-container {
-                display: flex;
-                flex-direction: column;
-                overflow-x: hidden;
-            }
-            .hourly-forecast-card {
-                flex-direction: row;
-                justify-content: space-between;
-                padding: 10px 14px;
-                gap: 12px;
-            }
-            .hourly-primary-info {
-                flex-direction: row;
-                gap: 20px;
-            }
-            .hourly-time {
-                font-size: 15px;
-                font-weight: 700;
-                min-width: 50px;
-                text-align: left;
-            }
-            .hourly-icon { font-size: 28px; }
-            .hourly-temp { font-size: 20px; }
-            .hourly-condition-text { font-size: 12px; }
-            .hourly-secondary-details {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-                font-size: 12.5px;
-                color: var(--current-text-muted-color);
-                flex-shrink: 0;
-            }
+        .hourly-secondary-details { 
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 5px;
+            font-size: 11px;
+            border-top: 1px solid var(--current-container-border-color);
+            padding-top: 8px;
+            margin-top: 4px;
+        }
+        
+        .hourly-detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .hourly-detail-row span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .hourly-detail-row i {
+            width: 12px;
+            text-align: center;
+            opacity: 0.7;
         }
         
         .detail-item, .info-bar-item { perspective: 600px; }
@@ -936,10 +922,6 @@
             
             .info-bar-value {
                 font-size: 14px;
-            }
-            
-            .hourly-secondary-details {
-                display: none;
             }
             .air-quality-grid {
                 grid-template-columns: 1fr 1fr;
@@ -1804,7 +1786,7 @@
             if (el_moonInfoAltitude) el_moonInfoAltitudeNode = el_moonInfoAltitude.childNodes[0];
             el_moonInfoTrend = document.getElementById('moon-info-trend');
             el_moonInfoPhasename = document.getElementById('moon-info-phasename');
-            el_moonInfoIllumination = document.getElementById('moon-info-illumination'); // JAVÍTVA
+            el_moonInfoIllumination = document.getElementById('moon-info-illumination');
             el_moonPathRefreshBtn = document.getElementById('moon-path-refresh-btn');
             
             el_sunEventContainer = document.getElementById('sun-event-container');
@@ -2260,26 +2242,24 @@
                 <div class="hourly-forecast-card">
                     <div class="hourly-primary-info">
                         <div class="hourly-time">${formatTime(hour.time)}</div>
-                        <i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i>
+                        <div class="hourly-icon-and-condition">
+                            <i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i>
+                            <div class="hourly-condition-text">${conditionText}</div>
+                        </div>
                         <div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div>
-                        <div class="hourly-condition-text">${conditionText}</div>
                     </div>
                     <div class="hourly-secondary-details">
                         <div class="hourly-detail-row">
-                            <i class="fas fa-tint"></i>
-                            <span>Csapadék: ${formatValue(hour.precipChance, '%', 0, '--')}</span>
+                            <span><i class="fas fa-tint"></i> Csapadék</span>
+                            <strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong>
                         </div>
                         <div class="hourly-detail-row">
-                            <i class="fas fa-wind"></i>
-                            <span title="${degreesToCompass(hour.windDirection)}">Szél: ${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, ' km/h', 0)}</span>
+                            <span><i class="fas fa-wind"></i> Szél</span>
+                            <strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong>
                         </div>
                         <div class="hourly-detail-row">
-                            <i class="fas fa-hand-holding-water"></i>
-                            <span>Pára: ${formatValue(hour.humidity, '%', 0)}</span>
-                        </div>
-                         <div class="hourly-detail-row">
-                            <i class="fas fa-sun"></i>
-                            <span>UV: ${formatValue(hour.uvIndex, '', 0, '0')}</span>
+                            <span><i class="fas fa-hand-holding-water"></i> Pára</span>
+                            <strong>${formatValue(hour.humidity, '%', 0)}</strong>
                         </div>
                     </div>
                 </div>`;
