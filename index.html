@@ -737,7 +737,7 @@
             width: 100%; 
             max-width: 800px; 
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px; 
             padding: 4px; 
             box-sizing: border-box; 
@@ -826,6 +826,18 @@
             width: 12px;
             text-align: center;
             opacity: 0.7;
+        }
+        
+        @media (min-width: 640px) {
+            .hourly-forecast-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (min-width: 1000px) {
+            .hourly-forecast-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
         
         .detail-item, .info-bar-item { perspective: 600px; }
@@ -2255,7 +2267,7 @@
                         </div>
                         <div class="hourly-detail-row">
                             <span><i class="fas fa-wind"></i> Szél</span>
-                            <strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong>
+                            <strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompass(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong>
                         </div>
                         <div class="hourly-detail-row">
                             <span><i class="fas fa-hand-holding-water"></i> Pára</span>
