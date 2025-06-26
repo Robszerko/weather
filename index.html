@@ -474,7 +474,7 @@
             cursor: help;
             font-size: 0;
             color: transparent;
-            transition: transform 0.2s linear, opacity 0.5s ease-in-out;
+            /* A transition-t a JS kezeli a sima mozgás érdekében */
         }
 
         #sun-path-icon {
@@ -863,12 +863,13 @@
         const ISS_NORAD_ID = 25544;
         const REFRESH_INTERVAL_ISS = 2 * 60 * 60 * 1000;
 
+        // === MÓDOSÍTOTT ÁLLOMÁS SORREND ===
         const STATIONS = {
-            HONVED: { id: 'INYREG37', name: 'Nyíregyháza Honvéd utcai állomás', displayName: 'Honvéd u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
             NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyháza Nyíregyházi úti állomás', displayName: 'Nyíregyházi út', provides: ['precip', 'temp'], isOnline: false, data: null },
-            KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50 állomás', displayName: 'Kossuth út 50', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null }
+            KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50 állomás', displayName: 'Kossuth út 50', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
+            HONVED: { id: 'INYREG37', name: 'Nyíregyháza Honvéd utcai állomás', displayName: 'Honvéd u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null }
         };
-        let activeDisplayStationKey = 'HONVED';
+        let activeDisplayStationKey = 'NYIREGYHAZI_UT'; // Alapértelmezett állomás az első a listában
 
         let lastApiCallTimes = { generalConditions: 0, openMeteoRain: 0, forecast: 0, hourlyForecast: 0, issPasses: 0 };
         let cachedData = {
@@ -891,15 +892,15 @@
         
         let animationFrameId = null;
         
-        // === MÓDOSÍTOTT IDŐZÍTÉS A KÉRÉS ALAPJÁN ===
-        const CELESTIAL_EVENT_WINDOW_MS = 15 * 60 * 1000; // 15 perc az esemény előtt
-        const CELESTIAL_TRANSITION_WINDOW_MS = 5 * 60 * 1000; // 5 perc az esemény után
+        // === TOVÁBBFEJLESZTETT IDŐZÍTÉSI ÉS ANIMÁCIÓS KONSTANSOK ===
+        const CELESTIAL_EVENT_WINDOW_MS = 15 * 60 * 1000; // 15 perc visszaszámlálás az esemény előtt
+        const CELESTIAL_EVENT_DURATION_MS = 3 * 60 * 1000; // Az esemény (felkelés/lenyugvás) animációjának teljes hossza (esemény köré központosítva)
+        const CELESTIAL_POST_EVENT_TRANSITION_MS = 1 * 60 * 1000; // 1 perc várakozás az esemény után, mielőtt a UI-t vált
         
         let celestialBodyStates = {
             sun: { currentState: 'UNKNOWN' },
             moon: { currentState: 'UNKNOWN' }
         };
-
 
         let masterTickCounter = 0;
 
@@ -1495,13 +1496,6 @@
             </div>
             
             <div class="station-status-container">
-                <div class="station-selector" id="honved-selector-container">
-                    <label for="station-select-honved">
-                        <input type="radio" name="station-select" id="station-select-honved" value="HONVED">
-                        <span class="station-name">${STATIONS.HONVED.displayName}</span>
-                        <div id="honved-status-text" class="station-status-text">állapot ?</div>
-                    </label>
-                </div>
                 <div class="station-selector" id="nyiregyhazi-ut-selector-container">
                      <label for="station-select-nyiregyhazi-ut">
                         <input type="radio" name="station-select" id="station-select-nyiregyhazi-ut" value="NYIREGYHAZI_UT">
@@ -1514,6 +1508,13 @@
                         <input type="radio" name="station-select" id="station-select-kossuth" value="KOSSUTH">
                         <span class="station-name">${STATIONS.KOSSUTH.displayName}</span>
                         <div id="kossuth-status-text" class="station-status-text">állapot ?</div>
+                    </label>
+                </div>
+                <div class="station-selector" id="honved-selector-container">
+                    <label for="station-select-honved">
+                        <input type="radio" name="station-select" id="station-select-honved" value="HONVED">
+                        <span class="station-name">${STATIONS.HONVED.displayName}</span>
+                        <div id="honved-status-text" class="station-status-text">állapot ?</div>
                     </label>
                 </div>
             </div>
@@ -1868,12 +1869,15 @@
                 if (el_rainInfoSection) el_rainInfoSection.classList.remove('is-hidden');
                 if (el_mainRainVisual) el_mainRainVisual.classList.add('is-raining-actively');
             } else {
-                if (isDayTime) {
-                    if (el_sunInfoSection) el_sunInfoSection.classList.remove('is-hidden');
-                } else if (isMoonUp) {
-                    if (el_moonInfoSection) el_moonInfoSection.classList.remove('is-hidden');
+                const sunState = celestialBodyStates.sun.currentState;
+                const moonState = celestialBodyStates.moon.currentState;
+
+                if (['AWAITING_RISE', 'RISING', 'POST_RISE_TRANSITION', 'ON_PATH', 'AWAITING_SET', 'SETTING', 'POST_SET_TRANSITION'].includes(sunState)) {
+                     if (el_sunInfoSection) el_sunInfoSection.classList.remove('is-hidden');
+                } else if (['AWAITING_RISE', 'RISING', 'POST_RISE_TRANSITION', 'ON_PATH', 'AWAITING_SET', 'SETTING', 'POST_SET_TRANSITION'].includes(moonState)) {
+                     if (el_moonInfoSection) el_moonInfoSection.classList.remove('is-hidden');
                 } else {
-                    if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.remove('is-hidden');
+                     if (el_nightSkyInfoSection) el_nightSkyInfoSection.classList.remove('is-hidden');
                 }
             }
             
@@ -2236,88 +2240,138 @@
         // === ÚJ ÉS MÓDOSÍTOTT ANIMÁCIÓS FUNKCIÓK ===
         // ===========================================
 
+        /**
+         * Meghatározza az égitest aktuális állapotát a felkelési és lenyugvási idők alapján.
+         * Az állapotok a következők:
+         * AWAITING_RISE: Felkelés előtti visszaszámlálás.
+         * RISING: Aktív felkelési animáció.
+         * POST_RISE_TRANSITION: Felkelés utáni 1 perces átmenet.
+         * ON_PATH: Normál mozgás a pályán.
+         * AWAITING_SET: Lenyugvás előtti visszaszámlálás.
+         * SETTING: Aktív lenyugvási animáció.
+         * POST_SET_TRANSITION: Lenyugvás utáni 1 perces átmenet.
+         * BELOW_HORIZON: Horizont alatt.
+         */
         function determineCelestialState(nowMs, riseTime, setTime) {
             if (!riseTime && !setTime) return 'BELOW_HORIZON';
 
             const riseMs = riseTime ? riseTime.getTime() : -1;
             const setMs = setTime ? setTime.getTime() : -1;
 
-            if (riseMs > 0 && nowMs < riseMs) {
-                if (nowMs >= riseMs - CELESTIAL_EVENT_WINDOW_MS) return 'AWAITING_RISE';
+            if (riseMs > 0) {
+                const riseStartTime = riseMs - (CELESTIAL_EVENT_DURATION_MS / 2);
+                const riseEndTime = riseMs + (CELESTIAL_EVENT_DURATION_MS / 2);
+                const postRiseEndTime = riseEndTime + CELESTIAL_POST_EVENT_TRANSITION_MS;
+                const awaitingRiseStartTime = riseMs - CELESTIAL_EVENT_WINDOW_MS;
+
+                if (nowMs >= awaitingRiseStartTime && nowMs < riseStartTime) return 'AWAITING_RISE';
+                if (nowMs >= riseStartTime && nowMs < riseEndTime) return 'RISING';
+                if (nowMs >= riseEndTime && nowMs < postRiseEndTime) return 'POST_RISE_TRANSITION';
             }
-            if (riseMs > 0 && nowMs >= riseMs) {
-                if (nowMs < riseMs + CELESTIAL_TRANSITION_WINDOW_MS) return 'RISING';
+
+            if (setMs > 0) {
+                const setStartTime = setMs - (CELESTIAL_EVENT_DURATION_MS / 2);
+                const setEndTime = setMs + (CELESTIAL_EVENT_DURATION_MS / 2);
+                const postSetEndTime = setEndTime + CELESTIAL_POST_EVENT_TRANSITION_MS;
+                const awaitingSetStartTime = setMs - CELESTIAL_EVENT_WINDOW_MS;
+
+                if (nowMs >= awaitingSetStartTime && nowMs < setStartTime) return 'AWAITING_SET';
+                if (nowMs >= setStartTime && nowMs < setEndTime) return 'SETTING';
+                if (nowMs >= setEndTime && nowMs < postSetEndTime) return 'POST_SET_TRANSITION';
             }
-            if (setMs > 0 && nowMs < setMs) {
-                if (nowMs >= setMs - CELESTIAL_EVENT_WINDOW_MS) return 'AWAITING_SET';
-            }
-            if (setMs > 0 && nowMs >= setMs) {
-                if (nowMs < setMs + CELESTIAL_TRANSITION_WINDOW_MS) return 'SETTING';
-            }
+            
             if (riseMs > 0 && setMs > 0 && nowMs > riseMs && nowMs < setMs) {
                 return 'ON_PATH';
             }
+            
+            // Ha a hold éppen fent van, de a mai napon nem kel fel/nyugszik (pl. tegnap kelt fel)
+            if (riseMs === -1 && setMs > 0 && nowMs < setMs) return 'ON_PATH';
+            if (setMs === -1 && riseMs > 0 && nowMs > riseMs) return 'ON_PATH';
 
             return 'BELOW_HORIZON';
         }
+
+        /**
+         * Az égitest ikonját a horizonton keresztül animálja a valós magassági adatok alapján.
+         */
+        function animateIconAcrossHorizon(iconEl, altitude) {
+            if (!iconEl) return;
+            const maxAltitudeForAnim = 1.0; // Az animáció -1 és +1 fok között a leglátványosabb
+            const progress = Math.max(-1, Math.min(1, altitude / maxAltitudeForAnim)); // Normalizálás -1 és 1 között
+            
+            const visualHeight = 25; // A mozgás teljes függőleges területe pixelben
+            const horizonY = 75; // A horizont pozíciója az SVG nézetben
+            const iconSize = iconEl.id.includes('sun') ? 20 : 18;
+            
+            const yPos = horizonY - (progress * (visualHeight / 2)) - (iconSize / 2);
+            
+            // Az X pozíció fixen középen van az esemény alatt
+            const xPos = 75; 
+
+            iconEl.style.transform = `translate(${xPos}px, ${yPos}px) translate(-50%, -50%)`;
+            iconEl.style.transition = 'none'; // A folyamatos frissítéshez kikapcsoljuk a CSS transitiont
+        }
         
         function renderCelestialState(bodyName, state, elements) {
-            const { visualEl, iconEl, arcEl, nowMarkerEl, eventContainerEl, eventMessageEl, eventCountdownEl, altitude, eventTime, otherBodyState } = elements;
+            const { visualEl, iconEl, arcEl, nowMarkerEl, eventContainerEl, eventMessageEl, eventCountdownEl, altitude, eventRiseTime, eventSetTime, otherBodyState } = elements;
             
-            const isEventActive = ['AWAITING_RISE', 'RISING', 'AWAITING_SET', 'SETTING'].includes(state);
+            const isEventActive = ['AWAITING_RISE', 'RISING', 'AWAITING_SET', 'SETTING', 'POST_SET_TRANSITION'].includes(state);
             visualEl.classList.toggle('is-event-active', isEventActive);
-            
             eventContainerEl.classList.toggle('is-hidden', !isEventActive);
+
             iconEl.style.opacity = 1;
+            eventCountdownEl.classList.add('is-hidden');
             
-            // === ÚJ LOGIKA A FOLYAMATOS MOZGÁSHOZ ===
-            const setIconPositionForEvent = (alt) => {
-                const maxVisibleAlt = 1.5; // Hány fok magasságig tartson ez a nézet
-                const progress = Math.max(-1, Math.min(1, alt / maxVisibleAlt)); // Normalizálás -1 és 1 között
-                const visualHeight = 40; // A mozgás függőleges területe pixelben
-                const horizonY = 75; // A horizont pozíciója
-                const iconSize = (bodyName === 'sun') ? 20 : 18;
-                
-                const yPos = horizonY - (progress * (visualHeight / 2)) - (iconSize / 2);
-                iconEl.style.transform = `translate(75px, ${yPos}px) translate(-50%, -50%)`;
-            };
-            
-            // Az üzenetek és a visszaszámláló kezelése
-            eventCountdownEl.classList.add('is-hidden'); // Alapból rejtett
             switch (state) {
                 case 'AWAITING_RISE':
                     eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan felkelek, jó reggelt!' : 'Hamarosan felkelek!';
-                    eventCountdownEl.textContent = formatCountdown(eventTime - Date.now()) + ' múlva';
+                    eventCountdownEl.textContent = formatCountdown(eventRiseTime.getTime() - Date.now()) + ' múlva';
                     eventCountdownEl.classList.remove('is-hidden');
-                    setIconPositionForEvent(altitude);
+                    animateIconAcrossHorizon(iconEl, altitude);
                     break;
+
                 case 'RISING':
-                     eventMessageEl.textContent = (bodyName === 'sun') ? 'Felkeltem és követem az utam!' : 'Felkeltem!';
-                     setIconPositionForEvent(altitude);
+                    eventMessageEl.textContent = (bodyName === 'sun') ? 'Felkelés folyamatban...' : 'Holdkelte folyamatban...';
+                    animateIconAcrossHorizon(iconEl, altitude);
                     break;
+                
+                case 'POST_RISE_TRANSITION': // Átváltás az esemény után a pályára
+                    visualEl.classList.remove('is-event-active'); // Visszaállítjuk a normál nézetet
+                    updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, true);
+                    break;
+
                 case 'AWAITING_SET':
-                     eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan lenyugszom!' : 'Hamarosan lenyugszom!';
-                     eventCountdownEl.textContent = formatCountdown(eventTime - Date.now()) + ' múlva';
-                     eventCountdownEl.classList.remove('is-hidden');
-                     setIconPositionForEvent(altitude);
+                    eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan lenyugszom!' : 'Hamarosan lenyugszom!';
+                    eventCountdownEl.textContent = formatCountdown(eventSetTime.getTime() - Date.now()) + ' múlva';
+                    eventCountdownEl.classList.remove('is-hidden');
+                    animateIconAcrossHorizon(iconEl, altitude);
                     break;
+
                 case 'SETTING':
-                     let settingMessage = '';
-                     if (bodyName === 'sun') {
-                        if (otherBodyState && ['AWAITING_RISE', 'RISING', 'ON_PATH'].includes(otherBodyState)) {
-                            settingMessage = 'Lenyugodtam. Most jön a Hold élőben!';
-                        } else {
-                            settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
-                        }
-                     } else {
-                        settingMessage = 'Lenyugodtam.';
-                     }
-                     eventMessageEl.textContent = settingMessage;
-                     setIconPositionForEvent(altitude);
+                     eventMessageEl.textContent = (bodyName === 'sun') ? 'Lenyugvás folyamatban...' : 'Holdnyugta folyamatban...';
+                     animateIconAcrossHorizon(iconEl, altitude);
                     break;
+
+                case 'POST_SET_TRANSITION':
+                    let settingMessage = '';
+                    if (bodyName === 'sun') {
+                       if (otherBodyState && ['ON_PATH', 'RISING', 'AWAITING_RISE'].includes(otherBodyState)) {
+                           settingMessage = 'Lenyugodtam. Most jön a Hold!';
+                       } else {
+                           settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
+                       }
+                    } else {
+                       settingMessage = 'Lenyugodtam.';
+                    }
+                    eventMessageEl.textContent = settingMessage;
+                    iconEl.style.opacity = 0; // Az ikon már eltűnt
+                    break;
+
                 case 'ON_PATH':
-                    updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, altitude > 0);
+                    iconEl.style.transition = 'transform 0.2s linear, opacity 0.5s ease-in-out'; // Visszaállítjuk a transitiont
+                    updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, true);
                     break;
+
                 case 'BELOW_HORIZON':
                     iconEl.style.opacity = 0;
                     updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, false);
@@ -2365,9 +2419,10 @@
                 return;
             }
             
-            const nowMs = Date.now();
-            const sunPos = SunCalc.getPosition(new Date(nowMs), NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
-            const moonPos = SunCalc.getMoonPosition(new Date(nowMs), NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
+            const now = new Date();
+            const nowMs = now.getTime();
+            const sunPos = SunCalc.getPosition(now, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
+            const moonPos = SunCalc.getMoonPosition(now, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
 
             const sunState = determineCelestialState(nowMs, cachedData.sunCalc.sunriseDateForPath, cachedData.sunCalc.sunsetDateForPath);
             const moonState = determineCelestialState(nowMs, cachedData.sunCalc.moonRiseDateForPath, cachedData.sunCalc.moonSetDateForPath);
@@ -2381,7 +2436,7 @@
                 eventContainerEl: el_sunEventContainer, eventMessageEl: el_sunEventMessage, eventCountdownEl: el_sunEventCountdown,
                 altitude: sunPos.altitude * 180 / Math.PI,
                 pathStartTime: cachedData.sunCalc.sunriseDateForPath, pathEndTime: cachedData.sunCalc.sunsetDateForPath,
-                eventTime: (sunState === 'AWAITING_RISE') ? cachedData.sunCalc.sunriseDateForPath.getTime() : cachedData.sunCalc.sunsetDateForPath.getTime(),
+                eventRiseTime: cachedData.sunCalc.sunriseDateForPath, eventSetTime: cachedData.sunCalc.sunsetDateForPath,
                 otherBodyState: moonState
             };
             
@@ -2391,12 +2446,12 @@
                 eventContainerEl: el_moonEventContainer, eventMessageEl: el_moonEventMessage, eventCountdownEl: el_moonEventCountdown,
                 altitude: moonPos.altitude * 180 / Math.PI,
                 pathStartTime: cachedData.sunCalc.moonRiseDateForPath, pathEndTime: cachedData.sunCalc.moonSetDateForPath,
-                eventTime: (moonState === 'AWAITING_RISE' && cachedData.sunCalc.moonRiseDateForPath) ? cachedData.sunCalc.moonRiseDateForPath.getTime() : (cachedData.sunCalc.moonSetDateForPath ? cachedData.sunCalc.moonSetDateForPath.getTime() : 0),
+                eventRiseTime: cachedData.sunCalc.moonRiseDateForPath, eventSetTime: cachedData.sunCalc.moonSetDateForPath,
                 otherBodyState: sunState
             };
             
-            renderCelestialState('sun', sunState, sunElements);
-            renderCelestialState('moon', moonState, moonElements);
+            if(el_sunInfoSection) renderCelestialState('sun', sunState, sunElements);
+            if(el_moonInfoSection) renderCelestialState('moon', moonState, moonElements);
 
             animationFrameId = requestAnimationFrame(masterAnimationLoop);
         }
@@ -2427,6 +2482,11 @@
 
                 if (masterTickCounter % MIDNIGHT_CHECK_S === 0) {
                     checkMidnight();
+                }
+                
+                // Frissítjük a fő UI-t is, hogy az égitestek láthatósága alapján döntsön
+                if (masterTickCounter % 60 === 0 && cachedData.displayPws) { // percenkénti frissítés elég
+                    renderWeatherData();
                 }
 
             }, 1000);
