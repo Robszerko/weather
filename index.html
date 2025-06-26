@@ -315,6 +315,7 @@
             flex-grow: 1;
             min-width: 0;
             flex-basis: 130px;
+            transition: opacity 0.5s ease-in-out;
         }
 
         #iss-info .night-sky-text-details {
@@ -388,15 +389,19 @@
         .path-refresh-btn:hover { opacity: 1; color: var(--current-icon-color); }
         .path-refresh-btn.is-refreshing { transform: rotate(360deg); transition: transform 0.8s; }
         
-        /* === JAVÍTOTT RÉSZ KEZDETE (Égitest animáció) === */
         .sun-path-visual, .moon-path-visual {
-            width: 150px; height: 110px; position: relative;
-            display: flex; justify-content: center; align-items: flex-end;
-            margin-bottom: 5px; /* Kisebb margó a megnövelt magasság miatt */
+            width: 150px; 
+            height: 130px; /* JAVÍTÁS: Magasság megnövelve, hogy a címkék elférjenek */
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            margin-bottom: 5px;
             flex-shrink: 0;
             transition: all 0.5s ease-in-out;
-            overflow: hidden; /* Fontos az "előbukkanó" animációhoz */
+            overflow: hidden; 
         }
+
         .sun-path-svg, .moon-path-svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; transition: opacity 0.5s; }
 
         .sun-path-arc-main, .moon-path-arc-main {
@@ -413,22 +418,20 @@
             opacity: 0.25;
         }
         .sun-path-horizon, .moon-path-horizon {
-            position: absolute; bottom: 35px; /* Feljebb tolva, hogy helyet adjon az égitestnek alatta */
+            position: absolute; bottom: 35px;
             left: 0;
             width: 100%; height: 1px;
             background-color: var(--current-text-muted-color);
             opacity: 0.35;
             transition: all 0.5s ease;
-            z-index: 5; /* A horizont legyen az égitest felett, amíg az alatta van */
+            z-index: 5; 
         }
         
         .sun-path-visual.is-event-active .sun-path-svg,
         .moon-path-visual.is-event-active .moon-path-svg,
         .sun-path-visual.is-event-active .sun-path-label,
-        .moon-path-visual.is-event-active .moon-path-label,
-        .sun-path-visual.is-event-active .sun-text-details, /* Szöveg elrejtése animáció alatt */
-        .moon-path-visual.is-event-active .moon-text-details {
-            opacity: 0.3; /* Elhalványítás a fókuszért */
+        .moon-path-visual.is-event-active .moon-path-label {
+            opacity: 0.3; 
             pointer-events: none;
         }
         
@@ -441,11 +444,11 @@
 
         .celestial-event-container {
             position: absolute;
-            top: 10px; left: 0; /* Felülre pozicionálva */
+            top: 10px; left: 0;
             width: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Fentről indul */
+            justify-content: flex-start;
             align-items: center;
             padding: 0;
             box-sizing: border-box;
@@ -477,7 +480,7 @@
         }
 
         .sun-path-now-marker, .moon-path-now-marker {
-            position: absolute; bottom: 31px; /* A horizont vonalához igazítva */
+            position: absolute; bottom: 31px;
             width: 3px;
             height: 8px;
             border-radius: 1.5px;
@@ -490,12 +493,11 @@
         .celestial-body-icon {
             position: absolute;
             top: 0; left: 0;
-            z-index: 4; /* Az ikon legyen a horizont alatt alapból, de a pálya felett */
+            z-index: 4;
             pointer-events: auto;
             cursor: help;
             font-size: 0;
             color: transparent;
-            /* A transzformációt és színt a JS kezeli */
             will-change: transform, background-color, box-shadow, color, text-shadow;
             transition: background-color 0.5s, box-shadow 0.5s, color 0.5s, text-shadow 0.5s;
         }
@@ -503,7 +505,7 @@
         #sun-path-icon {
             width: 20px;
             height: 20px;
-            background-color: #FFD700; /* Alapértelmezett szín */
+            background-color: #FFD700;
             border-radius: 50%;
             box-shadow: 0 0 10px 3px gold,
                         0 0 18px 6px rgba(255, 215, 0, 0.45),
@@ -521,9 +523,9 @@
             width: 18px;
             height: 18px;
             font-size: 18px;
-            line-height: 18px; /* Pontosabb igazítás */
+            line-height: 18px;
             text-align: center;
-            color: #E8EAF6; /* Alapértelmezett szín */
+            color: #E8EAF6;
             text-shadow: 0 0 7px rgba(200, 200, 255, 0.6),
                          0 0 13px rgba(150, 150, 220, 0.4);
         }
@@ -536,7 +538,8 @@
         }
 
         .sun-path-label, .moon-path-label {
-            position: absolute; bottom: -16px;
+            position: absolute; 
+            bottom: 5px; /* JAVÍTÁS: A címke a konténeren belülre került */
             font-size: 9.5px;
             font-weight: 600;
             color: var(--current-text-muted-color);
@@ -547,11 +550,11 @@
         .sun-path-label.sunrise-label, .moon-path-label.moonrise-label { left: 0; text-align: left; }
         .sun-path-label.sunset-label, .moon-path-label.moonset-label { right: 0; text-align: right;}
         .sun-path-time, .moon-path-time {
+            display: block; /* JAVÍTÁS: Biztosítja, hogy az idő a felirat alá kerüljön */
             font-weight: 700;
             color: var(--current-text-color);
             opacity: 0.9;
         }
-        /* === JAVÍTOTT RÉSZ VÉGE === */
 
         .rain-visual { width: 130px; height: 120px; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; flex-shrink: 0; overflow: hidden; }
         #main-rain-visual { clip-path: url(#raindrop-clip-main); }
@@ -794,7 +797,6 @@
         const REFRESH_INTERVAL_WIND = 15 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 5 * 60 * 1000;
         const REFRESH_INTERVAL_HISTORICAL_RAIN = 12 * 60 * 60 * 1000; // 12 óránként
-        // A REFRESH_INTERVAL_FORECAST konstanst eltávolítottuk
         const SKY_COLOR_UPDATE_INTERVAL = 1 * 60 * 1000;
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
@@ -816,7 +818,6 @@
             displayPws: null,
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null },
             last30DaysPrecipitation: null,
-            // A forecastDays kulcsot eltávolítottuk
             hourlyForecast: [],
             sunCalc: null,
             issPasses: [],
@@ -1386,8 +1387,6 @@
                 return null;
             }
         }
-        
-        // A fetchDailyForecastData funkciót teljesen eltávolítottuk.
 
         async function fetchHourlyForecastData(lat, lon) {
             const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
@@ -1469,7 +1468,7 @@
             <div class="main-info-wrapper">
                 <div class="sun-info-section is-hidden" id="sun-info-section">
                     <div class="sun-path-visual" id="sun-path-visual">
-                        <svg class="sun-path-svg" viewBox="0 0 150 110" preserveAspectRatio="xMidYMax meet"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
+                        <svg class="sun-path-svg" viewBox="0 0 150 130" preserveAspectRatio="xMidYMax meet"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
                         <div class="sun-path-horizon"></div>
                         <div class="sun-path-now-marker" id="sun-path-now-marker"></div>
                         <div id="sun-path-icon" class="celestial-body-icon"></div>
@@ -1484,7 +1483,7 @@
                 </div>
                 <div class="moon-info-section is-hidden" id="moon-info-section">
                     <div class="moon-path-visual" id="moon-path-visual">
-                        <svg class="moon-path-svg" viewBox="0 0 150 110" preserveAspectRatio="xMidYMax meet"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
+                        <svg class="moon-path-svg" viewBox="0 0 150 130" preserveAspectRatio="xMidYMax meet"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
                         <div class="moon-path-horizon"></div>
                         <div class="moon-path-now-marker" id="moon-path-now-marker"></div>
                         <i class="fas fa-moon celestial-body-icon" id="moon-path-icon"></i>
@@ -1726,7 +1725,6 @@
 
             renderWeatherData(); 
             renderHourlyForecastData(); 
-            // A renderForecastData() hívást eltávolítottuk.
         }
 
         function updateAnimatedValue(element, newValue) {
@@ -2030,8 +2028,6 @@
             if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden');
         }
 
-        // A renderForecastData funkciót teljesen eltávolítottuk.
-
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
             await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
@@ -2049,7 +2045,6 @@
             if (isInitialLoad || now - lastApiCallTimes.historicalPrecip > REFRESH_INTERVAL_HISTORICAL_RAIN) {
                 independentPromises.push(fetchHistoricalPrecipitation(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.last30DaysPrecipitation = data; }).catch(e => console.warn("Archív csapadék lekérési hiba:", e.message)));
             }
-            // A napi előrejelzés lekérését eltávolítottuk.
             
             if (isInitialLoad && cachedData.hourlyForecast.length === 0) {
                  independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
@@ -2215,29 +2210,22 @@
             const visualContainer = iconEl.parentElement;
             if (!visualContainer) return;
 
-            const HORIZON_Y_POS = 35; // a 'bottom' CSS tulajdonság a .sun-path-horizon-ból
-            const VISUAL_HEIGHT = visualContainer.offsetHeight; // a .sun-path-visual magassága
+            const HORIZON_Y_POS = 35; 
+            const VISUAL_HEIGHT = visualContainer.offsetHeight;
             const ICON_HEIGHT = iconEl.offsetHeight || (iconEl.id.includes('sun') ? 20 : 18);
 
-            // Magassági tartomány az animációhoz (-0.83 a horizont, 1.5 a teljes felbukkanás)
             const ALTITUDE_START = -0.83;
             const ALTITUDE_END = 1.5;
             
-            // Haladás kiszámítása 0 (teljesen lent) és 1 (teljesen fent) között
             const progress = (altitude - ALTITUDE_START) / (ALTITUDE_END - ALTITUDE_START);
             const clampedProgress = Math.max(0, Math.min(1, progress));
 
-            // Y pozíció kiszámítása: alulról felfelé mozog
-            // (VISUAL_HEIGHT - HORIZON_Y_POS) a horizont alatti terület.
-            // (clampedProgress * ICON_HEIGHT) a felbukkanás mértéke.
-            // Az eredményt kivonjuk a teljes magasságból, hogy a `top` értéket kapjuk.
             const yPos = VISUAL_HEIGHT - HORIZON_Y_POS - (clampedProgress * ICON_HEIGHT);
 
-            // X pozíció: bal (kelés) vagy jobb (nyugvás) oldalon fix
             const xPos = isRising ? 10 : 140;
 
             iconEl.style.transform = `translate(${xPos}px, ${yPos}px) translate(-50%, 0)`;
-            iconEl.style.transition = 'none'; // A folyamatos animációhoz ne legyen CSS transition
+            iconEl.style.transition = 'none';
         }
         
         function renderCelestialState(bodyName, state, elements) {
