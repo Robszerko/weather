@@ -112,11 +112,13 @@
             transition: all 0.6s ease-in-out; 
         }
         
+        /* === JAVÍTOTT RÉSZ KEZDETE === */
         .info-tongue {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 8px 16px;
+            justify-content: center; /* Vertikális középre igazítás */
+            padding: 8px 12px;
             color: white;
             text-shadow: 0 1px 3px rgba(0,0,0,0.4);
             font-family: 'Inter', sans-serif;
@@ -147,27 +149,22 @@
             font-size: 11.5px;
             font-weight: 500;
             color: var(--current-text-color);
-            margin-top: 6px;
-            line-height: 1.4;
+            margin-top: 4px; /* Csökkentett margó */
+            line-height: 1.3;
             transition: color 0.6s;
-            max-width: 220px;
             opacity: 0.9;
         }
-
-        .tongue-description strong {
-            font-weight: 800;
-            font-style: normal;
-        }
-
+        
         .top-info-tongues-container {
             display: flex;
             justify-content: center;
             gap: 16px;
             margin-bottom: 12px;
+            align-items: stretch; /* Egyenlő magasság biztosítása */
         }
+        /* === JAVÍTOTT RÉSZ VÉGE === */
 
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
-
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
 
         .header-container { display: inline-block; background-color: rgba(0, 0, 0, 0.1); padding: 8px 24px; border-radius: 12px; margin-bottom: 4px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); transition: all 0.6s; }
@@ -276,13 +273,7 @@
             transition: transform 0.8s ease-out;
         }
 
-        @keyframes pulse-icon {
-            0% { transform: scale(1); opacity: 0.8; }
-            50% { transform: scale(1.1); opacity: 1; }
-            100% { transform: scale(1); opacity: 0.8; }
-        }
-        
-        .precipitation-forecast-info {
+        .precipitation-forecast-info, .drought-info-bar {
             margin: 12px auto 0 auto;
             padding: 10px 16px;
             background-color: rgba(0, 0, 0, 0.15);
@@ -292,13 +283,13 @@
             text-align: center;
             max-width: 450px;
         }
-        #next-precipitation-info-text {
+        #next-precipitation-info-text, #drought-info-text {
             color: var(--current-text-color);
             transition: color 0.6s;
             font-size: 13.5px;
             font-weight: 500;
         }
-        #next-precipitation-info-text strong {
+        #next-precipitation-info-text strong, #drought-info-text strong {
             font-weight: 700;
             color: var(--current-text-color);
         }
@@ -429,7 +420,6 @@
             transition: all 0.5s ease;
         }
         
-        /* Event Active State */
         .sun-path-visual.is-event-active .sun-path-svg,
         .moon-path-visual.is-event-active .moon-path-svg,
         .sun-path-visual.is-event-active .sun-path-label,
@@ -453,7 +443,7 @@
             flex-direction: column;
             justify-content: flex-end;
             align-items: center;
-            padding-bottom: 25px; /* Igazítás a horizonthoz */
+            padding-bottom: 25px; 
             box-sizing: border-box;
             text-align: center;
             opacity: 0;
@@ -500,7 +490,6 @@
             cursor: help;
             font-size: 0;
             color: transparent;
-            /* A transition-t a JS kezeli a sima mozgás érdekében */
         }
 
         #sun-path-icon {
@@ -833,19 +822,6 @@
             .header-container {
                 padding: 6px 18px;
             }
-
-            .top-info-tongues-container {
-                align-items: stretch; 
-            }
-
-            .info-tongue {
-                max-width: 280px;
-                box-sizing: border-box;
-            }
-
-            .tongue-description {
-                max-width: none;
-            }
             
             .info-bar-value {
                 font-size: 14px;
@@ -989,7 +965,10 @@
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
             el_precipitationForecastBar, el_nextPrecipitationInfoText, el_nextPrecipitationDetailsText,
             el_tempTongueContainer, el_tempTongueValue, el_rainTongueContainer, el_rainTongueValue,
-            el_tempTongueDescription, el_rainTongueDescription;
+            el_tempTongueDescription,
+            // === JAVÍTOTT RÉSZ KEZDETE ===
+            el_droughtInfoBar, el_droughtInfoText;
+            // === JAVÍTOTT RÉSZ VÉGE ===
 
 
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
@@ -1544,6 +1523,7 @@
             } return null;
         }
 
+        // === JAVÍTOTT RÉSZ KEZDETE (HTML struktúra változása miatt) ===
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár a pontos nap- és hold-ciklusokhoz.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k kombinációja.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként (szél: ${REFRESH_INTERVAL_WIND / 1000} mp)</li><li>Órás előrejelzés: Minden óra kb. 0., 20. és 40. percében</li><li>ISS adatok: kb. ${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li><li>Általános állapot & Előrejelzések: Pár percenként / óránként</li></ul><p>A felület témája (hajnal, nappal, szürkület, éjjel) a napkelte és napnyugta idejéhez igazodik dinamikusan.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
@@ -1656,7 +1636,6 @@
                     <div class="info-tongue" id="rain-tongue-container">
                         <div class="tongue-label">Ennyi esett ma eddig:</div>
                         <div class="tongue-content" id="rain-tongue-value">-- mm</div>
-                        <div class="tongue-description" id="rain-tongue-description">Csapadékhelyzet</div>
                     </div>
                 </div>
                 <div class="secondary-info-bar">
@@ -1668,6 +1647,9 @@
             <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar">
                 <div id="next-precipitation-info-text"></div>
                 <div id="next-precipitation-details-text" class="is-hidden"></div>
+            </div>
+            <div class="drought-info-bar is-hidden" id="drought-info-bar">
+                <div id="drought-info-text"></div>
             </div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value" id="dewpoint-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value" id="humidity-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value"></span><span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value" id="visibility-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value" id="solar-radiation-value"></span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value"></span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
             
@@ -1772,17 +1754,20 @@
             el_precipitationForecastBar = document.getElementById('precipitation-forecast-bar');
             el_nextPrecipitationInfoText = document.getElementById('next-precipitation-info-text');
             el_nextPrecipitationDetailsText = document.getElementById('next-precipitation-details-text');
+            
+            el_droughtInfoBar = document.getElementById('drought-info-bar');
+            el_droughtInfoText = document.getElementById('drought-info-text');
 
             el_tempTongueContainer = document.getElementById('temp-tongue-container');
             el_tempTongueValue = document.getElementById('temp-tongue-value');
             el_rainTongueContainer = document.getElementById('rain-tongue-container');
             el_rainTongueValue = document.getElementById('rain-tongue-value');
             el_tempTongueDescription = document.getElementById('temp-tongue-description');
-            el_rainTongueDescription = document.getElementById('rain-tongue-description');
 
             addStationChangeListeners();
             isWeatherDisplayInitialized = true;
         }
+        // === JAVÍTOTT RÉSZ VÉGE ===
 
         function updateStationStatusUI(stationKey, status = 'unknown') {
             const stationConfig = STATIONS[stationKey];
@@ -1874,7 +1859,7 @@
 
         function getDroughtDescription(precipSumLast30Days) {
             if (precipSumLast30Days === null || typeof precipSumLast30Days === 'undefined' || isNaN(precipSumLast30Days)) {
-                return 'Csapadékhelyzet elemzése...';
+                return 'Aszály-index elemzése...';
             }
             
             const precipVal = `<strong>${formatValue(precipSumLast30Days, 'mm', 0)}</strong>`;
@@ -1924,6 +1909,7 @@
             }
         }
 
+        // === JAVÍTOTT RÉSZ KEZDETE (render logika a megváltozott struktúrához) ===
         function renderWeatherData() {
             const obs = cachedData.displayPws;
             const general = cachedData.generalConditions;
@@ -1933,6 +1919,7 @@
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
 
+            // Hőmérséklet kártya
             if (el_tempTongueContainer && el_tempTongueValue && el_tempTongueDescription) {
                 const temp = obs.temp;
                 el_tempTongueValue.textContent = formatValue(temp, '°C', 1, '--');
@@ -1940,17 +1927,27 @@
                 el_tempTongueDescription.textContent = getTemperatureDescription(temp);
             }
 
-            if (el_rainTongueContainer && el_rainTongueValue && el_rainTongueDescription) {
+            // Csapadék kártya
+            if (el_rainTongueContainer && el_rainTongueValue) {
                 const precip = obs.precipTotal;
                 el_rainTongueValue.textContent = formatValue(precip, ' mm', 2, '--');
-                el_rainTongueDescription.innerHTML = getDroughtDescription(cachedData.last30DaysPrecipitation);
-
                 let rainColor = '#6B7280';
                 if (precip > 0) rainColor = '#3B82F6';
                 if (precip >= 5) rainColor = '#2563EB';
                 if (precip >= 15) rainColor = '#1D4ED8';
                 el_rainTongueContainer.style.backgroundColor = rainColor;
             }
+
+            // Aszály infó sáv
+            if(el_droughtInfoBar && el_droughtInfoText) {
+                if (cachedData.last30DaysPrecipitation !== null) {
+                    el_droughtInfoText.innerHTML = getDroughtDescription(cachedData.last30DaysPrecipitation);
+                    el_droughtInfoBar.classList.remove('is-hidden');
+                } else {
+                    el_droughtInfoBar.classList.add('is-hidden');
+                }
+            }
+
 
             const isRainingNow = obs.precipRate > 0;
             const sunState = celestialBodyStates.sun.currentState;
@@ -2064,6 +2061,7 @@
 
             renderPrecipitationForecastInfo();
         }
+        // === JAVÍTOTT RÉSZ VÉGE ===
         
         function getTemperatureColorVar(temp) { if (temp === null || isNaN(temp)) return 'var(--mild)'; if (temp >= 35) return 'var(--hot)'; if (temp >= 25) return 'var(--warm)'; if (temp >= 10) return 'var(--mild)'; if (temp >= 0) return 'var(--cool)'; return 'var(--cold)'; }
         function getWindColorVar(speed) { if (speed === null || isNaN(speed)) return 'rgba(0,0,0,0.15)'; if (speed > 40) return 'var(--hot)'; if (speed > 25) return 'var(--warm)'; if (speed > 10) return 'var(--mild)'; return 'var(--cool)'; }
@@ -2299,7 +2297,6 @@
                     renderWeatherData();
                 }
             } catch (error) {
-                // Hiba már naplózva van a fetchPwsStationData-ban
             }
         }
 
@@ -2415,7 +2412,7 @@
                 
                 case 'POST_RISE_TRANSITION':
                     eventMessageEl.textContent = 'Felkeltem!';
-                    animateIconAcrossHorizon(iconEl, altitude); // keep it at the top of the anim
+                    animateIconAcrossHorizon(iconEl, altitude);
                     break;
 
                 case 'AWAITING_SET':
