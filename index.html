@@ -306,6 +306,7 @@
             margin-top: 4px;
             transition: color 0.6s;
             font-style: italic;
+            line-height: 1.5;
         }
         #next-precipitation-details-text strong {
             font-weight: 600;
@@ -562,10 +563,8 @@
             line-height: 1.3;
             transition: opacity 0.5s;
         }
-        /* *** JAVÍTÁS ITT: A feliratok igazítása a grafikonhoz *** */
         .sun-path-label.sunrise-label, .moon-path-label.moonrise-label { left: 5px; text-align: left; }
         .sun-path-label.sunset-label, .moon-path-label.moonset-label { right: 5px; text-align: right;}
-        
         .sun-path-time, .moon-path-time {
             display: block;
             font-weight: 700;
@@ -985,7 +984,7 @@
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null },
             last30DaysPrecipitation: null,
             hourlyForecast: [],
-            dailyForecastToday: null, // Új adat tárolására
+            dailyForecastToday: null,
             sunCalc: null,
             issPasses: [],
             airQuality: null,
@@ -1059,7 +1058,7 @@
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
             el_precipitationForecastBar, el_nextPrecipitationInfoText, el_nextPrecipitationDetailsText,
             el_tempTongueContainer, el_tempTongueValue, el_rainTongueContainer, el_rainTongueValue,
-            el_tempTongueDescription, el_droughtInfoBar, el_droughtInfoText,
+            el_droughtInfoBar, el_droughtInfoText,
             el_aqiValue, el_aqiDescription, el_pm10Value, el_pm25Value, el_ozoneValue, el_ragweedPollenValue, el_grassPollenValue,
             el_ragweedPollenDescription, el_grassPollenDescription;
 
@@ -1603,7 +1602,6 @@
             } catch (error) { console.warn(`Órás előrejelzés hiba: ${error.message}`); throw error; }
         }
 
-        // *** ÚJ FUNKCIÓ a napi csapadékmennyiség lekéréséhez ***
         async function fetchDailyForecastData(lat, lon) {
             const url = `https://api.weather.com/v3/wx/forecast/daily/5day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
@@ -1612,8 +1610,6 @@
                 const data = await response.json();
                 lastApiCallTimes.dailyForecast = Date.now();
                 
-                // A mai nap a 0. indexű elem. A QPF (Quantitative Precipitation Forecast) a csapadékmennyiség.
-                // A nappali (daypart[0]) és éjszakai (daypart[1]) értéket összeadjuk.
                 if (data && data.daypart && data.daypart[0] && data.daypart[0].qpf) {
                     const qpfDay = data.daypart[0].qpf[0] || 0;
                     const qpfNight = data.daypart[0].qpf[1] || 0;
@@ -1762,7 +1758,6 @@
                     <div class="info-tongue" id="temp-tongue-container">
                         <div class="tongue-label">Jelenleg:</div>
                         <div class="tongue-content" id="temp-tongue-value">-- °C</div>
-                        <div class="tongue-description" id="temp-tongue-description">Hőmérséklet-érzet</div>
                     </div>
                     <div class="info-tongue" id="rain-tongue-container">
                         <div class="tongue-label">Ennyi esett ma eddig:</div>
@@ -1894,7 +1889,6 @@
             el_tempTongueValue = document.getElementById('temp-tongue-value');
             el_rainTongueContainer = document.getElementById('rain-tongue-container');
             el_rainTongueValue = document.getElementById('rain-tongue-value');
-            el_tempTongueDescription = document.getElementById('temp-tongue-description');
             
             el_aqiValue = document.getElementById('aqi-value');
             el_aqiDescription = document.getElementById('aqi-description');
@@ -1988,16 +1982,6 @@
             }
         }
 
-        function getTemperatureDescription(temp) {
-            if (temp === null || typeof temp === 'undefined' || isNaN(temp)) return 'Hőmérséklet-érzet';
-            if (temp > 30) return 'Forróság van';
-            if (temp > 22) return 'Meleg van';
-            if (temp > 15) return 'Kellemes idő van';
-            if (temp > 5) return 'Hűvös van';
-            if (temp > 0) return 'Hideg van';
-            return 'Fagyos idő van';
-        }
-
         function getDroughtDescription(precipSumLast30Days) {
             if (precipSumLast30Days === null || typeof precipSumLast30Days === 'undefined' || isNaN(precipSumLast30Days)) {
                 return 'Aszály-index elemzése...';
@@ -2012,7 +1996,6 @@
             return `A talaj nedvessége megfelelő. ${precipVal} esett az elmúlt 30 napban.`;
         }
         
-        // *** JAVÍTOTT FUNKCIÓ A CSAPADÉK ELŐREJELZÉSHEZ ***
         function renderPrecipitationForecastInfo() {
             if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText || !el_nextPrecipitationDetailsText) return;
 
@@ -2029,12 +2012,11 @@
                     detailsHTML += `Jelleg: <strong>${nextEvent.phrase}</strong>`;
                 }
 
-                // Hozzáadjuk a napi összesített csapadékot, ha elérhető
                 if (cachedData.dailyForecastToday && cachedData.dailyForecastToday.totalPrecip > 0) {
                     if (detailsHTML !== '') {
-                        detailsHTML += '<br>'; // Sortörés, ha már van előtte szöveg
+                        detailsHTML += '<br>';
                     }
-                    detailsHTML += `Ma összesen <strong>${formatValue(cachedData.dailyForecastToday.totalPrecip, ' mm')}</strong> várunk.`;
+                    detailsHTML += `Ma összesen <strong>${formatValue(cachedData.dailyForecastToday.totalPrecip, ' mm', 1)}</strong>-t várunk.`;
                 }
                 
                 if (detailsHTML) {
@@ -2109,11 +2091,10 @@
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
             if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
 
-            if (el_tempTongueContainer && el_tempTongueValue && el_tempTongueDescription) {
+            if (el_tempTongueContainer && el_tempTongueValue) {
                 const temp = obs.temp;
                 el_tempTongueValue.textContent = formatValue(temp, '°C', 1, '--');
                 el_tempTongueContainer.style.backgroundColor = getTemperatureColorVar(temp);
-                el_tempTongueDescription.textContent = getTemperatureDescription(temp);
             }
 
             if (el_rainTongueContainer && el_rainTongueValue) {
@@ -2342,7 +2323,6 @@
                 }).catch(e => console.warn("Levegőminőség lekérési hiba:", e.message)));
             }
             
-            // Órás és napi előrejelzés együtt frissül
             if (isInitialLoad || (now - lastApiCallTimes.hourlyForecast > 20 * 60 * 1000)) {
                  independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
                     if (data) cachedData.hourlyForecast = data;
@@ -2706,7 +2686,6 @@
             setTimeout(async () => {
                 console.log(`Időzített előrejelzés frissítése: ${new Date().toLocaleTimeString()}`);
                 try {
-                    // Párhuzamosan futtatjuk a két lekérést
                     await Promise.all([
                         fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
                             if (data) cachedData.hourlyForecast = data;
