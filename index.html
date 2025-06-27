@@ -514,7 +514,7 @@
             font-size: 0;
             color: transparent;
             will-change: transform, background-color, box-shadow, color, text-shadow;
-            transition: background-color 0.5s, box-shadow 0.5s, color 0.5s, text-shadow 0.5s;
+            transition: background-color 0.5s, box-shadow 0.5s, color 0.5s, text-shadow 0.5s, opacity 0.5s;
         }
 
         #sun-path-icon {
@@ -998,13 +998,13 @@
         
         let animationFrameId = null;
         
-        const CELESTIAL_EVENT_WINDOW_MS = 15 * 60 * 1000;
-        const CELESTIAL_EVENT_DURATION_MS = 3 * 60 * 1000;
-        const CELESTIAL_POST_EVENT_TRANSITION_MS = 1 * 60 * 1000; 
+        const CELESTIAL_EVENT_DURATION_MS = 10 * 60 * 1000;
+        const CELESTIAL_RISE_TRANSITION_ALTITUDE = 0.6; 
+        const CELESTIAL_SET_TRANSITION_ALTITUDE = -0.6;
         
         let celestialBodyStates = {
-            sun: { currentState: 'UNKNOWN' },
-            moon: { currentState: 'UNKNOWN' }
+            sun: { currentState: 'UNKNOWN', previousState: 'UNKNOWN' },
+            moon: { currentState: 'UNKNOWN', previousState: 'UNKNOWN' }
         };
 
         let masterTickCounter = 0;
@@ -1618,6 +1618,10 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás előrejelzés: ~20 percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             
+            // *** JAVÍTÁS ITT: A GÖRBE SZÉLESEBB PADDINGOT KAP ***
+            // A görbe M 10 ... 140 helyett M 15 ... 135 lesz, a sugara 65 helyett 60.
+            const celestialArcPath = "M 15 75 A 60 60 0 0 1 135 75";
+            
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza</div>
@@ -1656,7 +1660,7 @@
             <div class="main-info-wrapper">
                 <div class="sun-info-section is-hidden" id="sun-info-section">
                     <div class="sun-path-visual" id="sun-path-visual">
-                        <svg class="sun-path-svg" viewBox="0 0 150 130" preserveAspectRatio="xMidYMax meet"><path class="sun-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
+                        <svg class="sun-path-svg" viewBox="0 0 150 130" preserveAspectRatio="xMidYMax meet"><path class="sun-path-arc-bg" d="${celestialArcPath}"></path><path id="sun-path-arc-main" class="sun-path-arc-main" d="${celestialArcPath}"></path></svg>
                         <div class="sun-path-horizon"></div>
                         <div class="sun-path-now-marker" id="sun-path-now-marker"></div>
                         <div id="sun-path-icon" class="celestial-body-icon"></div>
@@ -1671,7 +1675,7 @@
                 </div>
                 <div class="moon-info-section is-hidden" id="moon-info-section">
                     <div class="moon-path-visual" id="moon-path-visual">
-                        <svg class="moon-path-svg" viewBox="0 0 150 130" preserveAspectRatio="xMidYMax meet"><path class="moon-path-arc-bg" d="M 10 75 A 65 65 0 0 1 140 75"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="M 10 75 A 65 65 0 0 1 140 75"></path></svg>
+                        <svg class="moon-path-svg" viewBox="0 0 150 130" preserveAspectRatio="xMidYMax meet"><path class="moon-path-arc-bg" d="${celestialArcPath}"></path><path id="moon-path-arc-main" class="moon-path-arc-main" d="${celestialArcPath}"></path></svg>
                         <div class="moon-path-horizon"></div>
                         <div class="moon-path-now-marker" id="moon-path-now-marker"></div>
                         <i class="fas fa-moon celestial-body-icon" id="moon-path-icon"></i>
@@ -2414,42 +2418,25 @@
             }
         }
         
-        function determineCelestialState(nowMs, riseTime, setTime) {
-            if (!riseTime && !setTime) return 'BELOW_HORIZON';
-
+        function determineCelestialState(nowMs, riseTime, setTime, altitude) {
+            if (altitude > CELESTIAL_RISE_TRANSITION_ALTITUDE) return 'ON_PATH';
+            if (altitude < CELESTIAL_SET_TRANSITION_ALTITUDE) return 'BELOW_HORIZON';
+            
             const riseMs = riseTime ? riseTime.getTime() : -1;
             const setMs = setTime ? setTime.getTime() : -1;
 
-            if (riseMs > 0) {
-                const riseStartTime = riseMs - (CELESTIAL_EVENT_DURATION_MS / 2);
-                const riseEndTime = riseMs + (CELESTIAL_EVENT_DURATION_MS / 2);
-                const postRiseEndTime = riseEndTime + CELESTIAL_POST_EVENT_TRANSITION_MS;
-                const awaitingRiseStartTime = riseMs - CELESTIAL_EVENT_WINDOW_MS;
+            if (riseMs > 0 || setMs > 0) {
+                const timeToRise = riseMs > 0 ? Math.abs(nowMs - riseMs) : Infinity;
+                const timeToSet = setMs > 0 ? Math.abs(nowMs - setMs) : Infinity;
 
-                if (nowMs >= awaitingRiseStartTime && nowMs < riseStartTime) return 'AWAITING_RISE';
-                if (nowMs >= riseStartTime && nowMs < riseEndTime) return 'RISING';
-                if (nowMs >= riseEndTime && nowMs < postRiseEndTime) return 'POST_RISE_TRANSITION';
+                if (timeToRise < timeToSet && timeToRise < CELESTIAL_EVENT_DURATION_MS) {
+                    return 'RISING';
+                }
+                if (timeToSet < timeToRise && timeToSet < CELESTIAL_EVENT_DURATION_MS) {
+                    return 'SETTING';
+                }
             }
-
-            if (setMs > 0) {
-                const setStartTime = setMs - (CELESTIAL_EVENT_DURATION_MS / 2);
-                const setEndTime = setMs + (CELESTIAL_EVENT_DURATION_MS / 2);
-                const postSetEndTime = setEndTime + CELESTIAL_POST_EVENT_TRANSITION_MS;
-                const awaitingSetStartTime = setMs - CELESTIAL_EVENT_WINDOW_MS;
-
-                if (nowMs >= awaitingSetStartTime && nowMs < setStartTime) return 'AWAITING_SET';
-                if (nowMs >= setStartTime && nowMs < setEndTime) return 'SETTING';
-                if (nowMs >= setEndTime && nowMs < postSetEndTime) return 'POST_SET_TRANSITION';
-            }
-            
-            if (riseMs > 0 && setMs > 0 && nowMs > riseMs && nowMs < setMs) {
-                return 'ON_PATH';
-            }
-            
-            if (riseMs === -1 && setMs > 0 && nowMs < setMs) return 'ON_PATH';
-            if (setMs === -1 && riseMs > 0 && nowMs > riseMs) return 'ON_PATH';
-
-            return 'BELOW_HORIZON';
+            return altitude > 0 ? 'RISING' : 'SETTING';
         }
 
         function animateIconOnHorizon(iconEl, altitude) {
@@ -2461,10 +2448,7 @@
             const VISUAL_HEIGHT = visualContainer.offsetHeight;
             const ICON_HEIGHT = iconEl.offsetHeight || (iconEl.id.includes('sun') ? 20 : 18);
             
-            const ALTITUDE_START = -1.0; 
-            const ALTITUDE_END = 1.5;
-
-            const progress = (altitude - ALTITUDE_START) / (ALTITUDE_END - ALTITUDE_START);
+            const progress = (altitude - CELESTIAL_SET_TRANSITION_ALTITUDE) / (CELESTIAL_RISE_TRANSITION_ALTITUDE - CELESTIAL_SET_TRANSITION_ALTITUDE);
             const clampedProgress = Math.max(0, Math.min(1, progress));
             
             const yPos = (VISUAL_HEIGHT - HORIZON_Y_POS_FROM_BOTTOM) - (clampedProgress * ICON_HEIGHT);
@@ -2474,61 +2458,27 @@
             iconEl.style.transition = 'none';
         }
         
-        function renderCelestialState(bodyName, state, elements) {
-            const { visualEl, textDetailsEl, iconEl, arcEl, nowMarkerEl, eventContainerEl, eventMessageEl, eventCountdownEl, altitude, eventRiseTime, eventSetTime, otherBodyState } = elements;
+        function renderCelestialState(bodyName, previousState, currentState, elements) {
+            const { visualEl, textDetailsEl, iconEl, arcEl, nowMarkerEl, eventContainerEl, eventMessageEl, eventCountdownEl, altitude, otherBodyState } = elements;
             
-            const isEventActive = ['AWAITING_RISE', 'RISING', 'POST_RISE_TRANSITION', 'AWAITING_SET', 'SETTING', 'POST_SET_TRANSITION'].includes(state);
+            const isEventActive = ['RISING', 'SETTING'].includes(currentState);
             visualEl.classList.toggle('is-event-active', isEventActive);
             textDetailsEl.style.opacity = isEventActive ? '0.3' : '1';
             eventContainerEl.classList.toggle('is-hidden', !isEventActive);
 
             iconEl.style.opacity = 1;
-            eventCountdownEl.classList.add('is-hidden');
             
-            switch (state) {
-                case 'AWAITING_RISE':
-                    eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan felkelek, jó reggelt!' : 'Hamarosan felkelek!';
-                    if(eventRiseTime) {
-                        eventCountdownEl.textContent = formatCountdown(eventRiseTime.getTime() - Date.now()) + ' múlva';
-                        eventCountdownEl.classList.remove('is-hidden');
-                    }
-                    animateIconOnHorizon(iconEl, altitude);
-                    break;
+            switch (currentState) {
                 case 'RISING':
                     eventMessageEl.textContent = (bodyName === 'sun') ? 'Felkelés folyamatban...' : 'Holdkelte folyamatban...';
                     animateIconOnHorizon(iconEl, altitude);
                     break;
-                case 'POST_RISE_TRANSITION':
-                    eventMessageEl.textContent = 'Felkeltem!';
-                    animateIconOnHorizon(iconEl, altitude);
-                    break;
-                case 'AWAITING_SET':
-                    eventMessageEl.textContent = (bodyName === 'sun') ? 'Hamarosan lenyugszom!' : 'Hamarosan lenyugszom!';
-                    if(eventSetTime) {
-                       eventCountdownEl.textContent = formatCountdown(eventSetTime.getTime() - Date.now()) + ' múlva';
-                       eventCountdownEl.classList.remove('is-hidden');
-                    }
-                    animateIconOnHorizon(iconEl, altitude);
-                    break;
+                
                 case 'SETTING':
                      eventMessageEl.textContent = (bodyName === 'sun') ? 'Lenyugvás folyamatban...' : 'Holdnyugta folyamatban...';
                      animateIconOnHorizon(iconEl, altitude);
                     break;
-                case 'POST_SET_TRANSITION':
-                    let settingMessage = '';
-                    if (bodyName === 'sun') {
-                       if (otherBodyState && ['ON_PATH', 'RISING', 'AWAITING_RISE'].includes(otherBodyState)) {
-                           settingMessage = 'Lenyugodtam. Most jön a Hold!';
-                       } else {
-                           settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
-                       }
-                    } else {
-                       settingMessage = 'Lenyugodtam.';
-                    }
-                    eventMessageEl.textContent = settingMessage;
-                    iconEl.style.opacity = 0;
-                    break;
-
+                
                 case 'ON_PATH':
                     visualEl.classList.remove('is-event-active');
                     iconEl.style.transition = 'transform 0.2s linear, opacity 0.5s ease-in-out';
@@ -2538,6 +2488,21 @@
                 case 'BELOW_HORIZON':
                     visualEl.classList.remove('is-event-active');
                     iconEl.style.opacity = 0;
+                    if(previousState === 'SETTING') {
+                        let settingMessage = '';
+                        if (bodyName === 'sun') {
+                           if (otherBodyState && ['ON_PATH', 'RISING'].includes(otherBodyState)) {
+                               settingMessage = 'Lenyugodtam. Most jön a Hold!';
+                           } else {
+                               settingMessage = 'Lenyugodtam, most jönnek a csillagok!';
+                           }
+                        } else {
+                           settingMessage = 'Lenyugodtam.';
+                        }
+                        eventMessageEl.textContent = settingMessage;
+                        eventContainerEl.classList.remove('is-hidden');
+                        setTimeout(() => eventContainerEl.classList.add('is-hidden'), 3000);
+                    }
                     updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, false);
                     break;
             }
@@ -2547,7 +2512,7 @@
             const { iconEl, mainArcEl, nowMarkerEl } = elements;
              if (!isVisible || !startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || !iconEl || !mainArcEl || !nowMarkerEl) {
                 if(mainArcEl && mainArcEl.style) mainArcEl.style.strokeDashoffset = mainArcEl.getTotalLength ? mainArcEl.getTotalLength() : '999';
-                if(iconEl) iconEl.style.transform = 'translate(-50%, -100px)';
+                if(iconEl && iconEl.style) iconEl.style.transform = 'translate(-50%, -100px)';
                 if(nowMarkerEl) nowMarkerEl.classList.add('is-hidden');
                 return;
             }
@@ -2563,22 +2528,26 @@
             }
             
             const arcLength = mainArcEl.getTotalLength();
-            if (arcLength === 0) return;
+            if (arcLength === 0) {
+                requestAnimationFrame(() => updatePathVisuals(startTime, endTime, elements, isVisible));
+                return;
+            };
 
             if (mainArcEl.style) {
               mainArcEl.style.strokeDasharray = arcLength;
               mainArcEl.style.strokeDashoffset = arcLength * (1 - percentageOfPath);
             }
-
+            
+            // *** JAVÍTÁS ITT: A GÖRBE ÚJ MÉRETEIHEZ IGAZÍTOTT SZÁMÍTÁS ***
             const angle = Math.PI * (1 - percentageOfPath);
-            const r = 65, cx = 75, cy = 75;
+            const r = 60, cx = 75, cy = 75; // R sugár 65-ről 60-ra változott!
             const x = cx + r * Math.cos(angle);
             const y = cy - r * Math.sin(angle);
 
             iconEl.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px)`;
             nowMarkerEl.style.left = `${x}px`;
         }
-
+        
         function masterAnimationLoop() {
             if (!cachedData.sunCalc || !isWeatherDisplayInitialized) {
                 animationFrameId = requestAnimationFrame(masterAnimationLoop);
@@ -2602,14 +2571,16 @@
                  else { el_moonPathIcon.style.color = '#E8EAF6'; el_moonPathIcon.style.textShadow = '0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4)';}
             }
             
-            const sunState = determineCelestialState(nowMs, cachedData.sunCalc.sunriseDateForPath, cachedData.sunCalc.sunsetDateForPath);
-            const moonState = determineCelestialState(nowMs, cachedData.sunCalc.moonRiseDateForPath, cachedData.sunCalc.moonSetDateForPath);
-
+            const sunState = determineCelestialState(nowMs, cachedData.sunCalc.sunriseDateForPath, cachedData.sunCalc.sunsetDateForPath, sunAltitude);
+            const moonState = determineCelestialState(nowMs, cachedData.sunCalc.moonRiseDateForPath, cachedData.sunCalc.moonSetDateForPath, moonAltitude);
+            
             if (celestialBodyStates.sun.currentState !== sunState) {
+                celestialBodyStates.sun.previousState = celestialBodyStates.sun.currentState;
                 celestialBodyStates.sun.currentState = sunState;
                 if(cachedData.displayPws) renderWeatherData(); 
             }
              if (celestialBodyStates.moon.currentState !== moonState) {
+                celestialBodyStates.moon.previousState = celestialBodyStates.moon.currentState;
                 celestialBodyStates.moon.currentState = moonState;
                 if(cachedData.displayPws) renderWeatherData();
             }
@@ -2620,7 +2591,6 @@
                 eventContainerEl: el_sunEventContainer, eventMessageEl: el_sunEventMessage, eventCountdownEl: el_sunEventCountdown,
                 altitude: sunAltitude,
                 pathStartTime: cachedData.sunCalc.sunriseDateForPath, pathEndTime: cachedData.sunCalc.sunsetDateForPath,
-                eventRiseTime: cachedData.sunCalc.sunriseDateForPath, eventSetTime: cachedData.sunCalc.sunsetDateForPath,
                 otherBodyState: moonState
             };
             
@@ -2630,12 +2600,11 @@
                 eventContainerEl: el_moonEventContainer, eventMessageEl: el_moonEventMessage, eventCountdownEl: el_moonEventCountdown,
                 altitude: moonAltitude,
                 pathStartTime: cachedData.sunCalc.moonRiseDateForPath, pathEndTime: cachedData.sunCalc.moonSetDateForPath,
-                eventRiseTime: cachedData.sunCalc.moonRiseDateForPath, eventSetTime: cachedData.sunCalc.moonSetDateForPath,
                 otherBodyState: sunState
             };
             
-            if(el_sunInfoSection) renderCelestialState('sun', sunState, sunElements);
-            if(el_moonInfoSection) renderCelestialState('moon', moonState, moonElements);
+            if(el_sunInfoSection) renderCelestialState('sun', celestialBodyStates.sun.previousState, sunState, sunElements);
+            if(el_moonInfoSection) renderCelestialState('moon', celestialBodyStates.moon.previousState, moonState, moonElements);
 
             animationFrameId = requestAnimationFrame(masterAnimationLoop);
         }
