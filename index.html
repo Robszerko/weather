@@ -562,8 +562,10 @@
             line-height: 1.3;
             transition: opacity 0.5s;
         }
-        .sun-path-label.sunrise-label, .moon-path-label.moonrise-label { left: 0; text-align: left; }
-        .sun-path-label.sunset-label, .moon-path-label.moonset-label { right: 0; text-align: right;}
+        /* *** JAVÍTÁS ITT: A feliratok igazítása a grafikonhoz *** */
+        .sun-path-label.sunrise-label, .moon-path-label.moonrise-label { left: 5px; text-align: left; }
+        .sun-path-label.sunset-label, .moon-path-label.moonset-label { right: 5px; text-align: right;}
+        
         .sun-path-time, .moon-path-time {
             display: block;
             font-weight: 700;
@@ -977,12 +979,13 @@
         };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT';
 
-        let lastApiCallTimes = { generalConditions: 0, historicalPrecip: 0, hourlyForecast: 0, issPasses: 0, airQuality: 0 };
+        let lastApiCallTimes = { generalConditions: 0, historicalPrecip: 0, hourlyForecast: 0, dailyForecast: 0, issPasses: 0, airQuality: 0 };
         let cachedData = {
             displayPws: null,
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null },
             last30DaysPrecipitation: null,
             hourlyForecast: [],
+            dailyForecastToday: null, // Új adat tárolására
             sunCalc: null,
             issPasses: [],
             airQuality: null,
@@ -1600,6 +1603,31 @@
             } catch (error) { console.warn(`Órás előrejelzés hiba: ${error.message}`); throw error; }
         }
 
+        // *** ÚJ FUNKCIÓ a napi csapadékmennyiség lekéréséhez ***
+        async function fetchDailyForecastData(lat, lon) {
+            const url = `https://api.weather.com/v3/wx/forecast/daily/5day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Napi előrejelzés API hiba: ${response.status}`);
+                const data = await response.json();
+                lastApiCallTimes.dailyForecast = Date.now();
+                
+                // A mai nap a 0. indexű elem. A QPF (Quantitative Precipitation Forecast) a csapadékmennyiség.
+                // A nappali (daypart[0]) és éjszakai (daypart[1]) értéket összeadjuk.
+                if (data && data.daypart && data.daypart[0] && data.daypart[0].qpf) {
+                    const qpfDay = data.daypart[0].qpf[0] || 0;
+                    const qpfNight = data.daypart[0].qpf[1] || 0;
+                    return {
+                        totalPrecip: qpfDay + qpfNight
+                    };
+                }
+                return null;
+            } catch (error) {
+                console.warn(`Napi előrejelzés hiba: ${error.message}`);
+                return null;
+            }
+        }
+
         function findNextPrecipitationEvent(hourlyData) {
             if (!hourlyData || hourlyData.length === 0) return null;
             const stormKeywords = ['vihar', 'zivatar']; const rainKeywords = ['eső', 'zápor']; const snowKeywords = ['hó', 'havazás', 'hózápor'];
@@ -1615,11 +1643,9 @@
         }
 
         function initializeWeatherDisplayDOM() {
-            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás előrejelzés: ~20 percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
+            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API (Honvéd u., Kossuth út 50, Nyíregyházi út magán időjárás-állomások).</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás & Napi előrejelzés: ~20 percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
             const mainRaindropPath = `M50,85 C20,85 15,55 50,15 C85,55 80,85 50,85`;
             
-            // *** JAVÍTÁS ITT: A GÖRBE SZÉLESEBB PADDINGOT KAP ***
-            // A görbe M 10 ... 140 helyett M 15 ... 135 lesz, a sugara 65 helyett 60.
             const celestialArcPath = "M 15 75 A 60 60 0 0 1 135 75";
             
             weatherDisplayEl.innerHTML = `<div class="widget-header">
@@ -1986,33 +2012,40 @@
             return `A talaj nedvessége megfelelő. ${precipVal} esett az elmúlt 30 napban.`;
         }
         
+        // *** JAVÍTOTT FUNKCIÓ A CSAPADÉK ELŐREJELZÉSHEZ ***
         function renderPrecipitationForecastInfo() {
             if (!el_precipitationForecastBar || !el_nextPrecipitationInfoText || !el_nextPrecipitationDetailsText) return;
 
             const nextEvent = findNextPrecipitationEvent(cachedData.hourlyForecast);
-
+            
             if (nextEvent) {
                 const dateText = formatPrecipitationDate(nextEvent.time);
                 const timeText = formatTime(nextEvent.time);
 
-                el_nextPrecipitationInfoText.innerHTML = `Várható ${nextEvent.type.toLowerCase()}: <strong>${dateText} ${timeText}</strong> (${formatValue(nextEvent.chance, '%', 0)})`;
+                el_nextPrecipitationInfoText.innerHTML = `Várható csapadék leghamarabb <strong>${dateText} ${timeText}</strong> ( ${formatValue(nextEvent.chance, '%', 0)} esély )`;
                 
                 let detailsHTML = '';
                 if (nextEvent.phrase) {
-                    detailsHTML = `Jelleg: <strong>${nextEvent.phrase}</strong>`;
-                } else {
-                    if (nextEvent.chance >= 75) {
-                        detailsHTML = "Intenzitás: Valószínűleg erős.";
-                    } else if (nextEvent.chance >= 50) {
-                        detailsHTML = "Intenzitás: Mérsékelt.";
-                    } else {
-                        detailsHTML = "Intenzitás: Gyenge, futó.";
-                    }
+                    detailsHTML += `Jelleg: <strong>${nextEvent.phrase}</strong>`;
                 }
-                el_nextPrecipitationDetailsText.innerHTML = detailsHTML;
-                el_nextPrecipitationDetailsText.classList.remove('is-hidden');
+
+                // Hozzáadjuk a napi összesített csapadékot, ha elérhető
+                if (cachedData.dailyForecastToday && cachedData.dailyForecastToday.totalPrecip > 0) {
+                    if (detailsHTML !== '') {
+                        detailsHTML += '<br>'; // Sortörés, ha már van előtte szöveg
+                    }
+                    detailsHTML += `Ma összesen <strong>${formatValue(cachedData.dailyForecastToday.totalPrecip, ' mm')}</strong> várunk.`;
+                }
+                
+                if (detailsHTML) {
+                    el_nextPrecipitationDetailsText.innerHTML = detailsHTML;
+                    el_nextPrecipitationDetailsText.classList.remove('is-hidden');
+                } else {
+                    el_nextPrecipitationDetailsText.classList.add('is-hidden');
+                }
 
                 el_precipitationForecastBar.classList.remove('is-hidden');
+
             } else if (cachedData.hourlyForecast && cachedData.hourlyForecast.length > 0) {
                 el_nextPrecipitationInfoText.textContent = "A következő órákban nem várható jelentős csapadék.";
                 el_nextPrecipitationDetailsText.classList.add('is-hidden');
@@ -2309,11 +2342,15 @@
                 }).catch(e => console.warn("Levegőminőség lekérési hiba:", e.message)));
             }
             
-            if (isInitialLoad && cachedData.hourlyForecast.length === 0) {
+            // Órás és napi előrejelzés együtt frissül
+            if (isInitialLoad || (now - lastApiCallTimes.hourlyForecast > 20 * 60 * 1000)) {
                  independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
                     if (data) cachedData.hourlyForecast = data;
-                    renderHourlyForecastData();
-                 }).catch(e => console.warn("Kezdeti órás előrejelzés lekérési hiba:", e.message)));
+                 }).catch(e => console.warn("Órás előrejelzés lekérési hiba:", e.message)));
+
+                 independentPromises.push(fetchDailyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
+                    cachedData.dailyForecastToday = data;
+                 }).catch(e => console.warn("Napi előrejelzés lekérési hiba:", e.message)));
             }
 
             if (ENABLE_ISS_TRACKING && (isInitialLoad || now - (lastApiCallTimes.issPasses || 0) > REFRESH_INTERVAL_ISS)) {
@@ -2538,9 +2575,8 @@
               mainArcEl.style.strokeDashoffset = arcLength * (1 - percentageOfPath);
             }
             
-            // *** JAVÍTÁS ITT: A GÖRBE ÚJ MÉRETEIHEZ IGAZÍTOTT SZÁMÍTÁS ***
             const angle = Math.PI * (1 - percentageOfPath);
-            const r = 60, cx = 75, cy = 75; // R sugár 65-ről 60-ra változott!
+            const r = 60, cx = 75, cy = 75; 
             const x = cx + r * Math.cos(angle);
             const y = cy - r * Math.sin(angle);
 
@@ -2665,19 +2701,24 @@
             const secondsToWait = (minutesToWait === 0 && currentMinutes >= targetMinute - randomDelayMinutes) ? 0 : (60 - currentSeconds);
             const delayInMs = (minutesToWait * 60 + secondsToWait) * 1000;
 
-            console.log(`Következő órás előrejelzés frissítés ütemezve kb. ${Math.round(delayInMs / 60000)} perc múlva. (Cél: ${targetMinute % 60}, Jelenlegi: ${currentMinutes})`);
+            console.log(`Következő előrejelzés frissítés ütemezve kb. ${Math.round(delayInMs / 60000)} perc múlva. (Cél: ${targetMinute % 60}, Jelenlegi: ${currentMinutes})`);
 
             setTimeout(async () => {
-                console.log(`Időzített órás előrejelzés frissítése: ${new Date().toLocaleTimeString()}`);
+                console.log(`Időzített előrejelzés frissítése: ${new Date().toLocaleTimeString()}`);
                 try {
-                    const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
-                    if (data) {
-                        cachedData.hourlyForecast = data;
-                        renderHourlyForecastData();
-                        renderPrecipitationForecastInfo();
-                    }
+                    // Párhuzamosan futtatjuk a két lekérést
+                    await Promise.all([
+                        fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
+                            if (data) cachedData.hourlyForecast = data;
+                        }),
+                        fetchDailyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => {
+                            cachedData.dailyForecastToday = data;
+                        })
+                    ]);
+                    renderHourlyForecastData();
+                    renderPrecipitationForecastInfo();
                 } catch (e) {
-                    console.warn("Az időzített órás előrejelzés frissítése sikertelen:", e);
+                    console.warn("Az időzített előrejelzés frissítése sikertelen:", e);
                 }
 
                 scheduleHourlyForecastUpdate();
