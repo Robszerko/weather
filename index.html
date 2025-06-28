@@ -481,6 +481,7 @@
             last30DaysPrecipitation: null,
             hourlyForecast: [],
             dailyForecasts: [],
+            yesterdaySummary: null, // JAVÍTÁS: Új mező a tegnapi adatoknak
             sunCalc: null,
             issPasses: [],
             airQuality: null,
@@ -778,6 +779,27 @@
             const endDate = new Date(); const startDate = new Date(); startDate.setDate(endDate.getDate() - (days - 1));
             const formatDate = (date) => date.toISOString().split('T')[0]; const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${lat}&longitude=${lon}&start_date=${formatDate(startDate)}&end_date=${formatDate(endDate)}&daily=precipitation_sum&timezone=auto`;
             try { const response = await fetch(url); if (!response.ok) throw new Error(`Open-Meteo Archív API hiba: ${response.status}`); const data = await response.json(); lastApiCallTimes.historicalPrecip = Date.now(); if (data?.daily?.precipitation_sum) { const totalPrecip = data.daily.precipitation_sum.reduce((sum, current) => sum + (current || 0), 0); return totalPrecip; } else { throw new Error('Hiányos archív csapadék adat (Open-Meteo).'); } } catch(e) { return null; }
+        }
+
+        // JAVÍTÁS: Új, dedikált funkció a tegnapi adatok lekérésére
+        async function fetchYesterdaySummaryData() {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const dateStr = yesterday.toISOString().split('T')[0];
+            const url = `https://archive-api.open-meteo.com/v1/archive?latitude=${NYIREGYHAZA_COORDS.lat}&longitude=${NYIREGYHAZA_COORDS.lon}&start_date=${dateStr}&end_date=${dateStr}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,windgusts_10m_max&timezone=auto`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Open-Meteo Archive (Yesterday) API hiba: ${response.status}`);
+                const data = await response.json();
+                if (data && data.daily) {
+                    return data.daily;
+                }
+                throw new Error("Hiányos tegnapi adatok.");
+            } catch (error) {
+                console.warn(`Hiba a tegnapi összefoglaló adatok lekérésekor: ${error.message}`);
+                return null;
+            }
         }
 
         async function fetchHourlyForecastData(lat, lon) {
@@ -1135,12 +1157,13 @@
                 const currentHour = new Date().getHours();
                 if (currentHour >= 0 && currentHour < 2) {
                     el_pastDayReviewSection.classList.remove('is-hidden');
-                    const yesterdayData = cachedData.dailyForecasts[0];
-                    if (yesterdayData) {
-                        el_pastDayTempMax.textContent = formatValue(yesterdayData.tempMax, '°C', 0);
-                        el_pastDayTempMin.textContent = formatValue(yesterdayData.tempMin, '°C', 0);
-                        el_pastDayWindGust.textContent = formatValue(yesterdayData.windGust, ' km/h', 0);
-                        el_pastDayPrecip.textContent = formatValue(yesterdayData.precipTotal, ' mm', 1);
+                    // JAVÍTÁS: A dedikált tegnapi adatforrás használata
+                    const yesterdayData = cachedData.yesterdaySummary;
+                    if (yesterdayData && yesterdayData.time && yesterdayData.time.length > 0) {
+                        el_pastDayTempMax.textContent = formatValue(yesterdayData.temperature_2m_max[0], '°C', 0);
+                        el_pastDayTempMin.textContent = formatValue(yesterdayData.temperature_2m_min[0], '°C', 0);
+                        el_pastDayWindGust.textContent = formatValue(yesterdayData.windgusts_10m_max[0], ' km/h', 0);
+                        el_pastDayPrecip.textContent = formatValue(yesterdayData.precipitation_sum[0], ' mm', 1);
                     }
                 } else if (currentHour >= 2 && currentHour < sunriseHour) {
                     el_tomorrowOutlookSection.classList.remove('is-hidden');
@@ -1223,6 +1246,12 @@
             if (isInitialLoad || now - lastApiCallTimes.airQuality > REFRESH_INTERVAL_AIR_QUALITY) independentPromises.push(fetchAirQualityData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.airQuality = data; }).catch(e => {}));
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) independentPromises.push(fetchAndRefreshForecasts());
             if (ENABLE_ISS_TRACKING && (isInitialLoad || now - (lastApiCallTimes.issPasses || 0) > REFRESH_INTERVAL_ISS)) { independentPromises.push( fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15).then(passes => { cachedData.issPasses = passes; lastApiCallTimes.issPasses = Date.now(); }).catch(e => {}) ); }
+            
+            // JAVÍTÁS: Kezdeti betöltéskor is kérjük le a tegnapi adatokat
+            if (isInitialLoad) {
+                independentPromises.push(fetchYesterdaySummaryData().then(data => { cachedData.yesterdaySummary = data; }).catch(e => {}));
+            }
+
             await Promise.allSettled(independentPromises);
             try { const sunCalcResult = await fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon); cachedData.sunCalc = sunCalcResult; if (sunCalcResult.sunriseDateForPath) cachedData.generalConditions.sunriseTimeLocal = sunCalcResult.sunriseDateForPath.toISOString(); if (sunCalcResult.sunsetDateForPath) cachedData.generalConditions.sunsetTimeLocal = sunCalcResult.sunsetDateForPath.toISOString(); } catch (e) { cachedData.sunCalc = null; }
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
@@ -1237,7 +1266,17 @@
         }
 
         function checkMidnight() {
-             const newDay = new Date().getDate(); if (newDay !== currentDay) { currentDay = newDay; hasRainBeenDetectedToday = false; const updatePromises = [ fetchHistoricalPrecipitation(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.last30DaysPrecipitation = data; }) ]; if (ENABLE_ISS_TRACKING) updatePromises.push( fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15).then(passes => { cachedData.issPasses = passes; lastApiCallTimes.issPasses = Date.now(); }) ); Promise.all(updatePromises).finally(() => { if (cachedData.displayPws) renderWeatherData(); }); }
+             const newDay = new Date().getDate(); if (newDay !== currentDay) { 
+                currentDay = newDay; 
+                hasRainBeenDetectedToday = false; 
+                const updatePromises = [ 
+                    fetchHistoricalPrecipitation(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.last30DaysPrecipitation = data; }),
+                    // JAVÍTÁS: Napváltáskor is frissítjük a tegnapi adatokat
+                    fetchYesterdaySummaryData().then(data => { cachedData.yesterdaySummary = data; })
+                ]; 
+                if (ENABLE_ISS_TRACKING) updatePromises.push( fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15).then(passes => { cachedData.issPasses = passes; lastApiCallTimes.issPasses = Date.now(); }) ); 
+                Promise.all(updatePromises).finally(() => { if (cachedData.displayPws) renderWeatherData(); }); 
+            }
         }
         
         function determineCelestialState(nowMs, riseTime, setTime, altitude) {
