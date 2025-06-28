@@ -189,7 +189,7 @@
         .path-refresh-btn.is-refreshing { transform: rotate(360deg); transition: transform 0.8s; }
         
         /********************************************/
-        /** ÚJ CELESTIAL PATH DIZÁJN (V6)         **/
+        /** ÚJ CELESTIAL PATH DIZÁJN (V7)         **/
         /********************************************/
         .celestial-path-visual-v2 {
             width: 280px; 
@@ -258,28 +258,6 @@
             color: var(--current-text-color);
         }
 
-        .path-now-marker-v2 {
-            position: absolute;
-            bottom: 40px;
-            transform: translateX(-50%);
-            z-index: 10;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        
-        .path-now-marker-v2.is-visible {
-            opacity: 1;
-        }
-        
-        .path-now-marker-v2 .now-line {
-            width: 1.5px;
-            /* A magasságot a JS állítja be */
-            background-color: var(--current-icon-color);
-            opacity: 0.8;
-            margin: 0 auto;
-        }
-
         .celestial-body-icon-v2 {
             position: absolute;
             top: 0; left: 0;
@@ -308,8 +286,7 @@
         }
 
         .celestial-path-visual-v2.is-event-active .celestial-path-svg-v2,
-        .celestial-path-visual-v2.is-event-active .path-label-v2,
-        .celestial-path-visual-v2.is-event-active .path-now-marker-v2 {
+        .celestial-path-visual-v2.is-event-active .path-label-v2 {
             opacity: 0.3; 
             pointer-events: none;
         }
@@ -555,9 +532,9 @@
             el_rainInfoSection, el_mainRainVisual, el_sunInfoSection, el_moonInfoSection, el_nightSkyInfoSection, el_airQualityInfoSection,
             el_gridSunriseItem, el_gridSunsetItem, el_gridMoonriseItem, el_gridMoonsetItem,
             el_mainRainGaugeValue, el_mainRainVisualTotal, el_rainCurrentlyRainingValue, el_rainIntensityValue, el_rainExpectedTodayValue, el_nextPrecipItem, el_nextPrecipValue,
-            el_sunPathVisual, el_sunPathIcon, el_sunPathArcMain, el_sunPathNowMarker,
+            el_sunPathVisual, el_sunPathIcon, el_sunPathArcMain,
             el_sunInfoAltitude, el_sunInfoAltitudeNode, el_sunInfoAzimuth, el_sunInfoTrend, el_sunInfoNoon, el_sunInfoRemaining, el_sunPathSunriseTime, el_sunPathSunsetTime, el_sunPathRefreshBtn,
-            el_moonPathVisual, el_moonPathIcon, el_moonPathArcMain, el_moonPathNowMarker,
+            el_moonPathVisual, el_moonPathIcon, el_moonPathArcMain,
             el_moonriseTimeLabel, el_moonsetTimeLabel,
             el_moonInfoAltitude, el_moonInfoAltitudeNode, el_moonInfoTrend, el_moonInfoPhasename, el_moonInfoIllumination, el_moonPathRefreshBtn,
             el_sunEventContainer, el_sunEventMessage, el_sunEventCountdown,
@@ -855,7 +832,6 @@
                             <div class="path-label-v2 sunrise-label"><span>Napkelte</span><div id="sun-path-sunrise-time" class="path-time-v2">--:--</div></div>
                             <div class="path-label-v2 sunset-label"><span>Napnyugta</span><div id="sun-path-sunset-time" class="path-time-v2">--:--</div></div>
                         </div>
-                        <div class="path-now-marker-v2" id="sun-path-now-marker"><div class="now-line"></div></div>
                         <div id="sun-path-icon-v2" class="celestial-body-icon-v2"></div>
                         <div class="celestial-event-container-v2 is-hidden" id="sun-event-container">
                            <div class="celestial-event-message-v2" id="sun-event-message"></div>
@@ -879,7 +855,6 @@
                             <div class="path-label-v2 sunrise-label"><span>Holdkelte</span><div id="moonrise-time-label" class="path-time-v2">--:--</div></div>
                             <div class="path-label-v2 sunset-label"><span>Holdnyugta</span><div id="moonset-time-label" class="path-time-v2">--:--</div></div>
                         </div>
-                        <div class="path-now-marker-v2" id="moon-path-now-marker"><div class="now-line"></div></div>
                         <i class="fas fa-moon celestial-body-icon-v2" id="moon-path-icon-v2"></i>
                         <div class="celestial-event-container-v2 is-hidden" id="moon-event-container">
                            <div class="celestial-event-message-v2" id="moon-event-message"></div>
@@ -932,7 +907,6 @@
             el_sunPathVisual = document.getElementById('sun-path-visual');
             el_sunPathIcon = document.getElementById('sun-path-icon-v2');
             el_sunPathArcMain = document.getElementById('sun-path-arc-main');
-            el_sunPathNowMarker = document.getElementById('sun-path-now-marker');
             el_sunInfoAltitude = document.getElementById('sun-info-altitude');
             if (el_sunInfoAltitude) el_sunInfoAltitudeNode = el_sunInfoAltitude.childNodes[0];
             el_sunInfoAzimuth = document.getElementById('sun-info-azimuth');
@@ -946,7 +920,6 @@
             el_moonPathVisual = document.getElementById('moon-path-visual');
             el_moonPathIcon = document.getElementById('moon-path-icon-v2');
             el_moonPathArcMain = document.getElementById('moon-path-arc-main');
-            el_moonPathNowMarker = document.getElementById('moon-path-now-marker');
             el_moonriseTimeLabel = document.getElementById('moonrise-time-label');
             el_moonsetTimeLabel = document.getElementById('moonset-time-label');
             el_moonInfoAltitude = document.getElementById('moon-info-altitude');
@@ -1159,35 +1132,32 @@
         }
         
         function renderCelestialState(bodyName, previousState, currentState, elements) {
-            const { visualEl, textDetailsEl, iconEl, arcEl, nowMarkerEl, eventContainerEl, eventMessageEl, eventCountdownEl, altitude, otherBodyState } = elements;
+            const { visualEl, textDetailsEl, iconEl, arcEl, eventContainerEl, eventMessageEl, eventCountdownEl, altitude, otherBodyState } = elements;
             const isEventActive = ['RISING', 'SETTING'].includes(currentState);
             visualEl.classList.toggle('is-event-active', isEventActive); textDetailsEl.style.opacity = isEventActive ? '0.3' : '1'; eventContainerEl.classList.toggle('is-hidden', !isEventActive);
             iconEl.style.opacity = 1;
             switch (currentState) {
                 case 'RISING': eventMessageEl.textContent = (bodyName === 'sun') ? 'Felkelés folyamatban...' : 'Holdkelte folyamatban...'; animateIconOnHorizon(iconEl, altitude); break;
                 case 'SETTING': eventMessageEl.textContent = (bodyName === 'sun') ? 'Lenyugvás folyamatban...' : 'Holdnyugta folyamatban...'; animateIconOnHorizon(iconEl, altitude); break;
-                case 'ON_PATH': visualEl.classList.remove('is-event-active'); iconEl.style.transition = 'transform 0.2s linear, opacity 0.5s ease-in-out'; updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, true); break;
+                case 'ON_PATH': visualEl.classList.remove('is-event-active'); iconEl.style.transition = 'transform 0.2s linear, opacity 0.5s ease-in-out'; updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl }, true); break;
                 case 'BELOW_HORIZON':
                     visualEl.classList.remove('is-event-active'); iconEl.style.opacity = 0;
                     if(previousState === 'SETTING') {
                         let settingMessage = (bodyName === 'sun') ? (otherBodyState && ['ON_PATH', 'RISING'].includes(otherBodyState) ? 'Lenyugodtam. Most jön a Hold!' : 'Lenyugodtam, most jönnek a csillagok!') : 'Lenyugodtam.';
                         eventMessageEl.textContent = settingMessage; eventContainerEl.classList.remove('is-hidden'); setTimeout(() => eventContainerEl.classList.add('is-hidden'), 3000);
                     }
-                    updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl, nowMarkerEl }, false);
+                    updatePathVisuals(elements.pathStartTime, elements.pathEndTime, { iconEl, mainArcEl: arcEl }, false);
                     break;
             }
         }
 
         function updatePathVisuals(startTime, endTime, elements, isVisible = true) {
-            const { iconEl, mainArcEl, nowMarkerEl } = elements;
-             if (!isVisible || !startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || !iconEl || !mainArcEl || !nowMarkerEl) {
+            const { iconEl, mainArcEl } = elements;
+             if (!isVisible || !startTime || !endTime || isNaN(startTime.getTime()) || isNaN(endTime.getTime()) || !iconEl || !mainArcEl) {
                 if(mainArcEl && mainArcEl.style) mainArcEl.style.strokeDashoffset = mainArcEl.getTotalLength ? mainArcEl.getTotalLength() : '999';
                 if(iconEl && iconEl.style) iconEl.style.transform = 'translate(-50%, -150px)';
-                if(nowMarkerEl) nowMarkerEl.classList.remove('is-visible');
                 return;
             }
-            nowMarkerEl.classList.add('is-visible');
-            const nowLine = nowMarkerEl.querySelector('.now-line');
 
             const now = new Date();
             const totalTimeInSky = endTime.getTime() - startTime.getTime();
@@ -1200,8 +1170,6 @@
             
             const point = mainArcEl.getPointAtLength(arcLength * percentageOfPath);
             iconEl.style.transform = `translate(-50%, -50%) translate(${point.x}px, ${point.y}px)`;
-            nowMarkerEl.style.left = `${point.x}px`;
-            if (nowLine) nowLine.style.height = `${point.y}px`;
         }
         
         function masterAnimationLoop() {
@@ -1228,8 +1196,8 @@
             if (celestialBodyStates.sun.currentState !== sunState) { celestialBodyStates.sun.previousState = celestialBodyStates.sun.currentState; celestialBodyStates.sun.currentState = sunState; if(cachedData.displayPws) renderWeatherData(); }
             if (celestialBodyStates.moon.currentState !== moonState) { celestialBodyStates.moon.previousState = celestialBodyStates.moon.currentState; celestialBodyStates.moon.currentState = moonState; if(cachedData.displayPws) renderWeatherData(); }
 
-            const sunElements = { bodyName: 'sun', visualEl: el_sunPathVisual, textDetailsEl: el_sunInfoSection.querySelector('.sun-text-details'), iconEl: el_sunPathIcon, arcEl: el_sunPathArcMain, nowMarkerEl: el_sunPathNowMarker, eventContainerEl: el_sunEventContainer, eventMessageEl: el_sunEventMessage, eventCountdownEl: el_sunEventCountdown, altitude: sunAltitude, pathStartTime: cachedData.sunCalc.sunriseDateForPath, pathEndTime: cachedData.sunCalc.sunsetDateForPath, otherBodyState: moonState };
-            const moonElements = { bodyName: 'moon', visualEl: el_moonPathVisual, textDetailsEl: el_moonInfoSection.querySelector('.moon-text-details'), iconEl: el_moonPathIcon, arcEl: el_moonPathArcMain, nowMarkerEl: el_moonPathNowMarker, eventContainerEl: el_moonEventContainer, eventMessageEl: el_moonEventMessage, eventCountdownEl: el_moonEventCountdown, altitude: moonAltitude, pathStartTime: cachedData.sunCalc.moonRiseDateForPath, pathEndTime: cachedData.sunCalc.moonSetDateForPath, otherBodyState: sunState };
+            const sunElements = { bodyName: 'sun', visualEl: el_sunPathVisual, textDetailsEl: el_sunInfoSection.querySelector('.sun-text-details'), iconEl: el_sunPathIcon, arcEl: el_sunPathArcMain, eventContainerEl: el_sunEventContainer, eventMessageEl: el_sunEventMessage, eventCountdownEl: el_sunEventCountdown, altitude: sunAltitude, pathStartTime: cachedData.sunCalc.sunriseDateForPath, pathEndTime: cachedData.sunCalc.sunsetDateForPath, otherBodyState: moonState };
+            const moonElements = { bodyName: 'moon', visualEl: el_moonPathVisual, textDetailsEl: el_moonInfoSection.querySelector('.moon-text-details'), iconEl: el_moonPathIcon, arcEl: el_moonPathArcMain, eventContainerEl: el_moonEventContainer, eventMessageEl: el_moonEventMessage, eventCountdownEl: el_moonEventCountdown, altitude: moonAltitude, pathStartTime: cachedData.sunCalc.moonRiseDateForPath, pathEndTime: cachedData.sunCalc.moonSetDateForPath, otherBodyState: sunState };
             
             if(el_sunInfoSection && el_sunPathVisual.id === 'sun-path-visual') renderCelestialState('sun', celestialBodyStates.sun.previousState, sunState, sunElements);
             if(el_moonInfoSection && el_moonPathVisual.id === 'moon-path-visual') renderCelestialState('moon', celestialBodyStates.moon.previousState, moonState, moonElements);
