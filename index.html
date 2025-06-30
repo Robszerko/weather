@@ -170,14 +170,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: border-color 0.6s ease-out;
+            transition: border-color 0.6s ease-out, background-color 0.6s ease-out;
             flex-shrink: 0;
             margin-right: 8px;
         }
 
         #main-wind-dir-arrow {
             font-size: 1em;
-            transition: transform 0.8s ease-out, color 0.6s ease-out;
+            transition: transform 0.8s ease-out;
         }
         /* VÉGE: Szélirány jelző stílusok */
 
@@ -1177,9 +1177,10 @@
                 const windColor = getWindColor(obs.windSpeed);
                 if(el_mainWindDirArrow) {
                     el_mainWindDirArrow.style.transform = `rotate(${(obs.winddir || 0) - 45}deg)`;
-                    el_mainWindDirArrow.style.color = windColor;
+                    el_mainWindDirArrow.style.color = '#FFFFFF'; // Nyíl színe mindig fehér
                     if(el_mainWindDirArrow.parentElement) {
-                        el_mainWindDirArrow.parentElement.style.borderColor = windColor;
+                        // A karika hátterének színezése
+                        el_mainWindDirArrow.parentElement.style.backgroundColor = windColor; 
                     }
                 }
                 if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir); 
