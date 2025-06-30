@@ -158,7 +158,28 @@
         .info-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; background-color: transparent; box-shadow: none; border: none; padding: 0; min-width: auto; }
         .info-bar-label { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); text-transform: uppercase; letter-spacing: 0.4px; }
         .info-bar-value { font-size: 16px; font-weight: 700; color: var(--current-text-color); display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; }
-        #main-wind-dir-arrow { font-size: 0.8em; opacity: 0.8; transition: transform 0.8s ease-out; }
+        .info-bar-description { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; line-height: 1.2; transition: color 0.6s; }
+        
+        /* Szélirány jelző stílusok */
+        .wind-arrow-container {
+            position: relative;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1.5px solid var(--current-text-muted-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: border-color 0.6s ease-out;
+            flex-shrink: 0;
+            margin-right: 8px;
+        }
+
+        #main-wind-dir-arrow {
+            font-size: 1em;
+            transition: transform 0.8s ease-out, color 0.6s ease-out;
+        }
+        /* VÉGE: Szélirány jelző stílusok */
 
         .precipitation-forecast-info, .drought-info-bar { margin: 12px auto 0 auto; padding: 10px 16px; background-color: rgba(0, 0, 0, 0.15); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); transition: all 0.6s; text-align: center; max-width: 450px; }
         #next-precipitation-info-text, #drought-info-text { color: var(--current-text-color); transition: color 0.6s; font-size: 13.5px; font-weight: 500; }
@@ -543,8 +564,8 @@
             el_issVisualIcon, el_issNextPassTime, el_issMaxElevation, el_issDuration, el_issBrightness, el_issPathDetails,
             el_nightSkyVisualIcon, el_nightSkyObjectName, el_nightSkyObjectStatus, el_nightSkyObjectDetails, el_nightSkyAstroDarknessItemPlanet, el_nightSkyAstroDarknessPlanet,
             el_constellationSvgContainer, el_constellationName, el_constellationDetails, el_constellationAstroDarknessItemConst, el_constellationAstroDarknessConst,
-            el_heatIndexItem, el_mainHeatIndexValue, el_windSpeedItem, el_mainWindDirArrow, el_mainWindDirText, el_mainWindValueContainer, el_mainWindSpeedValue,
-            el_windGustItem, el_mainWindGustValue,
+            el_heatIndexItem, el_mainHeatIndexValue, el_heatIndexDescription, el_windSpeedItem, el_mainWindDirArrow, el_mainWindValueContainer, el_mainWindSpeedValue, el_windDirectionDescription,
+            el_windGustItem, el_mainWindGustValue, el_windGustDescription,
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
             el_precipitationForecastBar, el_nextPrecipitationInfoText, el_nextPrecipitationDetailsText,
@@ -557,6 +578,34 @@
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
         
+        function getHeatIndexDescription(heatIndex, temp) {
+            if (heatIndex == null || temp == null) return '';
+            const diff = heatIndex - temp;
+            if (heatIndex > 38) return "Extrém melegnek érződik";
+            if (heatIndex > 30) return "Nagyon melegnek érződik";
+            if (heatIndex > 25 && diff > 2) return "Melegebbnek érződik";
+            if (heatIndex < temp - 2) return "Hűvösebbnek érződik";
+            if (heatIndex > temp + 2) return "Melegebbnek érződik";
+            return 'Valós hőmérséklethez hasonló';
+        }
+
+        function getWindGustDescription(gustSpeed) {
+            if (gustSpeed == null || gustSpeed <= 5) return 'Gyenge lökés';
+            if (gustSpeed < 20) return 'Mérsékelt lökés';
+            if (gustSpeed < 40) return 'Élénk lökés';
+            if (gustSpeed < 60) return 'Erős lökés';
+            if (gustSpeed < 80) return 'Viharos lökés';
+            return 'Orkán erejű lökés';
+        }
+
+        function getWindColor(speed) {
+            if (speed == null) return 'var(--current-text-muted-color)';
+            if (speed > 50) return 'var(--hot)';
+            if (speed > 30) return 'var(--warm)';
+            if (speed > 12) return 'var(--mild)';
+            return 'var(--cool)';
+        }
+
         function formatPrecipitationDate(isoDateString) {
             if (!isoDateString) return '';
             try {
@@ -898,7 +947,20 @@
             </div>
             <div class="additional-core-info">
                  <div class="top-info-tongues-container"><div class="info-tongue" id="temp-tongue-container"><div class="tongue-label">Jelenleg:</div><div class="tongue-content" id="temp-tongue-value">-- °C</div></div><div class="info-tongue" id="rain-tongue-container"><div class="tongue-label">Ennyi esett ma eddig:</div><div class="tongue-content" id="rain-tongue-value">-- mm</div></div></div>
-                 <div class="secondary-info-bar"><div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value">--</span>°C</div></div><div class="info-bar-item is-hidden" id="wind-speed-item"><div class="info-bar-label">Szél</div><div class="info-bar-value" id="main-wind-value-container" title=""><i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i><span id="main-wind-dir-text">--</span><span id="main-wind-speed-value">--</span> km/h</div></div><div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value">--</span> km/h</div></div></div>
+                 <div class="secondary-info-bar">
+                    <div class="info-bar-item is-hidden" id="heat-index-item"><div class="info-bar-label">Hőérzet</div><div class="info-bar-value"><span id="main-heat-index-value">--</span>°C</div><div class="info-bar-description" id="heat-index-description">--</div></div>
+                    <div class="info-bar-item is-hidden" id="wind-speed-item">
+                        <div class="info-bar-label">Szél</div>
+                        <div class="info-bar-value" id="main-wind-value-container" title="">
+                            <div class="wind-arrow-container">
+                                <i id="main-wind-dir-arrow" class="fas fa-location-arrow"></i>
+                            </div>
+                            <span id="main-wind-speed-value">--</span> km/h
+                        </div>
+                        <div class="info-bar-description" id="wind-direction-description">--</div>
+                    </div>
+                    <div class="info-bar-item is-hidden" id="wind-gust-item"><div class="info-bar-label">Széllökés</div><div class="info-bar-value"><span id="main-wind-gust-value">--</span> km/h</div><div class="info-bar-description" id="wind-gust-description">--</div></div>
+                 </div>
             </div>
             <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar"><div id="next-precipitation-info-text"></div><div id="next-precipitation-details-text" class="is-hidden"></div></div>
             <div class="drought-info-bar is-hidden" id="drought-info-bar"><div id="drought-info-text"></div></div>
@@ -962,9 +1024,9 @@
             el_nightSkyVisualIcon = document.getElementById('night-sky-visual-icon'); el_nightSkyObjectName = document.getElementById('night-sky-object-name'); el_nightSkyObjectStatus = document.getElementById('night-sky-object-status'); el_nightSkyObjectDetails = document.getElementById('night-sky-object-details'); el_nightSkyAstroDarknessItemPlanet = document.getElementById('night-sky-astro-darkness-item-planet'); el_nightSkyAstroDarknessPlanet = document.getElementById('night-sky-astro-darkness-planet');
             el_constellationSvgContainer = document.getElementById('constellation-svg-container'); el_constellationName = document.getElementById('constellation-name'); el_constellationDetails = document.getElementById('constellation-details'); el_constellationAstroDarknessItemConst = document.getElementById('constellation-astro-darkness-item-const'); el_constellationAstroDarknessConst = document.getElementById('constellation-astro-darkness-const');
 
-            el_heatIndexItem = document.getElementById('heat-index-item'); el_mainHeatIndexValue = document.getElementById('main-heat-index-value');
-            el_windSpeedItem = document.getElementById('wind-speed-item'); el_mainWindDirArrow = document.getElementById('main-wind-dir-arrow'); el_mainWindDirText = document.getElementById('main-wind-dir-text'); el_mainWindValueContainer = document.getElementById('main-wind-value-container'); el_mainWindSpeedValue = document.getElementById('main-wind-speed-value');
-            el_windGustItem = document.getElementById('wind-gust-item'); el_mainWindGustValue = document.getElementById('main-wind-gust-value');
+            el_heatIndexItem = document.getElementById('heat-index-item'); el_mainHeatIndexValue = document.getElementById('main-heat-index-value'); el_heatIndexDescription = document.getElementById('heat-index-description');
+            el_windSpeedItem = document.getElementById('wind-speed-item'); el_mainWindDirArrow = document.getElementById('main-wind-dir-arrow'); el_mainWindValueContainer = document.getElementById('main-wind-value-container'); el_mainWindSpeedValue = document.getElementById('main-wind-speed-value'); el_windDirectionDescription = document.getElementById('wind-direction-description');
+            el_windGustItem = document.getElementById('wind-gust-item'); el_mainWindGustValue = document.getElementById('main-wind-gust-value'); el_windGustDescription = document.getElementById('wind-gust-description');
 
             el_dewpointValue = document.getElementById('dewpoint-value'); el_humidityValue = document.getElementById('humidity-value'); el_pressureValue = document.getElementById('pressure-value'); el_pressureTrendIcon = document.getElementById('pressure-trend-icon');
             el_visibilityValue = document.getElementById('visibility-value'); el_solarRadiationValue = document.getElementById('solar-radiation-value'); el_uvIndexValue = document.getElementById('uv-index-value'); el_uvDescription = document.getElementById('uv-description');
@@ -1101,9 +1163,40 @@
             if (el_moonriseTimeLabel) el_moonriseTimeLabel.textContent = formatTime(sunCalcData.moonRiseDateForPath); if (el_moonsetTimeLabel) el_moonsetTimeLabel.textContent = formatTime(sunCalcData.moonSetDateForPath); if (el_moonInfoAltitudeNode) el_moonInfoAltitudeNode.nodeValue = formatValue(sunCalcData.moonAltitude, '°', 1) + ' '; if (el_moonInfoTrend) el_moonInfoTrend.textContent = `(${sunCalcData.moonTrend || sunCalcData.moonStatus})`; if (el_moonInfoPhasename) el_moonInfoPhasename.textContent = sunCalcData.phaseName || NO_DATA_STRING; if (el_moonInfoIllumination) el_moonInfoIllumination.textContent = formatValue(sunCalcData.phaseValue, '%', 1); if (el_moonPathIcon && sunCalcData && typeof sunCalcData.phaseValue === 'number') { const minOpacity = 0.3, maxOpacity = 1.0; el_moonPathIcon.style.opacity = (minOpacity + (sunCalcData.phaseValue / 100) * (maxOpacity - minOpacity)).toFixed(2); } if (el_moonPathRefreshBtn) el_moonPathRefreshBtn.onclick = () => { el_moonPathRefreshBtn.classList.add('is-refreshing'); setTimeout(() => el_moonPathRefreshBtn.classList.remove('is-refreshing'), 800); };
             if(el_gridSunriseItem) el_gridSunriseItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden')); if(el_gridSunsetItem) el_gridSunsetItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden'));
             if(el_gridMoonriseItem) el_gridMoonriseItem.classList.toggle('is-hidden', !el_moonInfoSection.classList.contains('is-hidden')); if(el_gridMoonsetItem) el_gridMoonsetItem.classList.toggle('is-hidden', !el_moonInfoSection.classList.contains('is-hidden'));
-            if (obs.heatIndex != null && el_heatIndexItem && el_mainHeatIndexValue) { el_heatIndexItem.classList.remove('is-hidden'); updateAnimatedValue(el_mainHeatIndexValue, formatValue(obs.heatIndex, '', 1)); } else if (el_heatIndexItem) { el_heatIndexItem.classList.add('is-hidden'); }
-            if (obs.windSpeed != null && obs.windSpeed >= 0 && el_windSpeedItem) { el_windSpeedItem.classList.remove('is-hidden'); if(el_mainWindDirArrow) el_mainWindDirArrow.style.transform = `rotate(${obs.winddir || 0}deg)`; if(el_mainWindDirText) { if (window.innerWidth < 500) el_mainWindDirText.textContent = degreesToCompassAbbreviated(obs.winddir); else el_mainWindDirText.textContent = degreesToCompass(obs.winddir); } if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir); updateAnimatedValue(el_mainWindSpeedValue, formatValue(obs.windSpeed, '', 1)); } else if (el_windSpeedItem){ el_windSpeedItem.classList.add('is-hidden'); }
-            if (obs.windGust > 0 && el_windGustItem && el_mainWindGustValue) { el_windGustItem.classList.remove('is-hidden'); updateAnimatedValue(el_mainWindGustValue, formatValue(obs.windGust, '', 1)); } else if (el_windGustItem) { el_windGustItem.classList.add('is-hidden'); }
+            
+            if (obs.heatIndex != null && el_heatIndexItem && el_mainHeatIndexValue) { 
+                el_heatIndexItem.classList.remove('is-hidden'); 
+                updateAnimatedValue(el_mainHeatIndexValue, formatValue(obs.heatIndex, '', 1)); 
+                if (el_heatIndexDescription) el_heatIndexDescription.textContent = getHeatIndexDescription(obs.heatIndex, obs.temp);
+            } else if (el_heatIndexItem) { 
+                el_heatIndexItem.classList.add('is-hidden'); 
+            }
+
+            if (obs.windSpeed != null && obs.windSpeed >= 0 && el_windSpeedItem) { 
+                el_windSpeedItem.classList.remove('is-hidden'); 
+                const windColor = getWindColor(obs.windSpeed);
+                if(el_mainWindDirArrow) {
+                    el_mainWindDirArrow.style.transform = `rotate(${(obs.winddir || 0) - 45}deg)`;
+                    el_mainWindDirArrow.style.color = windColor;
+                    if(el_mainWindDirArrow.parentElement) {
+                        el_mainWindDirArrow.parentElement.style.borderColor = windColor;
+                    }
+                }
+                if(el_mainWindValueContainer) el_mainWindValueContainer.title = degreesToCompass(obs.winddir); 
+                updateAnimatedValue(el_mainWindSpeedValue, formatValue(obs.windSpeed, '', 1)); 
+                if (el_windDirectionDescription) el_windDirectionDescription.textContent = degreesToCompass(obs.winddir);
+            } else if (el_windSpeedItem){ 
+                el_windSpeedItem.classList.add('is-hidden'); 
+            }
+
+            if (obs.windGust > 0 && el_windGustItem && el_mainWindGustValue) { 
+                el_windGustItem.classList.remove('is-hidden'); 
+                updateAnimatedValue(el_mainWindGustValue, formatValue(obs.windGust, '', 1)); 
+                if (el_windGustDescription) el_windGustDescription.textContent = getWindGustDescription(obs.windGust);
+            } else if (el_windGustItem) { 
+                el_windGustItem.classList.add('is-hidden'); 
+            }
+
             updateAnimatedValue(el_dewpointValue, formatValue(obs.dewpt, '°C')); updateAnimatedValue(el_humidityValue, formatValue(obs.humidity, '%', 0)); updateAnimatedValue(el_pressureValue, formatValue(general.pressureAltimeter || obs.pressure, ' hPa'));
             const trendCode = general.pressureTendencyCode; let trendSymbol = ''; if (trendCode === 0) trendSymbol = '↑'; else if (trendCode === 1) trendSymbol = '↓'; else if (trendCode === 2) trendSymbol = '→'; if(el_pressureTrendIcon) el_pressureTrendIcon.textContent = trendSymbol;
             updateAnimatedValue(el_visibilityValue, formatValue(general.visibility, ' km')); updateAnimatedValue(el_solarRadiationValue, formatValue(obs.solarRadiation, ' W/m²', 0)); updateAnimatedValue(el_uvIndexValue, formatValue(obs.uv, '', 1));
