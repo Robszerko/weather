@@ -155,12 +155,12 @@
         .sensation-item .label { font-size: 12px; font-weight: 600; color: var(--current-text-muted-color); }
         .sensation-item .value { font-size: 13px; font-weight: 700; color: var(--current-text-color); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; justify-content: flex-end; text-align: right; }
         
-        /* MÓDOSÍTVA: A small tag CSS-e, hogy egy sorban jelenjen meg a leírás */
         .sensation-item .value small { font-size: 0.8em; font-weight: 500; color: var(--current-text-muted-color); margin-left: 6px; font-style: italic; }
         
         .wind-arrow-container { position: relative; width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--current-text-muted-color); display: flex; justify-content: center; align-items: center; transition: border-color 0.6s ease-out, background-color 0.6s ease-out; flex-shrink: 0; }
         #top-card-wind-dir-arrow { font-size: 0.8em; transition: transform 0.8s ease-out; }
 
+        /* MÓDOSÍTÁS: Új info sáv stílusának hozzáadása */
         .precipitation-forecast-info, .drought-info-bar { margin: 12px auto 0 auto; padding: 10px 16px; background-color: rgba(0, 0, 0, 0.15); border-radius: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); transition: all 0.6s; text-align: center; max-width: 450px; }
         #next-precipitation-info-text, #drought-info-text { color: var(--current-text-color); transition: color 0.6s; font-size: 13.5px; font-weight: 500; }
         #next-precipitation-info-text strong, #drought-info-text strong { font-weight: 700; color: var(--current-text-color); }
@@ -433,6 +433,8 @@
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
             el_precipitationForecastBar, el_nextPrecipitationInfoText, el_nextPrecipitationDetailsText,
+            // MÓDOSÍTÁS: Új elemek deklarálása
+            el_droughtInfoBar, el_droughtInfoText,
             el_aqiValue, el_aqiDescription, el_pm10Value, el_pm25Value, el_ozoneValue, el_ragweedPollenValue, el_grassPollenValue,
             el_ragweedPollenDescription, el_grassPollenDescription;
 
@@ -485,6 +487,17 @@
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function formatCountdown(ms) { if (ms < 0) ms = 0; const totalSeconds = Math.floor(ms / 1000); const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60; return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`; }
+
+        // MÓDOSÍTÁS: Új segédfüggvény annak ellenőrzésére, hogy éppen esik-e valahol
+        function isCurrentlyRaining() {
+            const rainStations = Object.values(STATIONS).filter(s => 
+                s.provides.includes('precip') && 
+                s.isOnline && 
+                s.data &&
+                (Date.now() - new Date(s.data.obsTimeLocal).getTime() < STALE_DATA_THRESHOLD_MS)
+            );
+            return rainStations.some(s => s.data.metric?.precipRate > 0);
+        }
 
         function updateThemeAndSky(currentTime, sunriseTimeIso, sunsetTimeIso) {
             const fallbackTheme = (new Date().getHours() >= 7 && new Date().getHours() < 18) ? 'day' : 'night';
@@ -828,6 +841,8 @@
             </div>
             
             <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar"><div id="next-precipitation-info-text"></div><div id="next-precipitation-details-text" class="is-hidden"></div></div>
+            <!-- MÓDOSÍTÁS: Új HTML elem a Kossuth utcai csapadékadatnak -->
+            <div class="drought-info-bar is-hidden" id="drought-info-bar"><div id="drought-info-text"></div></div>
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value"><span id="dewpoint-value" class="flippable-value">--</span>°C</span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value"><span id="humidity-value" class="flippable-value">--</span>%</span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value" class="flippable-value">--</span> hPa<span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value"><span id="visibility-value" class="flippable-value">--</span> km</span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value"><span id="solar-radiation-value" class="flippable-value">--</span> W/m²</span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value" class="flippable-value">--</span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
             
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
@@ -893,6 +908,11 @@
             el_visibilityValue = document.getElementById('visibility-value'); el_solarRadiationValue = document.getElementById('solar-radiation-value'); el_uvIndexValue = document.getElementById('uv-index-value'); el_uvDescription = document.getElementById('uv-description');
             el_detailsSunriseValue = document.getElementById('details-sunrise-value'); el_detailsSunsetValue = document.getElementById('details-sunset-value'); el_moonriseValue = document.getElementById('moonrise-value'); el_moonsetValue = document.getElementById('moonset-value');
             el_precipitationForecastBar = document.getElementById('precipitation-forecast-bar'); el_nextPrecipitationInfoText = document.getElementById('next-precipitation-info-text'); el_nextPrecipitationDetailsText = document.getElementById('next-precipitation-details-text');
+            
+            // MÓDOSÍTÁS: Új elemek inicializálása
+            el_droughtInfoBar = document.getElementById('drought-info-bar');
+            el_droughtInfoText = document.getElementById('drought-info-text');
+
             el_aqiValue = document.getElementById('aqi-value'); el_aqiDescription = document.getElementById('aqi-description'); el_pm10Value = document.getElementById('pm10-value'); el_pm25Value = document.getElementById('pm25-value'); el_ozoneValue = document.getElementById('ozone-value');
             el_ragweedPollenValue = document.getElementById('ragweed-pollen-value'); el_grassPollenValue = document.getElementById('grass-pollen-value');
             el_ragweedPollenDescription = document.getElementById('ragweed-pollen-description'); el_grassPollenDescription = document.getElementById('grass-pollen-description');
@@ -1021,7 +1041,6 @@
                 updateAnimatedValue(el_cardHeatIndexValue, formatValue(obs.heatIndex, '', 1));
                 if(el_cardHeatIndexDesc) el_cardHeatIndexDesc.textContent = `(${getHeatIndexDescription(obs.heatIndex, obs.temp)})`;
 
-                // MÓDOSÍTVA: A formázás 0-ról 1 tizedesjegyre változott
                 updateAnimatedValue(el_cardWindValue, formatValue(obs.windSpeed, '', 1));
                 if(windArrow) {
                      windArrow.style.transform = `rotate(${(obs.winddir || 0) - 45}deg)`;
@@ -1029,7 +1048,6 @@
                 }
                 if(el_cardWindDesc) el_cardWindDesc.textContent = `(${degreesToCompass(obs.winddir)})`;
                 
-                // MÓDOSÍTVA: A formázás 0-ról 1 tizedesjegyre változott
                 updateAnimatedValue(el_cardGustValue, formatValue(obs.windGust, '', 1));
                 if(el_cardGustDesc) el_cardGustDesc.textContent = `(${getWindGustDescription(obs.windGust)})`;
 
@@ -1037,32 +1055,55 @@
                 el_topSensationCard.classList.toggle('is-hidden', !hasSensationData);
             }
             
-            const sunState = celestialBodyStates.sun.currentState;
-            const moonState = celestialBodyStates.moon.currentState;
-
+            // MÓDOSÍTÁS: A fő panel megjelenítési logikájának teljes cseréje
+            const isRainingNow = isCurrentlyRaining();
+            
+            // Alaphelyzet: minden panelt elrejtünk
             el_rainInfoSection.classList.add('is-hidden');
             el_sunInfoSection.classList.add('is-hidden');
             el_moonInfoSection.classList.add('is-hidden');
             el_nightSkyInfoSection.classList.add('is-hidden');
             el_airQualityInfoSection.classList.add('is-hidden');
+            if (el_droughtInfoBar) el_droughtInfoBar.classList.add('is-hidden');
             stopNightSkyRotation(); 
 
-            if (hasRainBeenDetectedToday) {
+            if (isRainingNow) {
+                // 1. Ha éppen esik, a csapadék panelt mutatjuk
                 el_rainInfoSection.classList.remove('is-hidden');
-            } else if (sunState !== 'BELOW_HORIZON') {
-                el_sunInfoSection.classList.remove('is-hidden');
-            } else if (moonState !== 'BELOW_HORIZON') {
-                el_moonInfoSection.classList.remove('is-hidden');
+                if (!hasRainBeenDetectedToday) hasRainBeenDetectedToday = true;
             } else {
-                const currentHour = new Date().getHours();
-                if (currentHour >= 18 && currentHour < 22) {
-                    el_airQualityInfoSection.classList.remove('is-hidden');
+                // 2. Ha NEM esik...
+                
+                // ...de ma már esett, akkor a "szárazság" sávot mutatjuk a Kossuth u. adattal
+                if (hasRainBeenDetectedToday && el_droughtInfoBar && el_droughtInfoText) {
+                    const kossuthStation = STATIONS.KOSSUTH;
+                    let kossuthRainText = 'A Kossuth utcai csapadékadat nem elérhető.';
+                    if (kossuthStation && kossuthStation.isOnline && kossuthStation.data && kossuthStation.data.metric.precipTotal != null) {
+                        kossuthRainText = `A mai napon eddig <strong>${formatValue(kossuthStation.data.metric.precipTotal, ' mm', 2)}</strong> eső esett (Kossuth u. állomás).`;
+                    }
+                    el_droughtInfoText.innerHTML = kossuthRainText;
+                    el_droughtInfoBar.classList.remove('is-hidden');
+                }
+
+                // ...és a napszaknak megfelelő panelt is mutatjuk (Nap, Hold, stb.)
+                const sunState = celestialBodyStates.sun.currentState;
+                const moonState = celestialBodyStates.moon.currentState;
+
+                if (sunState !== 'BELOW_HORIZON') {
+                    el_sunInfoSection.classList.remove('is-hidden');
+                } else if (moonState !== 'BELOW_HORIZON') {
+                    el_moonInfoSection.classList.remove('is-hidden');
                 } else {
-                    el_nightSkyInfoSection.classList.remove('is-hidden');
-                    startNightSkyRotation();
+                    const currentHour = new Date().getHours();
+                    if (currentHour >= 18 && currentHour < 22) {
+                        el_airQualityInfoSection.classList.remove('is-hidden');
+                    } else {
+                        el_nightSkyInfoSection.classList.remove('is-hidden');
+                        startNightSkyRotation();
+                    }
                 }
             }
-            
+
             if (el_allStationsRainGrid) {
                 const onlineRainStations = Object.values(STATIONS)
                     .filter(s => s.provides.includes('precip'))
