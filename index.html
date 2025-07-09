@@ -97,7 +97,6 @@
         .temp-card .card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 8px; }
         .temp-card .card-main-value { font-size: 40px; font-weight: 800; line-height: 1; }
         
-        /* MÓDOSÍTÁS: Új, vertikális sensation kártya dizájn */
         .sensation-card { flex: 3 1 300px; padding: 12px; align-items: stretch; }
         .sensation-list { display: flex; flex-direction: column; justify-content: space-around; gap: 12px; width: 100%; height: 100%; }
         .sensation-item { display: flex; align-items: center; gap: 12px; text-align: left; }
@@ -128,12 +127,12 @@
         .path-refresh-btn.is-refreshing { transform: rotate(360deg); transition: transform 0.8s; }
         
         .regional-precip-section { margin: 20px auto 0; padding: 16px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); border-radius: 12px; width: 100%; max-width: 600px; box-sizing: border-box; }
-        .regional-precip-section h3 { font-size: 15px; color: var(--current-text-color); margin-top: 0; margin-bottom: 12px; text-align: center; font-weight: 700; }
+        /* MÓDOSÍTÁS: Ikon hozzáadása a címhez */
+        .regional-precip-section h3 { font-size: 15px; color: var(--current-text-color); margin-top: 0; margin-bottom: 12px; text-align: center; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .regional-precip-grid { display: flex; flex-direction: column; gap: 8px; }
         .precip-station-item { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; padding: 8px 12px; background-color: rgba(0,0,0,0.12); border-radius: 8px; transition: background-color 0.3s, border-color 0.3s; border-left: 3px solid transparent; }
         .precip-station-item .station-name { font-size: 14px; font-weight: 700; color: var(--current-text-color); margin-right: 15px; }
         .precip-station-item .station-data { font-size: 13px; font-weight: 500; color: var(--current-text-muted-color); text-align: right; flex-shrink: 0; }
-        /* MÓDOSÍTÁS: Esőben lévő állomás kiemelése */
         .precip-station-item.is-raining-highlight { background-color: rgba(from var(--current-icon-color) r g b / 0.15); border-left-color: var(--current-icon-color); }
         .precip-station-item .station-data.is-raining { color: var(--current-raining-text-color); font-weight: 600; }
         .precip-station-item .station-data strong { font-weight: 700; color: var(--current-text-color); }
@@ -269,15 +268,16 @@
         const OBSERVER_ALTITUDE = 120;
         const ISS_NORAD_ID = 25544;
         const REFRESH_INTERVAL_ISS = 2 * 60 * 60 * 1000;
-        const STALE_DATA_THRESHOLD_MS = 15 * 60 * 1000;
-        const PRECIP_STUCK_THRESHOLD_MS = 10 * 60 * 1000;
+        // MÓDOSÍTÁS: A nem frissülő állomások küszöbértéke 30 percre állítva
+        const STALE_DATA_THRESHOLD_MS = 30 * 60 * 1000;
 
         const STATIONS = {
             NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyháza Nyíregyházi úti állomás', displayName: 'Nyíregyházi út', provides: ['precip', 'temp'], isOnline: false, data: null },
             KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50 állomás', displayName: 'Kossuth út 50', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
             HONVED: { id: 'INYREG37', name: 'Nyíregyháza Honvéd utcai állomás', displayName: 'Honvéd u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
             SOSTOHEGY: { id: 'INYREG11', name: 'Nyíregyháza-Sóstóhegy PWS', displayName: 'Sóstóhegy', provides: ['precip', 'temp'], isOnline: false, data: null },
-            ALLATPARK: { id: 'INYREG20', name: 'Nyíregyháza-Állatpark PWS', displayName: 'Állatpark', provides: ['precip', 'temp'], isOnline: false, data: null },
+            // MÓDOSÍTÁS: Az Állatpark neve frissítve
+            ALLATPARK: { id: 'INYREG20', name: 'Nyíregyházi Állatpark PWS', displayName: 'Nyíregyházi Állatpark', provides: ['precip', 'temp'], isOnline: false, data: null },
             NAPKOR: { id: 'INAPKO1', name: 'Napkor PWS', displayName: 'Napkor', provides: ['precip', 'temp'], isOnline: false, data: null },
             KALLOSEMJEN: { id: 'IKLLSE3', name: 'Kállósemjén PWS', displayName: 'Kállósemjén', provides: ['precip', 'temp'], isOnline: false, data: null },
             KEMECSE: { id: 'IKEMEC1', name: 'Kemecse PWS', displayName: 'Kemecse', provides: ['precip', 'temp'], isOnline: false, data: null },
@@ -600,30 +600,13 @@
             try { const response = await fetch(url); if (!response.ok) throw new Error(`Levegőminőség API Hiba: ${response.status}`); const data = await response.json(); lastApiCallTimes.airQuality = Date.now(); if (data && data.current) return data.current; else throw new Error('Hiányos levegőminőség adat.'); } catch (error) { console.warn(`Hiba a levegőminőség adatok lekérésekor: ${error.message}`); return null; }
         }
         
+        // MÓDOSÍTÁS: Beragadt csapadék figyelő logika eltávolítva innen, a renderelésnél lesz kezelve a frissesség
         async function fetchPwsStationData(stationKey) {
             const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`;
             try { 
                 const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba: ${response.status}`); 
                 const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); 
                 stationConfig.isOnline = true; stationConfig.data = data.observations[0]; 
-                
-                if (stationConfig.provides.includes('precip')) {
-                    const newPrecip = data.observations[0].metric.precipTotal;
-                    if (stationConfig.lastPrecipValue === null) {
-                        stationConfig.lastPrecipValue = newPrecip;
-                        stationConfig.lastPrecipTimestamp = Date.now();
-                        stationConfig.isPrecipStuck = false;
-                    } else if (newPrecip.toFixed(1) === stationConfig.lastPrecipValue.toFixed(1)) {
-                        if (Date.now() - stationConfig.lastPrecipTimestamp > PRECIP_STUCK_THRESHOLD_MS) {
-                            stationConfig.isPrecipStuck = true; 
-                        }
-                    } else {
-                        stationConfig.lastPrecipValue = newPrecip;
-                        stationConfig.lastPrecipTimestamp = Date.now();
-                        stationConfig.isPrecipStuck = false;
-                    }
-                }
-
                 updateStationStatusUI(stationKey, 'online'); 
             } catch (error) { 
                 stationConfig.isOnline = false; stationConfig.data = null; updateStationStatusUI(stationKey, 'offline'); throw error; 
@@ -673,7 +656,6 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API.</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás & Napi előrejelzés: ${REFRESH_INTERVAL_FORECAST / 60000} percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
             const celestialArcPathV2 = "M 30 125 A 110 110 0 0 1 250 125";
             
-            // MÓDOSÍTÁS: A Sensation kártya HTML struktúrája a kért vertikális elrendezésre cserélve
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza</div><div class="station-subtitle" id="station-subtitle-text">Állomás kiválasztása...</div></div>
                 <div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div>
@@ -757,7 +739,7 @@
             </div>
             
             <div class="regional-precip-section" id="regional-precip-section">
-                <h3>Regionális Csapadék Adatok</h3>
+                <h3><i class="fas fa-map-marked-alt"></i>Regionális Csapadék Adatok</h3>
                 <div class="regional-precip-grid" id="regional-precip-grid"></div>
             </div>
 
@@ -912,45 +894,63 @@
             el_pm10Value.textContent = formatValue(aqData.pm10, '', 1, '--'); el_pm25Value.textContent = formatValue(aqData.pm2_5, '', 1, '--'); el_ozoneValue.textContent = formatValue(aqData.ozone, '', 1, '--');
         }
 
+        // MÓDOSÍTÁS: A regionális csapadék renderelése új sorrenddel és szűréssel
         function renderRegionalPrecipitation() {
             if (!el_regionalPrecipGrid) return;
-            const precipStations = Object.values(STATIONS)
-                .filter(s => s.provides.includes('precip'))
-                .sort((a, b) => a.displayName.localeCompare(b.displayName, 'hu'));
+            
+            const PREFERRED_ORDER = ['KOSSUTH', 'NYIREGYHAZI_UT', 'ALLATPARK', 'SOSTOHEGY', 'SZAKOLY'];
+            const now = Date.now();
+
+            // Állomások szűrése: csak az online és friss adatúak maradnak
+            const visibleStations = Object.entries(STATIONS)
+                .map(([key, station]) => ({ key, ...station }))
+                .filter(station => station.provides.includes('precip') && station.isOnline && station.data && (now - new Date(station.data.obsTimeLocal).getTime() < STALE_DATA_THRESHOLD_MS));
+            
+            // Állomások szétválogatása a sorrend szerint
+            const orderedPart = [];
+            const otherPart = [];
+
+            visibleStations.forEach(station => {
+                const orderIndex = PREFERRED_ORDER.indexOf(station.key);
+                if (orderIndex !== -1) {
+                    orderedPart[orderIndex] = station;
+                } else {
+                    otherPart.push(station);
+                }
+            });
+
+            // A maradék ábécé sorrendbe rendezése és a két lista összefűzése
+            const sortedStations = [
+                ...orderedPart.filter(Boolean), // Üres helyek (ha egy preferált állomás offline) eltávolítása
+                ...otherPart.sort((a, b) => a.displayName.localeCompare(b.displayName, 'hu'))
+            ];
 
             let gridHTML = '';
-            if (precipStations.length > 0) {
-                precipStations.forEach(station => {
-                    if (station.isPrecipStuck) return; // Beragadt állomás kihagyása
-
-                    const now = Date.now();
-                    const obsTime = station.data?.obsTimeLocal ? new Date(station.data.obsTimeLocal).getTime() : 0;
-                    const isStale = !station.isOnline || (now - obsTime > STALE_DATA_THRESHOLD_MS);
-                    
+            if (sortedStations.length > 0) {
+                sortedStations.forEach(station => {
                     let dataHTML;
                     let dataClass = "station-data";
                     let itemClass = "precip-station-item";
 
-                    if (isStale) {
-                        dataHTML = station.isOnline ? NO_FRESH_DATA_STRING : 'Offline';
-                        dataClass += " is-stale";
+                    const precipRate = station.data.metric?.precipRate;
+                    const precipTotal = station.data.metric?.precipTotal;
+                    const isRaining = precipRate > 0;
+                    
+                    if (isRaining) {
+                        dataClass += " is-raining";
+                        itemClass += " is-raining-highlight";
+                        dataHTML = `Esik | Intenzitás: <strong>${formatValue(precipRate, ' mm/h', 1)}</strong> | Ma eddig: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
                     } else {
-                        const precipRate = station.data.metric?.precipRate;
-                        const precipTotal = station.data.metric?.precipTotal;
-                        const isRaining = precipRate > 0;
-
-                        if (isRaining) {
-                            dataClass += " is-raining";
-                            itemClass += " is-raining-highlight"; // Kiemelő osztály hozzáadása
-                            dataHTML = `Esik | Intenzitás: <strong>${formatValue(precipRate, ' mm/h', 1)}</strong> | Mai: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
-                        } else {
-                            dataHTML = `Nem esik | Mai: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
-                        }
+                        dataHTML = `Nem esik | Ma eddig: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
                     }
-                    gridHTML += `<div class="${itemClass}"><span class="station-name">${station.displayName}</span><span class="${dataClass}">${dataHTML}</span></div>`;
+                    
+                    // Speciális név a Kossuth útnak
+                    const displayName = station.key === 'KOSSUTH' ? 'Nyíregyháza Kossuth út 50' : station.displayName;
+
+                    gridHTML += `<div class="${itemClass}"><span class="station-name">${displayName}</span><span class="${dataClass}">${dataHTML}</span></div>`;
                 });
             } else {
-                gridHTML = '<p>Nincs elérhető csapadékmérő állomás.</p>';
+                gridHTML = '<div>Nincs elérhető, friss adattal rendelkező csapadékmérő állomás.</div>';
             }
             el_regionalPrecipGrid.innerHTML = gridHTML;
         }
@@ -964,6 +964,7 @@
                 updateAnimatedValue(el_topTempCardValue, formatValue(obs.temp, '', 1));
                 el_topTempCardValue.closest('.temp-card').style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
             }
+            // MÓDOSÍTÁS: Az új vertikális kártya feltöltése
             if(el_cardHeatIndexValue) el_cardHeatIndexValue.textContent = formatValue(obs.heatIndex, '°C', 1);
             if(el_cardHeatIndexDesc) el_cardHeatIndexDesc.textContent = getHeatIndexDescription(obs.heatIndex, obs.temp);
             if(el_cardWindValue) el_cardWindValue.textContent = formatValue(obs.windSpeed, ' km/h', 1);
@@ -1087,12 +1088,6 @@
              const newDay = new Date().getDate(); 
              if (newDay !== currentDay) { 
                 currentDay = newDay; 
-                
-                Object.values(STATIONS).forEach(station => { 
-                    station.isPrecipStuck = false;
-                    station.lastPrecipValue = null;
-                }); 
-                
                 const updatePromises = []; 
                 if (ENABLE_ISS_TRACKING) updatePromises.push( fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15).then(passes => { cachedData.issPasses = passes; lastApiCallTimes.issPasses = Date.now(); }) ); 
                 Promise.all(updatePromises).finally(() => { if (cachedData.displayPws) renderWeatherData(); }); 
@@ -1218,12 +1213,6 @@
         }
         
         function initApp() {
-            Object.values(STATIONS).forEach(station => {
-                station.lastPrecipValue = null;
-                station.lastPrecipTimestamp = 0;
-                station.isPrecipStuck = false;
-            });
-
             weatherDisplayEl = document.getElementById('weather-display'); hourlyForecastContainerEl = document.getElementById('hourly-forecast-container'); hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
             initializeWeatherDisplayDOM();
             window.addEventListener('resize', () => { if (cachedData.displayPws) renderWeatherData(); });
