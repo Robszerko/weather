@@ -97,7 +97,6 @@
         .temp-card .card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 8px; }
         .temp-card .card-main-value { font-size: 40px; font-weight: 800; line-height: 1; }
         
-        /* <!-- MÓDOSÍTÁS: A "sensation" kártya stílusai a vertikális elrendezéshez --> */
         .sensation-card { flex: 3 1 300px; padding: 12px; align-items: stretch; }
         .sensation-list { display: flex; flex-direction: column; justify-content: space-around; gap: 12px; width: 100%; height: 100%; }
         .sensation-item { display: flex; align-items: center; gap: 12px; text-align: left; }
@@ -268,7 +267,6 @@
         const OBSERVER_ALTITUDE = 120;
         const ISS_NORAD_ID = 25544;
         const REFRESH_INTERVAL_ISS = 2 * 60 * 60 * 1000;
-        // JAVÍTVA: A nem frissülő állomások küszöbértéke 30 percre állítva, ez lesz a szűrés alapja.
         const STALE_DATA_THRESHOLD_MS = 30 * 60 * 1000;
 
         const STATIONS = {
@@ -276,7 +274,6 @@
             KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50 állomás', displayName: 'Kossuth út 50', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
             HONVED: { id: 'INYREG37', name: 'Nyíregyháza Honvéd utcai állomás', displayName: 'Honvéd u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
             SOSTOHEGY: { id: 'INYREG11', name: 'Nyíregyháza-Sóstóhegy PWS', displayName: 'Sóstóhegy', provides: ['precip', 'temp'], isOnline: false, data: null },
-            // JAVÍTVA: Az Állatpark neve frissítve a pontosságért.
             ALLATPARK: { id: 'INYREG20', name: 'Nyíregyházi Állatpark PWS', displayName: 'Nyíregyházi Állatpark', provides: ['precip', 'temp'], isOnline: false, data: null },
             NAPKOR: { id: 'INAPKO1', name: 'Napkor PWS', displayName: 'Napkor', provides: ['precip', 'temp'], isOnline: false, data: null },
             KALLOSEMJEN: { id: 'IKLLSE3', name: 'Kállósemjén PWS', displayName: 'Kállósemjén', provides: ['precip', 'temp'], isOnline: false, data: null },
@@ -665,7 +662,6 @@
                  <div class="station-selector" id="honved-selector-container"><label for="station-select-honved"><input type="radio" name="station-select" id="station-select-honved" value="HONVED"><span class="station-name">${STATIONS.HONVED.displayName}</span><div id="honved-status-text" class="station-status-text">állapot ?</div></label></div>
             </div>
             
-            <!-- MÓDOSÍTÁS: A "sensation" kártya új, vertikális elrendezése -->
             <div class="top-info-cards-container">
                 <div class="info-card temp-card">
                     <div class="card-label">Jelenleg</div>
@@ -894,12 +890,6 @@
             el_pm10Value.textContent = formatValue(aqData.pm10, '', 1, '--'); el_pm25Value.textContent = formatValue(aqData.pm2_5, '', 1, '--'); el_ozoneValue.textContent = formatValue(aqData.ozone, '', 1, '--');
         }
 
-        // <<< MÓDOSÍTÁS KEZDETE >>>
-        /**
-         * A csapadék intenzitását (mm/h) egy szöveges leírássá alakítja.
-         * @param {number | null} rate - A csapadék intenzitása mm/h-ban.
-         * @returns {string} A csapadék erősségének szöveges leírása.
-         */
         function getPrecipIntensityDescription(rate) {
             if (rate == null || rate <= 0) return 'Nem esik';
             if (rate > 0 && rate <= 0.2) return 'Szitálás';
@@ -967,7 +957,6 @@
             }
             el_regionalPrecipGrid.innerHTML = gridHTML;
         }
-        // <<< MÓDOSÍTÁS VÉGE >>>
 
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!obs || !general || !sunCalcData) return;
@@ -1218,8 +1207,6 @@
             
             setInterval(() => {
                 masterTickCounter++;
-                // JAVÍTVA: Eltávolítottuk a `document.visibilityState === 'visible'` feltételt,
-                // így a frissítések a háttérben is lefutnak.
                 if (masterTickCounter % PWS_INTERVAL_S === 0) {
                     fetchAllDataAndUpdateDisplay(false);
                 }
@@ -1238,9 +1225,24 @@
         }
         
         function initApp() {
-            weatherDisplayEl = document.getElementById('weather-display'); hourlyForecastContainerEl = document.getElementById('hourly-forecast-container'); hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
+            weatherDisplayEl = document.getElementById('weather-display');
+            hourlyForecastContainerEl = document.getElementById('hourly-forecast-container');
+            hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
+            
             initializeWeatherDisplayDOM();
+            
+            // <<< MÓDOSÍTÁS KEZDETE >>>
+            // Eseményfigyelő hozzáadása a fül láthatóságának változásához.
+            // Ha a fül láthatóvá válik, azonnali teljes frissítést indít.
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') {
+                    fetchAllDataAndUpdateDisplay(true);
+                }
+            });
+            // <<< MÓDOSÍTÁS VÉGE >>>
+            
             window.addEventListener('resize', () => { if (cachedData.displayPws) renderWeatherData(); });
+            
             fetchAllDataAndUpdateDisplay(true).finally(() => { 
                 startMasterLoop(); 
             });
