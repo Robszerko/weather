@@ -894,14 +894,29 @@
             el_pm10Value.textContent = formatValue(aqData.pm10, '', 1, '--'); el_pm25Value.textContent = formatValue(aqData.pm2_5, '', 1, '--'); el_ozoneValue.textContent = formatValue(aqData.ozone, '', 1, '--');
         }
 
-        // JAVÍTVA: A regionális csapadék renderelése új sorrenddel és a frissességi szűréssel
+        // <<< MÓDOSÍTÁS KEZDETE >>>
+        /**
+         * A csapadék intenzitását (mm/h) egy szöveges leírássá alakítja.
+         * @param {number | null} rate - A csapadék intenzitása mm/h-ban.
+         * @returns {string} A csapadék erősségének szöveges leírása.
+         */
+        function getPrecipIntensityDescription(rate) {
+            if (rate == null || rate <= 0) return 'Nem esik';
+            if (rate > 0 && rate <= 0.2) return 'Szitálás';
+            if (rate > 0.2 && rate <= 1.0) return 'Gyenge eső';
+            if (rate > 1.0 && rate <= 4.0) return 'Mérsékelt eső';
+            if (rate > 4.0 && rate <= 8.0) return 'Intenzív eső';
+            if (rate > 8.0 && rate <= 16.0) return 'Zápor';
+            if (rate > 16.0 && rate <= 50.0) return 'Heves zápor';
+            return 'Felhőszakadás';
+        }
+
         function renderRegionalPrecipitation() {
             if (!el_regionalPrecipGrid) return;
             
             const PREFERRED_ORDER = ['KOSSUTH', 'NYIREGYHAZI_UT', 'ALLATPARK', 'SOSTOHEGY', 'SZAKOLY'];
             const now = Date.now();
 
-            // Állomások szűrése: csak az online és friss adatúak maradnak
             const visibleStations = Object.entries(STATIONS)
                 .map(([key, station]) => ({ key, ...station }))
                 .filter(station => station.provides.includes('precip') && station.isOnline && station.data && (now - new Date(station.data.obsTimeLocal).getTime() < STALE_DATA_THRESHOLD_MS));
@@ -918,9 +933,8 @@
                 }
             });
 
-            // A maradék ábécé sorrendbe rendezése és a két lista összefűzése
             const sortedStations = [
-                ...orderedPart.filter(Boolean), // Üres helyek eltávolítása
+                ...orderedPart.filter(Boolean), 
                 ...otherPart.sort((a, b) => a.displayName.localeCompare(b.displayName, 'hu'))
             ];
 
@@ -938,7 +952,8 @@
                     if (isRaining) {
                         dataClass += " is-raining";
                         itemClass += " is-raining-highlight";
-                        dataHTML = `Esik | Intenzitás: <strong>${formatValue(precipRate, ' mm/h', 1)}</strong> | Ma eddig: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
+                        const intensityDescription = getPrecipIntensityDescription(precipRate);
+                        dataHTML = `<strong>${intensityDescription}</strong> | Ma eddig: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
                     } else {
                         dataHTML = `Nem esik | Ma eddig: <strong>${formatValue(precipTotal, ' mm', 1)}</strong>`;
                     }
@@ -952,6 +967,7 @@
             }
             el_regionalPrecipGrid.innerHTML = gridHTML;
         }
+        // <<< MÓDOSÍTÁS VÉGE >>>
 
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!obs || !general || !sunCalcData) return;
