@@ -94,9 +94,19 @@
         .top-info-cards-container { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 16px; margin-bottom: 16px; align-items: stretch; }
         .info-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; color: var(--current-text-color); font-family: 'Inter', sans-serif; text-align: center; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); transition: all 0.6s ease; border-radius: 12px; }
         .temp-card { flex: 1 1 140px; background: linear-gradient(145deg, var(--current-temp-bg-color), color-mix(in srgb, var(--current-temp-bg-color) 70%, black)) !important; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        .temp-card .card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 8px; }
-        .temp-card .card-main-value { font-size: 40px; font-weight: 800; line-height: 1; }
         
+        /* <<< MÓDOSÍTÁS KEZDETE >>> */
+        .temp-card .card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; transition: background-color 0.5s; }
+        .status-dot.fresh { background-color: #4ade80; box-shadow: 0 0 5px #4ade80; }
+        .status-dot.stale { background-color: #facc15; }
+        .status-dot.offline { background-color: #f87171; }
+        .live-tag { font-size: 9px; background-color: rgba(255, 255, 255, 0.15); color: #e5e7eb; padding: 2px 6px; border-radius: 6px; font-weight: 700; letter-spacing: 0.5px; }
+        .temp-card .card-main-value { font-size: 40px; font-weight: 800; line-height: 1; }
+        .temp-trend-arrow { font-size: 0.5em; vertical-align: middle; margin-left: 2px; font-weight: 600; width: 12px; display: inline-block; }
+        .precip-icon { font-size: 0.4em; vertical-align: middle; margin-left: 4px; opacity: 0.8; }
+        /* <<< MÓDOSÍTÁS VÉGE >>> */
+
         .sensation-card { flex: 3 1 300px; padding: 12px; align-items: stretch; }
         .sensation-list { display: flex; flex-direction: column; justify-content: space-around; gap: 12px; width: 100%; height: 100%; }
         .sensation-item { display: flex; align-items: center; gap: 12px; text-align: left; }
@@ -297,6 +307,8 @@
             sunCalc: null,
             issPasses: [],
             airQuality: null,
+            // <<< MÓDOSÍTÁS >>> Előző hőmérsékleti adatok tárolása a trendhez
+            previousTemperatures: {},
         };
         let isWeatherDisplayInitialized = false;
         let currentDay = new Date().getDate();
@@ -363,6 +375,8 @@
             el_nightSkyVisualIcon, el_nightSkyObjectName, el_nightSkyObjectStatus, el_nightSkyObjectDetails, el_nightSkyAstroDarknessItemPlanet, el_nightSkyAstroDarknessPlanet,
             el_constellationSvgContainer, el_constellationName, el_constellationDetails, el_constellationAstroDarknessItemConst, el_constellationAstroDarknessConst,
             el_topTempCardValue,
+            // <<< MÓDOSÍTÁS >>> Új DOM elemek referenciái
+            el_currentTempStatusDot, el_currentTempLiveTag, el_topTempTrendArrow, el_topTempPrecipIcon,
             el_cardHeatIndexValue, el_cardHeatIndexDesc, el_cardWindValue, el_cardWindDesc, el_cardGustValue, el_cardGustDesc,
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
@@ -600,6 +614,12 @@
         async function fetchPwsStationData(stationKey) {
             const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`;
             try { 
+                // <<< MÓDOSÍTÁS >>> Elmentjük az előző hőmérsékletet, mielőtt felülírnánk az adatot.
+                const currentData = stationConfig.data;
+                if (currentData && typeof currentData.metric?.temp === 'number') {
+                    cachedData.previousTemperatures[stationKey] = currentData.metric.temp;
+                }
+
                 const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba: ${response.status}`); 
                 const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); 
                 stationConfig.isOnline = true; stationConfig.data = data.observations[0]; 
@@ -652,6 +672,7 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API.</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás & Napi előrejelzés: ${REFRESH_INTERVAL_FORECAST / 60000} percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
             const celestialArcPathV2 = "M 30 125 A 110 110 0 0 1 250 125";
             
+            // <<< MÓDOSÍTÁS >>> HTML struktúra a hőmérséklet kártyához, új elemekkel.
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza</div><div class="station-subtitle" id="station-subtitle-text">Állomás kiválasztása...</div></div>
                 <div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div>
@@ -664,8 +685,14 @@
             
             <div class="top-info-cards-container">
                 <div class="info-card temp-card">
-                    <div class="card-label">Jelenleg</div>
-                    <div class="card-main-value"><span id="top-temp-card-value" class="flippable-value">--</span>°C</div>
+                    <div class="card-label">
+                        <span>Jelenleg</span>
+                        <span id="current-temp-status-dot" class="status-dot"></span>
+                        <span id="current-temp-live-tag" class="live-tag is-hidden">ÉLŐ</span>
+                    </div>
+                    <div class="card-main-value">
+                        <span id="top-temp-card-value" class="flippable-value">--</span><span id="top-temp-trend-arrow" class="temp-trend-arrow"></span>°C<span id="top-temp-precip-icon" class="precip-icon"></span>
+                    </div>
                 </div>
                 <div class="info-card sensation-card">
                     <div class="sensation-list">
@@ -793,6 +820,13 @@
             el_constellationSvgContainer = document.getElementById('constellation-svg-container'); el_constellationName = document.getElementById('constellation-name'); el_constellationDetails = document.getElementById('constellation-details'); el_constellationAstroDarknessItemConst = document.getElementById('constellation-astro-darkness-item-const'); el_constellationAstroDarknessConst = document.getElementById('constellation-astro-darkness-const');
             
             el_topTempCardValue = document.getElementById('top-temp-card-value');
+
+            // <<< MÓDOSÍTÁS >>> Új DOM elemek elmentése változókba.
+            el_currentTempStatusDot = document.getElementById('current-temp-status-dot');
+            el_currentTempLiveTag = document.getElementById('current-temp-live-tag');
+            el_topTempTrendArrow = document.getElementById('top-temp-trend-arrow');
+            el_topTempPrecipIcon = document.getElementById('top-temp-precip-icon');
+
             el_cardHeatIndexValue = document.getElementById('card-heat-index-value');
             el_cardHeatIndexDesc = document.getElementById('card-heat-index-desc');
             el_cardWindValue = document.getElementById('card-wind-value');
@@ -963,10 +997,47 @@
             
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`; if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
             
+            // <<< MÓDOSÍTÁS KEZDETE >>> Az új elemek vezérlése
             if(el_topTempCardValue) {
+                // Hőmérséklet érték frissítése
                 updateAnimatedValue(el_topTempCardValue, formatValue(obs.temp, '', 1));
                 el_topTempCardValue.closest('.temp-card').style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
+
+                // Státusz pötty és ÉLŐ címke vezérlése
+                const obsTime = new Date(obs.obsTimeLocal).getTime();
+                const ageInSeconds = (Date.now() - obsTime) / 1000;
+                const FRESH_THRESHOLD_S = 90; // 1.5 perc
+                const STALE_THRESHOLD_S = 180; // 3 perc
+                el_currentTempStatusDot.classList.remove('fresh', 'stale', 'offline');
+                if (ageInSeconds < FRESH_THRESHOLD_S) {
+                    el_currentTempStatusDot.classList.add('fresh');
+                    el_currentTempLiveTag.classList.remove('is-hidden');
+                } else if (ageInSeconds < STALE_THRESHOLD_S) {
+                    el_currentTempStatusDot.classList.add('stale');
+                    el_currentTempLiveTag.classList.add('is-hidden');
+                } else {
+                    el_currentTempStatusDot.classList.add('offline');
+                    el_currentTempLiveTag.classList.add('is-hidden');
+                }
+
+                // Hőmérséklet tendencia nyíl
+                const previousTemp = cachedData.previousTemperatures[activeDisplayStationKey];
+                let trendArrow = '';
+                if (typeof previousTemp === 'number' && typeof obs.temp === 'number') {
+                    const diff = obs.temp - previousTemp;
+                    if (diff > 0.05) trendArrow = '↑';
+                    else if (diff < -0.05) trendArrow = '↓';
+                    else trendArrow = '→';
+                }
+                el_topTempTrendArrow.textContent = trendArrow;
+
+                // Csapadék ikon
+                const isRaining = obs.precipRate > 0;
+                const isSnowing = isRaining && obs.temp < 1;
+                el_topTempPrecipIcon.textContent = isRaining ? (isSnowing ? '❄️' : '💧') : '';
             }
+            // <<< MÓDOSÍTÁS VÉGE >>>
+
             if(el_cardHeatIndexValue) el_cardHeatIndexValue.textContent = formatValue(obs.heatIndex, '°C', 1);
             if(el_cardHeatIndexDesc) el_cardHeatIndexDesc.textContent = getHeatIndexDescription(obs.heatIndex, obs.temp);
             if(el_cardWindValue) el_cardWindValue.textContent = formatValue(obs.windSpeed, ' km/h', 1);
@@ -1231,15 +1302,11 @@
             
             initializeWeatherDisplayDOM();
             
-            // <<< MÓDOSÍTÁS KEZDETE >>>
-            // Eseményfigyelő hozzáadása a fül láthatóságának változásához.
-            // Ha a fül láthatóvá válik, azonnali teljes frissítést indít.
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') {
                     fetchAllDataAndUpdateDisplay(true);
                 }
             });
-            // <<< MÓDOSÍTÁS VÉGE >>>
             
             window.addEventListener('resize', () => { if (cachedData.displayPws) renderWeatherData(); });
             
