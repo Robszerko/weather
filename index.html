@@ -66,10 +66,8 @@
         .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
         .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 800px; box-sizing: border-box; margin: 0 auto; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); transition: all 0.6s ease-in-out; }
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
-        /* <<< MÓDOSÍTÁS KEZDETE >>> */
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 8px; }
         .copyright-notice { font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); text-align: center; opacity: 0.85; letter-spacing: 0.2px; margin-top: 10px; transition: color 0.6s; }
-        /* <<< MÓDOSÍTÁS VÉGE >>> */
         .header-container { display: inline-block; background-color: rgba(0, 0, 0, 0.1); padding: 8px 24px; border-radius: 12px; margin-bottom: 4px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); transition: all 0.6s; }
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
         .station-subtitle { font-size: 13px; font-weight: 500; color: var(--current-text-muted-color); line-height: 1.2; margin-top: 2px; }
@@ -142,14 +140,12 @@
         .regional-precip-grid { display: flex; flex-direction: column; gap: 8px; }
         .precip-station-item { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; padding: 8px 12px; background-color: rgba(0,0,0,0.12); border-radius: 8px; transition: all 0.3s; border-left: 3px solid transparent; }
         .precip-station-item .station-name { font-size: 14px; font-weight: 700; color: var(--current-text-color); margin-right: 15px; }
-        /* <<< MÓDOSÍTÁS KEZDETE >>> */
         .precip-station-item.is-raining-highlight { background-color: rgba(from var(--current-icon-color) r g b / 0.15); border-left-color: var(--current-icon-color); box-shadow: inset 3px 0 8px -4px rgba(from var(--current-icon-color) r g b / 0.5); }
         .precip-station-item .station-data-wrapper { display: flex; align-items: baseline; gap: 12px; flex-shrink: 0; }
         .precip-station-item .station-data.intensity { font-size: 14px; font-weight: 600; color: var(--current-text-muted-color); transition: color 0.3s, text-shadow 0.3s; }
         .precip-station-item .station-data.intensity.is-raining { color: var(--current-raining-text-color); text-shadow: 0 0 5px rgba(from var(--current-raining-text-color) r g b / 0.5); }
         .precip-station-item .station-data.total { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); opacity: 0.9; }
         .precip-station-item .station-data.total strong { font-weight: 600; color: var(--current-text-color); }
-        /* <<< MÓDOSÍTÁS VÉGE >>> */
 
         .celestial-path-visual-v2 { width: 280px; height: 165px; position: relative; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: all 0.5s ease-in-out; }
         .celestial-path-svg-v2 { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: visible; transition: opacity 0.5s; }
@@ -163,7 +159,11 @@
         .path-label-v2 .path-time-v2 { font-weight: 700; font-size: 12px; color: var(--current-text-color); }
         .celestial-body-icon-v2 { position: absolute; top: 0; left: 0; z-index: 15; pointer-events: auto; cursor: help; font-size: 0; color: transparent; will-change: transform, background-color, box-shadow, color, text-shadow; transition: background-color 0.5s, box-shadow 0.5s, color 0.5s, text-shadow 0.5s, opacity 0.5s; }
         #sun-path-icon-v2 { width: 22px; height: 22px; background-color: #FFD700; border-radius: 50%; box-shadow: 0 0 10px 3px gold, 0 0 18px 6px rgba(255, 215, 0, 0.45), inset 0 0 4px rgba(255, 255, 220, 0.6); }
-        #moon-path-icon-v2 { width: 20px; height: 20px; font-size: 20px; line-height: 20px; text-align: center; color: #E8EAF6; text-shadow: 0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4); }
+        
+        /* <<< MÓDOSÍTÁS KEZDETE >>> */
+        #moon-path-icon-v2 { width: 28px; height: 28px; font-size: 28px; line-height: 28px; text-align: center; color: #E8EAF6; text-shadow: 0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4); }
+        /* <<< MÓDOSÍTÁS VÉGE >>> */
+
         .celestial-path-visual-v2.is-event-active .celestial-path-svg-v2, .celestial-path-visual-v2.is-event-active .path-label-v2 { opacity: 0.3; pointer-events: none; }
         .celestial-path-visual-v2.is-event-active .path-ground-v2 { border-top-width: 2px; opacity: 0.8; }
         .celestial-event-container-v2 { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; opacity: 0; transition: opacity 0.5s ease; pointer-events: none; z-index: 20; }
@@ -251,7 +251,6 @@
             .air-quality-grid { grid-template-columns: 1fr 1fr; }
             .celestial-path-visual-v2 { width: 100%; max-width: 280px; }
             .precip-station-item { flex-direction: column; align-items: flex-start; gap: 4px; }
-            /* <<< MÓDOSÍTÁS >>> */
             .precip-station-item .station-data-wrapper { justify-content: flex-start; width: 100%; }
         }
     </style>
@@ -392,6 +391,18 @@
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
         
+        function getMoonPhaseIcon(phase) {
+            if (phase < 0.0625) return '🌑'; // Újhold
+            if (phase < 0.1875) return '🌒'; // Növekvő sarló
+            if (phase < 0.3125) return '🌓'; // Első negyed
+            if (phase < 0.4375) return '🌔'; // Növekvő hold
+            if (phase < 0.5625) return '🌕'; // Telihold
+            if (phase < 0.6875) return '🌖'; // Fogyó hold
+            if (phase < 0.8125) return '🌗'; // Utolsó negyed
+            if (phase < 0.9375) return '🌘'; // Fogyó sarló
+            return '🌑'; // Újhold
+        }
+
         function getHeatIndexDescription(heatIndex, temp) {
             if (heatIndex == null || temp == null) return '';
             const diff = heatIndex - temp;
@@ -517,11 +528,12 @@
             let moonTrend = moonPos.altitude > 0 ? (moonPos.altitude > pastMoonPos.altitude ? 'Emelkedik' : 'Süllyed') : null; let moonStatus = comprehensiveMoonData.isUp ? 'Égen van' : 'Horizont alatt';
             let phaseName = 'N/A'; const phase = moonIllumination.phase;
             if (phase >= 0 && phase < 0.03) phaseName = 'Újhold'; else if (phase >= 0.03 && phase < 0.22) phaseName = 'Növekvő sarló'; else if (phase >= 0.22 && phase < 0.28) phaseName = 'Első negyed'; else if (phase >= 0.28 && phase < 0.47) phaseName = 'Növekvő hold'; else if (phase >= 0.47 && phase < 0.53) phaseName = 'Telihold'; else if (phase >= 0.53 && phase < 0.72) phaseName = 'Fogyó hold'; else if (phase >= 0.72 && phase < 0.78) phaseName = 'Utolsó negyed'; else if (phase >= 0.78 && phase < 0.97) phaseName = 'Fogyó sarló'; else if (phase >= 0.97 && phase <= 1) phaseName = 'Újholdhoz közeli';
+            
             return {
                 sunrise: formatTime(sunriseDate), sunset: formatTime(sunsetDate), solarNoon: formatTime(solarNoonDate), sunriseDateForPath: sunriseDate, sunsetDateForPath: sunsetDate, solarNoonDate: solarNoonDate,
                 sunAltitude: sunAltitude, sunAzimuthDegrees: sunAzimuthDegrees, sunAzimuthCompass: sunAzimuthCompass, sunTrend: sunTrend, sunStatus: sunStatus, remainingDaylight: remainingDaylightText,
                 isUp: comprehensiveMoonData.isUp, moonrise: formatTime(comprehensiveMoonData.nextRise), moonset: formatTime(comprehensiveMoonData.nextSet), moonRiseDateForPath: comprehensiveMoonData.pathRise, moonSetDateForPath: comprehensiveMoonData.pathSet,
-                moonAltitude: comprehensiveMoonData.moonAltitude, moonTrend: moonTrend, moonStatus: moonStatus, phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonDistance: moonPos.distance,
+                moonAltitude: comprehensiveMoonData.moonAltitude, moonTrend: moonTrend, moonStatus: moonStatus, phaseValue: (moonIllumination.fraction * 100), phaseName: phaseName, moonPhaseRaw: moonIllumination.phase, moonDistance: moonPos.distance,
                 astronomicalTwilightStart: sunTimesToday.nightEnd, astronomicalTwilightEnd: sunTimesYesterday.night,
             };
         }
@@ -674,7 +686,6 @@
             const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API.</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás & Napi előrejelzés: ${REFRESH_INTERVAL_FORECAST / 60000} percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
             const celestialArcPathV2 = "M 30 125 A 110 110 0 0 1 250 125";
             
-            // <<< MÓDOSÍTÁS KEZDETE >>>
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza</div><div class="station-subtitle" id="station-subtitle-text">Állomás kiválasztása...</div></div>
                 <div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div>
@@ -749,7 +760,7 @@
                     <div class="celestial-path-visual-v2" id="moon-path-visual">
                          <svg class="celestial-path-svg-v2" viewBox="0 0 280 165"><path class="path-arc-bg-v2" d="${celestialArcPathV2}"></path><path id="moon-path-arc-main" class="path-arc-main-v2" d="${celestialArcPathV2}" stroke="var(--text-secondary-night)"></path></svg>
                         <div class="path-ground-v2"><div class="path-label-v2 sunrise-label"><span>Holdkelte</span><div id="moonrise-time-label" class="path-time-v2">--:--</div></div><div class="path-label-v2 sunset-label"><span>Holdnyugta</span><div id="moonset-time-label" class="path-time-v2">--:--</div></div></div>
-                        <i class="fas fa-moon celestial-body-icon-v2" id="moon-path-icon-v2"></i>
+                        <div class="celestial-body-icon-v2" id="moon-path-icon-v2"></div>
                         <div class="celestial-event-container-v2 is-hidden" id="moon-event-container"><div class="celestial-event-message-v2" id="moon-event-message"></div><div class="celestial-event-countdown-v2" id="moon-event-countdown"></div></div>
                     </div>
                     <div class="moon-text-details"><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-ruler-vertical"></i>Magasság</span><span id="moon-info-altitude" class="sun-detail-value">--°<span id="moon-info-trend" class="sun-trend-text"></span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i></span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-circle-half-stroke"></i>Fázis</span><span id="moon-info-phasename" class="moon-detail-value">--</span></div><div class="moon-detail-item"><span class="moon-detail-label"><i class="fas fa-lightbulb"></i>Megvilágítás</span><span id="moon-info-illumination" class="moon-detail-value">--%</span></div></div>
@@ -772,7 +783,6 @@
             <div class="precipitation-forecast-info is-hidden" id="precipitation-forecast-bar"><div id="next-precipitation-info-text"></div><div id="next-precipitation-details-text" class="is-hidden"></div></div>
 
             <div class="weather-details-grid"><div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value"><span id="dewpoint-value" class="flippable-value">--</span>°C</span></div><div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value"><span id="humidity-value" class="flippable-value">--</span>%</span></div><div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value"><span id="pressure-value" class="flippable-value">--</span> hPa<span class="pressure-trend-icon" id="pressure-trend-icon"></span></span></div><div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value"><span id="visibility-value" class="flippable-value">--</span> km</span></div><div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value"><span id="solar-radiation-value" class="flippable-value">--</span> W/m²</span></div><div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value"><span id="uv-index-value" class="flippable-value">--</span><span class="uv-description-text" id="uv-description"></span></span></div><div class="detail-item" id="grid-sunrise-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value" id="details-sunrise-value"></span></div><div class="detail-item" id="grid-sunset-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value" id="details-sunset-value"></span></div><div class="detail-item" id="grid-moonrise-item"><span class="label"><i class="fas fa-moon"></i>Holdkelte:</span><span class="value" id="moonrise-value"></span></div><div class="detail-item" id="grid-moonset-item"><span class="label"><i class="fas fa-moon"></i>Holdnyugta:</span><span class="value" id="moonset-value"></span></div></div>`;
-            // <<< MÓDOSÍTÁS VÉGE >>>
             
             el_stationSubtitleText = document.getElementById('station-subtitle-text');
             el_timestampText = document.getElementById('timestamp-text');
@@ -938,7 +948,6 @@
             return 'Felhőszakadás';
         }
 
-        // <<< MÓDOSÍTÁS KEZDETE >>>
         function renderRegionalPrecipitation() {
             if (!el_regionalPrecipGrid) return;
             
@@ -999,7 +1008,6 @@
             }
             el_regionalPrecipGrid.innerHTML = gridHTML;
         }
-        // <<< MÓDOSÍTÁS VÉGE >>>
 
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!obs || !general || !sunCalcData) return;
@@ -1078,7 +1086,13 @@
             if (el_moonInfoAltitude) el_moonInfoAltitude.innerHTML = `${formatValue(sunCalcData.moonAltitude, '°', 1)}<span id="moon-info-trend" class="sun-trend-text">(${sunCalcData.moonTrend || sunCalcData.moonStatus})</span><i id="moon-path-refresh-btn" class="fas fa-sync-alt path-refresh-btn" title="Pozíció frissítése"></i>`;
             if (el_moonInfoPhasename) el_moonInfoPhasename.textContent = sunCalcData.phaseName || NO_DATA_STRING; 
             if (el_moonInfoIllumination) el_moonInfoIllumination.textContent = formatValue(sunCalcData.phaseValue, '%', 1); 
-            if (el_moonPathIcon && sunCalcData && typeof sunCalcData.phaseValue === 'number') { const minOpacity = 0.3, maxOpacity = 1.0; el_moonPathIcon.style.opacity = (minOpacity + (sunCalcData.phaseValue / 100) * (maxOpacity - minOpacity)).toFixed(2); } 
+            
+            if (el_moonPathIcon && sunCalcData && typeof sunCalcData.moonPhaseRaw === 'number') {
+                el_moonPathIcon.textContent = getMoonPhaseIcon(sunCalcData.moonPhaseRaw);
+                const minOpacity = 0.3, maxOpacity = 1.0;
+                el_moonPathIcon.style.opacity = (minOpacity + (sunCalcData.phaseValue / 100) * (maxOpacity - minOpacity)).toFixed(2);
+            }
+            
             if (document.getElementById('moon-path-refresh-btn')) document.getElementById('moon-path-refresh-btn').onclick = () => { document.getElementById('moon-path-refresh-btn').classList.add('is-refreshing'); setTimeout(() => document.getElementById('moon-path-refresh-btn').classList.remove('is-refreshing'), 800); };
 
             if(el_gridSunriseItem) el_gridSunriseItem.classList.toggle('is-hidden', !el_sunInfoSection.classList.contains('is-hidden')); 
@@ -1247,14 +1261,40 @@
 
             const sunIcon = document.getElementById('sun-path-icon-v2');
             if(sunIcon) {
-                if (sunAltitude < 1.0) { sunIcon.style.backgroundColor = '#F97316'; sunIcon.style.boxShadow = '0 0 10px 3px #F97316, 0 0 18px 6px rgba(249, 115, 22, 0.45)'; }
-                else if (sunAltitude < 5.0) { sunIcon.style.backgroundColor = '#FBBF24'; sunIcon.style.boxShadow = '0 0 10px 3px #FBBF24, 0 0 18px 6px rgba(251, 191, 36, 0.45)'; }
-                else { sunIcon.style.backgroundColor = '#FFD700'; sunIcon.style.boxShadow = '0 0 10px 3px gold, 0 0 18px 6px rgba(255, 215, 0, 0.45)';}
+                if (sunAltitude < 1.0) { // Mélyen a horizonton, vöröses szín
+                    sunIcon.style.backgroundColor = '#E4572E';
+                    sunIcon.style.boxShadow = '0 0 12px 4px #E4572E, 0 0 20px 8px rgba(228, 87, 46, 0.5)';
+                } else if (sunAltitude < 5.0) { // Napkelte/napnyugta, narancsos szín
+                    sunIcon.style.backgroundColor = '#F97316';
+                    sunIcon.style.boxShadow = '0 0 10px 3px #F97316, 0 0 18px 6px rgba(249, 115, 22, 0.45)';
+                } else { // Magasan az égen, aranyló sárga
+                    sunIcon.style.backgroundColor = '#FFD700';
+                    sunIcon.style.boxShadow = '0 0 10px 3px gold, 0 0 18px 6px rgba(255, 215, 0, 0.45)';
+                }
             }
             const moonIcon = document.getElementById('moon-path-icon-v2');
-            if(moonIcon) {
-                 if (moonAltitude < 2.0) { moonIcon.style.color = '#FDE9CC'; moonIcon.style.textShadow = '0 0 7px #FDE9CC, 0 0 13px rgba(253, 233, 204, 0.4)';}
-                 else { moonIcon.style.color = '#E8EAF6'; moonIcon.style.textShadow = '0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4)';}
+            if (moonIcon && cachedData.sunCalc) {
+                // <<< MÓDOSÍTÁS KEZDETE >>>
+                const illumination = cachedData.sunCalc.phaseValue / 100; // a 0-1 közötti érték
+                let color, shadowColor;
+
+                if (moonAltitude < 4.0) { // Közel a horizonthoz
+                    color = '#F59E0B'; // meleg narancs
+                    shadowColor = 'rgba(245, 158, 11, 0.6)';
+                } else { // Magasan az égen
+                    color = '#E8EAF6'; // hideg fehér
+                    shadowColor = 'rgba(200, 200, 255, 0.7)';
+                }
+                
+                // A megvilágítottságtól függő, hangsúlyosabb ragyogás
+                const glowIntensity = Math.pow(illumination, 1.5); // A ragyogás nem lineárisan erősödik
+                const brightBlur = Math.round(5 + 15 * glowIntensity);
+                const brightSpread = Math.round(2 + 8 * glowIntensity);
+
+                moonIcon.style.color = color;
+                // Egy alap derengés, ami mindig van, és egy erős, a fázistól függő ragyogás
+                moonIcon.style.textShadow = `0 0 2px ${color}, 0 0 ${brightBlur}px ${shadowColor}, 0 0 ${brightSpread}px ${shadowColor}`;
+                // <<< MÓDOSÍTÁS VÉGE >>>
             }
             
             const sunState = determineCelestialState(nowMs, cachedData.sunCalc.sunriseDateForPath, cachedData.sunCalc.sunsetDateForPath, sunAltitude, cachedData.sunCalc.solarNoonDate);
