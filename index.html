@@ -76,7 +76,7 @@
         .info-tooltip-container { position: relative; cursor: help; color: var(--current-text-muted-color); line-height: 1; }
         .info-tooltip-container .fa-info-circle { transition: color 0.3s; }
         .info-tooltip-container:hover .fa-info-circle { color: var(--current-icon-color); }
-        .info-tooltip-content { visibility: hidden; opacity: 0; position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 320px; background-color: #f9fafb; color: #1f2937; text-align: left; border-radius: 8px; padding: 12px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, visibility 0.3s; font-size: 12px; line-height: 1.6; z-index: 1000; }
+        .info-tooltip-content { visibility: hidden; opacity: 0; position: absolute; top: calc(100% + 12px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 450px; background-color: #f9fafb; color: #1f2937; text-align: left; border-radius: 8px; padding: 12px 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: opacity 0.3s, visibility 0.3s; font-size: 12px; line-height: 1.6; z-index: 1000; }
         .info-tooltip-content::after { content: ""; position: absolute; bottom: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: transparent transparent #f9fafb transparent; }
         .info-tooltip-container:hover .info-tooltip-content { visibility: visible; opacity: 1; }
         .info-tooltip-content strong { display: block; margin-bottom: 4px; color: #000; font-weight: 700; }
@@ -125,7 +125,11 @@
         .sun-text-details, .moon-text-details, .rain-text-details, .night-sky-text-details { text-align: left; display: flex; flex-direction: column; gap: 6px; font-size: 12px; flex-grow: 1; min-width: 0; flex-basis: 130px; transition: opacity 0.5s ease-in-out; }
         #iss-info .night-sky-text-details { min-width: 250px; flex-basis: 250px; }
         .sun-detail-item, .moon-detail-item, .rain-detail-item, .night-sky-detail-item { display: flex; justify-content: space-between; align-items: baseline; padding: 6px 8px; border-radius: 8px; border-bottom: none; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); background-color: rgba(0, 0, 0, 0.08); }
-        .sun-detail-item:hover, .moon-detail-item:hover, .rain-detail-item:hover, .night-sky-detail-item:hover { background-color: rgba(255, 255, 255, 0.07); transform: translateY(-2px) scale(1.02); }
+        
+        .rain-detail-item:hover, .night-sky-detail-item:hover { background-color: rgba(255, 255, 255, 0.07); transform: translateY(-2px) scale(1.02); }
+        .sun-detail-item, .moon-detail-item { transition: background-color 0.25s; }
+        .sun-detail-item:hover, .moon-detail-item:hover { background-color: rgba(255, 255, 255, 0.07); transform: none; }
+
         .sun-detail-label, .moon-detail-label, .rain-detail-label, .night-sky-detail-label { display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 11px; color: var(--current-text-muted-color); text-transform: uppercase; letter-spacing: 0.3px; transition: color 0.6s; flex-shrink: 0; }
         .sun-detail-label i, .moon-detail-label i, .rain-detail-label i, .night-sky-detail-label i { width: 13px; text-align: center; font-size: 1em; color: var(--current-icon-color); opacity: 0.7; transition: color 0.6s, opacity 0.6s; }
         .sun-detail-value, .moon-detail-value, .rain-detail-value, .night-sky-detail-value { font-weight: 700; font-size: 14px; color: var(--current-text-color); transition: color 0.6s; display: flex; align-items: center; text-align: right; flex-grow: 1; justify-content: flex-end; white-space: normal; word-break: break-word; line-height: 1.25; }
@@ -160,9 +164,7 @@
         .celestial-body-icon-v2 { position: absolute; top: 0; left: 0; z-index: 15; pointer-events: auto; cursor: help; font-size: 0; color: transparent; will-change: transform, background-color, box-shadow, color, text-shadow; transition: background-color 0.5s, box-shadow 0.5s, color 0.5s, text-shadow 0.5s, opacity 0.5s; }
         #sun-path-icon-v2 { width: 22px; height: 22px; background-color: #FFD700; border-radius: 50%; box-shadow: 0 0 10px 3px gold, 0 0 18px 6px rgba(255, 215, 0, 0.45), inset 0 0 4px rgba(255, 255, 220, 0.6); }
         
-        /* <<< MÓDOSÍTÁS KEZDETE >>> */
-        #moon-path-icon-v2 { width: 28px; height: 28px; font-size: 28px; line-height: 28px; text-align: center; color: #E8EAF6; text-shadow: 0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4); }
-        /* <<< MÓDOSÍTÁS VÉGE >>> */
+        #moon-path-icon-v2 { width: 28px; height: 28px; font-size: 28px; line-height: 28px; text-align: center; color: #E8EAF6; text-shadow: 0 0 7px rgba(200, 200, 255, 0.6), 0 0 13px rgba(150, 150, 220, 0.4); transition: all 0.5s ease-in-out; }
 
         .celestial-path-visual-v2.is-event-active .celestial-path-svg-v2, .celestial-path-visual-v2.is-event-active .path-label-v2 { opacity: 0.3; pointer-events: none; }
         .celestial-path-visual-v2.is-event-active .path-ground-v2 { border-top-width: 2px; opacity: 0.8; }
@@ -392,37 +394,66 @@
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = dateOrIsoString instanceof Date ? dateOrIsoString : new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if(includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
         
         function getMoonPhaseIcon(phase) {
-            if (phase < 0.0625) return '🌑'; // Újhold
-            if (phase < 0.1875) return '🌒'; // Növekvő sarló
-            if (phase < 0.3125) return '🌓'; // Első negyed
-            if (phase < 0.4375) return '🌔'; // Növekvő hold
-            if (phase < 0.5625) return '🌕'; // Telihold
-            if (phase < 0.6875) return '🌖'; // Fogyó hold
-            if (phase < 0.8125) return '🌗'; // Utolsó negyed
-            if (phase < 0.9375) return '🌘'; // Fogyó sarló
-            return '🌑'; // Újhold
+            if (phase < 0.0625) return '🌑';
+            if (phase < 0.1875) return '🌒';
+            if (phase < 0.3125) return '🌓';
+            if (phase < 0.4375) return '🌔';
+            if (phase < 0.5625) return '🌕';
+            if (phase < 0.6875) return '🌖';
+            if (phase < 0.8125) return '🌗';
+            if (phase < 0.9375) return '🌘';
+            return '🌑';
+        }
+
+        // <<< MÓDOSÍTÁS KEZDETE: Bővített és realisztikusabb leírások >>>
+        function getRandomItem(arr) {
+            if (!arr || arr.length === 0) return '';
+            return arr[Math.floor(Math.random() * arr.length)];
         }
 
         function getHeatIndexDescription(heatIndex, temp) {
             if (heatIndex == null || temp == null) return '';
             const diff = heatIndex - temp;
-            if (heatIndex > 38) return "Extrém melegnek érződik";
-            if (heatIndex > 30) return "Nagyon melegnek érződik";
-            if (heatIndex > 25 && diff > 2) return "Melegebbnek érződik";
-            if (heatIndex < temp - 2) return "Hűvösebbnek érződik";
-            if (heatIndex > temp + 2) return "Melegebbnek érződik";
-            return 'Valós hőmérséklethez hasonló';
+
+            if (heatIndex > 40) return getRandomItem(['Extrém hőség, vigyázat!', 'Veszélyesen forró idő.', 'Kerüld a fizikai munkát a szabadban!', 'Hőségriadó-gyanús körülmények.', 'Ilyenkor még a gyíkok is árnyékot keresnek.']);
+            if (heatIndex > 35) return getRandomItem(['Kánikula a javából!', 'A légkondi ma a legjobb barátod.', 'Ne felejtsd a vizet, sok vizet!', 'Nyomasztóan meleg van.', 'Izzasztó kalandok várnak.', 'Brutális hőség.']);
+            if (heatIndex > 32 && diff > 3) return getRandomItem(['Fülledt, ragacsos idő.', 'Mintha egy üvegházban lennénk.', 'Nagyon magas a páratartalom.', 'Szauna-hatás a köbön.', 'Nehéz levegő, fojtogató meleg.']);
+            if (heatIndex > 30) return getRandomItem(['Igazi nyári hőség.', 'Erősen meleg idő.', 'Fagyiért kiáltó időjárás.', 'Jól fog esni egy hideg zuhany.', 'Intenzív meleg.']);
+            if (heatIndex > 25) return getRandomItem(['Pólós, rövidnadrágos idő.', 'Kellemesen meleg.', 'Kellemes, nyárias hőmérséklet.', 'Ideális kinti programokhoz.', 'Már-már nyaralás érzés.', 'Tökéletes egy teraszos ebédhez.']);
+            if (heatIndex > 20) return getRandomItem(['Enyhe, kellemes idő.', 'Pulcsi nélkül is el lehet lenni.', 'Tavasziasan meleg.', 'Pont jó, se túl meleg, se túl hideg.', 'Tökéletes egy sétához.', 'Arany középút.']);
+            if (heatIndex > 15) return getRandomItem(['Kellemesen hűvös.', 'Egy vékony pulcsi jól jöhet.', 'Friss, tiszta levegő érzet.', 'Már nem kell a légkondi.']);
+            if (heatIndex < 5 && temp < 5) return getRandomItem(['Nagyon hideg, csípős idő.', 'Öltözz fel vastagon!', 'A forró tea most aranyat ér.', 'Igazi téli hideg.', 'Kesztyűs idő.']);
+            if (heatIndex < 10) return getRandomItem(['Hűvös, kabátos idő.', 'Elkél a sál és a sapka.', 'Csípős a levegő.', 'Beköszöntött az ősz.']);
+            
+            if (temp < 15 && diff < -3) return getRandomItem(['A szél miatt jóval hűvösebbnek érződik.', 'A szél belefúj a kabát alá.', 'Csontig hatoló szél.', 'Éles, metsző szél.']);
+            if (diff < -2) return getRandomItem(['Csípősebbnek érződik a mértnél.', 'Frissítően hűvösnek hat a levegő.', 'Öltözz egy réteggel többe!']);
+            if (diff > 2) return getRandomItem(['Melegebbnek hat a levegő.', 'Párás, fülledt érzet.', 'Érezhetően melegebb a vártnál.']);
+
+            return getRandomItem(['Pont olyannak érezni, amilyen.', 'A hőmérő ma nem hazudik.', 'Nincs nagy meglepetés.', 'A valóságnak megfelelő érzet.', 'Reális hőmérséklet.']);
+        }
+
+        function getWindDescription(windSpeed) {
+             if (windSpeed == null) return 'N/A';
+            if (windSpeed <= 2) return getRandomItem(['Szélcsend', 'Alig mozdul a levegő', 'Leveletlen ág sem rezdül', 'Tükörsima víz']);
+            if (windSpeed <= 6) return getRandomItem(['Gyenge fuvallat', 'Alig érezhető szellő', 'Lágy fuvallat']);
+            if (windSpeed <= 12) return getRandomItem(['Könnyű szellő', 'A levelek már rezdülnek', 'Kellemesen lengedez']);
+            if (windSpeed <= 20) return getRandomItem(['Mérsékelt szél', 'Leng a zászló', 'Érezhetően fúj']);
+            if (windSpeed <= 30) return getRandomItem(['Élénk szél', 'Kócolja a hajat', 'Frissítő, markáns szél']);
+            if (windSpeed <= 40) return getRandomItem(['Erős szél', 'Már-már barátságtalanul fúj', 'Nehezíti a gyaloglást']);
+            if (windSpeed <= 50) return getRandomItem(['Nagyon erős szél', 'Viharos közeli szél', 'Gallyakat törhet']);
+            return getRandomItem(['Viharos erejű szél', 'Jobb bent maradni!', 'Kifejezetten erős, viharos szél']);
         }
 
         function getWindGustDescription(gustSpeed) {
-            if (gustSpeed == null) return 'N/A';
-            if (gustSpeed <= 5) return 'Gyenge lökés';
-            if (gustSpeed < 20) return 'Mérsékelt lökés';
-            if (gustSpeed < 40) return 'Élénk lökés';
-            if (gustSpeed < 60) return 'Erős lökés';
-            if (gustSpeed < 80) return 'Viharos lökés';
-            return 'Orkán erejű lökés';
+            if (gustSpeed == null || gustSpeed <= 5) return getRandomItem(['Nincsenek jelentős lökések', 'Nyugodt a levegő', 'Simán lehet kártyázni a szabadban']);
+            if (gustSpeed < 15) return getRandomItem(['Gyenge lökések', 'Enyhe széllökések', 'Néha meg-meglibben valami']);
+            if (gustSpeed < 30) return getRandomItem(['Mérsékelt lökések', 'Hirtelen megérkezik', 'Zavaró lehet egy-egy lökés']);
+            if (gustSpeed < 45) return getRandomItem(['Élénk lökések', 'Vigyázz a kalapodra!', 'Hirtelen, erős széllökések']);
+            if (gustSpeed < 60) return getRandomItem(['Erős lökések', 'Megingatja az embert', 'Zörögnek a cserepek']);
+            if (gustSpeed < 80) return getRandomItem(['Viharos lökések', 'Kapaszkodj, mert visz a szél!', 'Biztonságosabb fedél alatt']);
+            return getRandomItem(['Orkán erejű lökések', 'Veszélyes!', 'Extrém, pusztító lökések']);
         }
+        // <<< MÓDOSÍTÁS VÉGE >>>
 
         function getUVDescription(uvIndex) {
             if (uvIndex == null) return '';
@@ -683,7 +714,30 @@
         }
 
         function initializeWeatherDisplayDOM() {
-            const tooltipContent = `<strong>Hogyan működöm?</strong><p>Ezt az időjárási panelt Robi készitette mesterséges intelligencia (AI) segitségével, valós idejű és előrejelzett adatok megjelenitesére Nyiregyháza területéről.</p><strong>Adatforrások:</strong><ul><li>Valós idejű adatok: Weather.com PWS API.</li><li>Csillagászati adatok: SunCalc.js könyvtár.</li><li>Levegőminőség & Pollen: Open-Meteo API.</li><li>ISS Áthaladások: N2YO.com API (ha engedélyezve)</li><li>Előrejelzés & Ált. adatok: Weather.com & Open-Meteo API-k.</li></ul><strong>Frissítési idők:</strong><ul><li>Mérőállomás adatok: ${REFRESH_INTERVAL_PWS / 1000} mp-ként</li><li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li><li>Órás & Napi előrejelzés: ${REFRESH_INTERVAL_FORECAST / 60000} percenként</li><li>ISS adatok: ~${REFRESH_INTERVAL_ISS / (60*60*1000)} óránként</li></ul><p>A felület témája és a megjelenített információs panel dinamikusan változik a napszak és az időjárási események függvényében.</p>`;
+            const tooltipContent = `<strong>Panel Információ</strong>
+            <p>Ez a felület egy személyes projekt, melyet Robi készített AI segítségével azzal a céllal, hogy egy modern és részletes időjárás-megjelenítőt hozzon létre Nyíregyháza számára.</p>
+            <strong>Hogyan Működik?</strong>
+            <p>Az oldal egy dinamikus, egyoldalas alkalmazás (SPA), ami azt jelenti, hogy a tartalom frissül anélkül, hogy az egész oldalt újra kellene tölteni. Különböző internetes szolgáltatásoktól (API-któl) kér le adatokat, és ezek alapján építi fel a megjelenített paneleket.</p>
+            <strong>Adatforrások Részletesen:</strong>
+            <ul>
+                <li><b>Helyi adatok:</b> A Weather.com személyes időjárás-állomás (PWS) hálózatából származnak. Ezek a Nyíregyházán és környékén található amatőr meteorológiai állomások (pl. a Nyíregyházi úton vagy a Honvéd utcán) által mért, szinte élő adatok (hőmérséklet, csapadék, szél stb.).</li>
+                <li><b>Előrejelzés:</b> Szintén a Weather.com szolgáltatja az órás és napi előrejelzési adatokat.</li>
+                <li><b>Levegő & Pollen:</b> Az Open-Meteo API-ból érkeznek a levegőminőségi (PM10, PM2.5), ózon- és pollenterhelési (parlagfű, fűfélék) adatok.</li>
+                <li><b>Csillagászat:</b> A Nap és a Hold pontos helyzetét, a kelési és nyugvási időket, valamint a holdfázist a böngésző helyben, a <i>SunCalc.js</i> könyvtár segítségével számolja ki a földrajzi koordináták és a pontos idő alapján.</li>
+                <li><b>Űrállomás (ISS):</b> Ha engedélyezve van, a N2YO.com API-n keresztül kérdezi le a Nemzetközi Űrállomás következő, Nyíregyháza felett látható áthaladásainak idejét és pályáját.</li>
+            </ul>
+            <strong>Dinamikus Felület:</strong>
+            <ul>
+                <li><b>Napszak-követés:</b> A háttér és a színek egy 12 fázisú ciklus szerint változnak, követve a nap útját a hajnali kék órától az aranyórán és a déli ragyogáson át az alkonyatig és a csillagos éjszakáig.</li>
+                <li><b>Intelligens Panelek:</b> A fő információs panel (a hőmérséklet alatt) a napszaknak megfelelően változik: nappal a Nap, éjjel a Hold adatait mutatja. Ha mindkettő a horizont alatt van, felváltva jelenít meg érdekességeket az aktuális éjszakai égboltról (bolygók, csillagképek, ISS) és a levegőminőségi adatokat.</li>
+            </ul>
+            <strong>Frissítési Idők:</strong>
+            <ul>
+                <li>Mérőállomások: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként</li>
+                <li>Előrejelzés: ${REFRESH_INTERVAL_FORECAST / 60000} percenként</li>
+                <li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li>
+            </ul>
+            <p>A projekt célja egy informatív, mégis esztétikus és szórakoztató felület létrehozása volt. © 2025 Copyright by: Robi</p>`;
             const celestialArcPathV2 = "M 30 125 A 110 110 0 0 1 250 125";
             
             weatherDisplayEl.innerHTML = `<div class="widget-header">
@@ -1048,11 +1102,13 @@
                 const isSnowing = isRaining && obs.temp < 1;
                 el_topTempPrecipIcon.textContent = isRaining ? (isSnowing ? '❄️' : '💧') : '';
             }
-
+            
             if(el_cardHeatIndexValue) el_cardHeatIndexValue.textContent = formatValue(obs.heatIndex, '°C', 1);
             if(el_cardHeatIndexDesc) el_cardHeatIndexDesc.textContent = getHeatIndexDescription(obs.heatIndex, obs.temp);
+            
             if(el_cardWindValue) el_cardWindValue.textContent = formatValue(obs.windSpeed, ' km/h', 1);
             if(el_cardWindDesc) el_cardWindDesc.textContent = degreesToCompass(obs.winddir);
+
             if(el_cardGustValue) el_cardGustValue.textContent = formatValue(obs.windGust, ' km/h', 1);
             if(el_cardGustDesc) el_cardGustDesc.textContent = getWindGustDescription(obs.windGust);
             
@@ -1124,7 +1180,8 @@
             let forecastHTML = '';
             hourlyDataFull.forEach(hour => {
                 let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight);
-                forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`;
+                // <<< MÓDOSÍTÁS: Teljes szélirány kiírása az órás előrejelzésben >>>
+                forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="Szél">${degreesToCompass(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`;
             });
             if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden');
         }
@@ -1274,27 +1331,23 @@
             }
             const moonIcon = document.getElementById('moon-path-icon-v2');
             if (moonIcon && cachedData.sunCalc) {
-                // <<< MÓDOSÍTÁS KEZDETE >>>
-                const illumination = cachedData.sunCalc.phaseValue / 100; // a 0-1 közötti érték
+                const illumination = cachedData.sunCalc.phaseValue / 100;
                 let color, shadowColor;
 
-                if (moonAltitude < 4.0) { // Közel a horizonthoz
-                    color = '#F59E0B'; // meleg narancs
+                if (moonAltitude < 4.0) {
+                    color = '#F59E0B';
                     shadowColor = 'rgba(245, 158, 11, 0.6)';
-                } else { // Magasan az égen
-                    color = '#E8EAF6'; // hideg fehér
+                } else {
+                    color = '#E8EAF6';
                     shadowColor = 'rgba(200, 200, 255, 0.7)';
                 }
                 
-                // A megvilágítottságtól függő, hangsúlyosabb ragyogás
-                const glowIntensity = Math.pow(illumination, 1.5); // A ragyogás nem lineárisan erősödik
+                const glowIntensity = Math.pow(illumination, 1.5);
                 const brightBlur = Math.round(5 + 15 * glowIntensity);
                 const brightSpread = Math.round(2 + 8 * glowIntensity);
 
                 moonIcon.style.color = color;
-                // Egy alap derengés, ami mindig van, és egy erős, a fázistól függő ragyogás
                 moonIcon.style.textShadow = `0 0 2px ${color}, 0 0 ${brightBlur}px ${shadowColor}, 0 0 ${brightSpread}px ${shadowColor}`;
-                // <<< MÓDOSÍTÁS VÉGE >>>
             }
             
             const sunState = determineCelestialState(nowMs, cachedData.sunCalc.sunriseDateForPath, cachedData.sunCalc.sunsetDateForPath, sunAltitude, cachedData.sunCalc.solarNoonDate);
