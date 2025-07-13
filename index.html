@@ -405,7 +405,7 @@
             return '🌑';
         }
 
-        // <<< MÓDOSÍTÁS KEZDETE: Bővített és realisztikusabb, napszakfüggő leírások >>>
+        // <<< A MŰKÖDŐ, RÉSZLETES LEÍRÓ FÜGGVÉNYEK VISSZAÁLLÍTVA >>>
         function getRandomItem(arr) {
             if (!arr || arr.length === 0) return '';
             return arr[Math.floor(Math.random() * arr.length)];
@@ -438,26 +438,26 @@
             }
             if (heatIndex > 20) { // Enyhe idő
                 if (isMorning) return getRandomItem(['Friss, de kellemes reggel.', 'Jól indul a nap ilyen időben.', 'Kabát nélkül is el lehet indulni.']);
-                if (isDay) return getRandomItem(['Enyhe, kellemes tavaszias idő.', 'Pont jó, se túl meleg, se túl hideg.', 'Energiával tölt fel ez az idő.']);
+                if (context.isDay) return getRandomItem(['Enyhe, kellemes tavaszias idő.', 'Pont jó, se túl meleg, se túl hideg.', 'Energiával tölt fel ez az idő.']);
                 if (isEvening) return getRandomItem(['Kellemes hőmérsékletű este.', 'Egy vékony kardigán elég lehet.', 'Frissítő esti levegő.']);
                 return getRandomItem(['Enyhe, kellemes idő.']);
             }
             if (heatIndex > 15) { // Hűvös
                 if (isNearSunrise) return getRandomItem(['A napfelkelte még hűvös, de ígéretes.', 'Csípős a hajnal.']);
-                if (isDay) return getRandomItem(['Kellemesen friss, tiszta levegő.', 'Egy vékony pulóver pont jó.']);
+                if (context.isDay) return getRandomItem(['Kellemesen friss, tiszta levegő.', 'Egy vékony pulóver pont jó.']);
                 if (isNearSunset) return getRandomItem(['Napnyugtával gyorsan hűl a levegő.', 'Kezd estére fordulni az idő.']);
                 if (isEvening) return getRandomItem(['Kezd hűvösre fordulni az este.', 'Jólesik behúzódni a meleg szobába.', 'Érdemes bezárni az ablakot éjszakára.']);
                 return getRandomItem(['Kellemesen hűvös.']);
             }
             if (heatIndex < 5) { // Nagyon hideg
                 if (isMorning) return getRandomItem(['Fagyos reggel, indul a kaparás.', 'Jól be kell öltözni a reggeli induláshoz.', 'A forró kávé most életet ment.']);
-                if (isDay) return getRandomItem(['Nagyon hideg, csípős időjárás.', 'Öltözz fel vastagon, rétegesen!', 'A nap fénye sem melegít sokat.']);
+                if (context.isDay) return getRandomItem(['Nagyon hideg, csípős időjárás.', 'Öltözz fel vastagon, rétegesen!', 'A nap fénye sem melegít sokat.']);
                 if (isNight) return getRandomItem(['Fagyos, metsző éjszaka.', 'A forró tea most aranyat ér.', 'Reggelre dér vagy zúzmara lehet.']);
                 return getRandomItem(['Igazi téli hideg.']);
             }
             if (heatIndex < 10) { // Hideg
                 if (isMorning) return getRandomItem(['Hűvös reggel, elkél a sál.', 'Csípős a reggeli levegő.']);
-                if (isDay) return getRandomItem(['Hűvös, kabátos idő.', 'Beköszöntött az ősz.', 'A szél is hidegebbnek érződik.']);
+                if (context.isDay) return getRandomItem(['Hűvös, kabátos idő.', 'Beköszöntött az ősz.', 'A szél is hidegebbnek érződik.']);
                 if (isNight) return getRandomItem(['Hideg éjszaka várható.', 'Jobb a meleg szobában maradni.', 'Bekapcsol a fűtés.']);
                 return getRandomItem(['Csípős, hideg idő.']);
             }
@@ -511,8 +511,7 @@
             if (gustSpeed < 80) return getRandomItem(['Nagyon erős, viharos lökések', 'Biztonságosabb fedél alatt', 'Gallyakat törhet le.']);
             return getRandomItem(['Orkán erejű lökések', 'Veszélyes!', 'Pusztító erejű lökések.']);
         }
-        // <<< MÓDOSÍTÁS VÉGE >>>
-
+        
         function getUVDescription(uvIndex) {
             if (uvIndex == null) return '';
             if (uvIndex <= 2) return '(Alacsony)';
@@ -718,6 +717,7 @@
         async function fetchPwsStationData(stationKey) {
             const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`;
             try { 
+                // <<< A KRITIKUS HIÁNYZÓ RÉSZ VISSZAÁLLÍTVA >>>
                 const currentData = stationConfig.data;
                 if (currentData && typeof currentData.metric?.temp === 'number') {
                     cachedData.previousTemperatures[stationKey] = currentData.metric.temp;
@@ -798,6 +798,7 @@
             <p>A projekt célja egy informatív, mégis esztétikus és szórakoztató felület létrehozása volt. © 2025 Copyright by: Robi</p>`;
             const celestialArcPathV2 = "M 30 125 A 110 110 0 0 1 250 125";
             
+            // <<< A MŰKÖDŐ HTML STRUKTÚRA VISSZAÁLLÍTVA >>>
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza</div><div class="station-subtitle" id="station-subtitle-text">Állomás kiválasztása...</div></div>
                 <div class="timestamp-container"><span class="timestamp" id="timestamp-text">Megfigyelés: --:--:--</span><div class="info-tooltip-container"><i class="fas fa-info-circle"></i><div class="info-tooltip-content">${tooltipContent}</div></div></div>
@@ -947,6 +948,7 @@
             
             el_topTempCardValue = document.getElementById('top-temp-card-value');
 
+            // <<< A HIÁNYZÓ ELEMEK HOZZÁRENDELÉSE VISSZAÁLLÍTVA >>>
             el_currentTempStatusDot = document.getElementById('current-temp-status-dot');
             el_currentTempLiveTag = document.getElementById('current-temp-live-tag');
             el_topTempTrendArrow = document.getElementById('top-temp-trend-arrow');
@@ -1124,7 +1126,6 @@
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!obs || !general || !sunCalcData) return;
             
-            // <<< MÓDOSÍTÁS: Részletesebb kontextus objektum létrehozása >>>
             const now = new Date(obs.obsTimeLocal);
             const hour = now.getHours();
             const context = {
@@ -1141,6 +1142,7 @@
             
             if (el_stationSubtitleText) el_stationSubtitleText.textContent = `állomás: ${STATIONS[activeDisplayStationKey].displayName}`; if (el_timestampText) el_timestampText.textContent = `Megfigyelés: ${formatTime(obs.obsTimeLocal, true)}`;
             
+            // <<< A MŰKÖDŐ, TELJES LOGIKA VISSZAÁLLÍTVA >>>
             if(el_topTempCardValue) {
                 updateAnimatedValue(el_topTempCardValue, formatValue(obs.temp, '', 1));
                 el_topTempCardValue.closest('.temp-card').style.setProperty('--current-temp-bg-color', getTemperatureColorVar(obs.temp));
@@ -1180,7 +1182,6 @@
             if(el_cardHeatIndexDesc) el_cardHeatIndexDesc.textContent = getHeatIndexDescription(obs.heatIndex, obs.temp, context);
             
             if(el_cardWindValue) el_cardWindValue.textContent = formatValue(obs.windSpeed, ' km/h', 1);
-            // <<< MÓDOSÍTÁS: Szélirány elöl, utána a leírás >>>
             if(el_cardWindDesc) {
                 const windDesc = getWindDescription(obs.windSpeed, obs.windGust, context);
                 const windDir = degreesToCompass(obs.winddir);
