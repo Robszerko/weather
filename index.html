@@ -1093,7 +1093,7 @@
             
             let firstPrecipIndex = -1;
             for (let i = 0; i < precipValues.length; i++) {
-                if (new Date(timeValues[i]) > now && precipValues[i] > 0.05) { // Threshold for meaningful precipitation
+                if (new Date(timeValues[i]) > now && precipValues[i] > 0.05) { 
                     firstPrecipIndex = i;
                     break;
                 }
@@ -1103,33 +1103,27 @@
                 const eventTime = new Date(timeValues[firstPrecipIndex]);
                 const intensity = precipValues[firstPrecipIndex];
                 const description = getPrecipIntensityDescription(intensity).toLowerCase();
-                let summaryHTML = `Várhatóan ${description} kezdődik <strong>${formatTime(eventTime)}</strong>-kor`;
-
-                let probability = null;
-                if (hourlyForecast && hourlyForecast.length > 0) {
-                    for (const hour of hourlyForecast) {
-                        const hourTime = new Date(hour.time);
-                        const nextHourTime = new Date(hourTime.getTime() + 60 * 60 * 1000);
-                        if (eventTime >= hourTime && eventTime < nextHourTime) {
-                            probability = hour.precipChance;
-                            break;
-                        }
-                    }
-                }
-                
-                if (probability !== null) {
-                    summaryHTML += `, a csapadék esélye <strong>${probability}%</strong>.`;
-                } else {
-                    summaryHTML += `.`;
-                }
+                let summaryHTML = `Várhatóan ${description} kezdődik <strong>${formatTime(eventTime)}</strong>-kor. A közeli előrejelzés alapján az érkezése <strong>szinte biztos</strong>.`;
                 el_nowcastSummary.innerHTML = summaryHTML;
 
             } else {
-                el_nowcastSummary.textContent = "A következő 2 órában nem várható csapadék.";
+                let laterChance = null;
+                if (hourlyForecast && hourlyForecast.length > 0) {
+                     for (const hour of hourlyForecast) {
+                        if (new Date(hour.time) > now && hour.precipChance > 25) {
+                           laterChance = hour;
+                           break;
+                        }
+                     }
+                }
+                if(laterChance) {
+                    el_nowcastSummary.innerHTML = `A következő két órában nem várható csapadék, de később, <strong>${formatTime(laterChance.time)}</strong> körül <strong>${laterChance.precipChance}%</strong> eséllyel kialakulhat.`;
+                } else {
+                    el_nowcastSummary.textContent = "A következő órákban nem várható csapadék.";
+                }
             }
 
             let graphHTML = '';
-            // Use a fixed max for more consistent visualization, e.g., 5 mm/h for heavy rain. Can be dynamic too.
             const maxGraphPrecip = Math.max(...precipValues, 2.5); 
             
             for (let i = 0; i < timeValues.length; i++) {
@@ -1149,6 +1143,7 @@
             }
             el_nowcastGraph.innerHTML = graphHTML;
         }
+
 
         function renderRegionalPrecipitation() {
             if (!el_regionalPrecipGrid) return;
