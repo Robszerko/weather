@@ -403,65 +403,64 @@
         }
 
         function getHeatIndexDescription(heatIndex, temp, context) {
-            const { isRainingInRegion, isSummer, isAutumn, isMorning, isLunchTime, isAfternoon, isEvening, isNight, isNearSunrise, isNearSunset } = context;
+            const { isRainingInRegion, isWinter, isSpring, isSummer, isAutumn, isMorning, isLunchTime, isLateLunchTime, isAfternoon, isEvening, isNight, isNearSunrise, isNearSunset } = context;
 
             if (isRainingInRegion) {
-                if (isSummer) return getRandomItem(['A nyári zápor kellemesen hűti a levegőt.', 'Végre egy frissítő eső a forróságban!', 'Az eső illata keveredik a nyár illatával.']);
-                if (isAutumn) return getRandomItem(['Igazi őszi, befelé fordulós idő.', 'Az eső az ablakon kopog.', 'Borongós, esős hangulat.']);
+                if (isSummer) return getRandomItem(['A nyári zápor kellemesen hűti a levegőt.', 'Végre egy frissítő eső a forróságban! A belváros is fellélegzik.', 'Az eső illata keveredik a nyár illatával. A Sóstói erdő most igazán hálás.', 'A Kossuth téri esernyők alatt is érezni a frissességet.']);
+                if (isAutumn) return getRandomItem(['Igazi őszi, befelé fordulós idő.', 'Az eső az ablakon kopog, jó egy meleg szobából nézni.', 'Borongós, esős hangulat a Bujtosi tó felett.', 'Előkerülhetnek a gumicsizmák.']);
+                if (isWinter) return getRandomItem(['Ónos eső vagy fagyott eső, csúszósak az utak.', 'A hideg eső most nem esik jól, jobb a melegben maradni.', 'Szürke, téli eső áztatja a várost.']);
+                if (isSpring) return getRandomItem(['Tavaszi zápor, áldás a kerteknek.', 'Az esőcseppek lemossák a port a virágokról.', 'Az eső után még zöldebb lesz minden a Sóstói-tó körül.']);
                 if (isMorning) return getRandomItem(['Esővel indul a nap.', 'Az esőcseppek mossák tisztára a reggelt.', 'A reggeli kávé mellé eső is jár.']);
-                if (isNight) return getRandomItem(['Az éjszakai eső dobolása megnyugtató.', 'Csendes, esős éjjel.']);
+                if (isNight) return getRandomItem(['Az éjszakai eső dobolása megnyugtató.', 'Csendes, esős éjjel, mélyen alszik a város.']);
                 return getRandomItem(['Az eső miatt hűvösebbnek érezzük.', 'Párás, nedves a levegő.', 'Jólesik az eső utáni frissesség.']);
             }
             
             const diff = heatIndex - temp;
 
             if (heatIndex > 35) {
-                if (isLunchTime || isAfternoon) return getRandomItem(['Veszélyes hőség, a beton is ontja a forróságot.', 'Extrém forróság, maradj hűvös helyen!', 'Kerüld a fizikai munkát a szabadban!', 'Hőségriadó-gyanús ebédidő.']);
-                if (isEvening) return getRandomItem(['Fülledt, trópusi este.', 'A lakás sem hűl le, nehéz éjszaka lesz.', 'Még napnyugta után is tikkasztó a meleg.']);
-                if (isNight) return getRandomItem(['Nehéz aludni ebben a melegben.', 'Trópusi éjszaka, áll a levegő.', 'Még éjjel sem frissül fel a levegő.']);
-                return getRandomItem(['Brutális meleg, rengeteg folyadékot igyál!', 'Nagyon erős a hőségérzet.']);
+                if (isLunchTime || isAfternoon) return getRandomItem(['Veszélyes hőség, a Kossuth téri szökőkút most aranyat ér.', 'Extrém forróság, kerüld a tűző napot a belvárosban!', 'Hőségriadó-gyanús idő, a Sóstói strand most a legjobb hely.', 'A beton ontja a forróságot, keress egy légkondis helyet!']);
+                if (isEvening) return getRandomItem(['Fülledt, trópusi este. Még a Sóstói tó vize sem hűsít.', 'A lakás sem hűl le, nehéz éjszaka lesz.', 'Még napnyugta után is tikkasztó a meleg.']);
+                if (isNight) return getRandomItem(['Nehéz aludni ebben a melegben.', 'Trópusi éjszaka, áll a levegő a város felett.', 'Még éjjel sem frissül fel a levegő.']);
+                return getRandomItem(['Brutális meleg, rengeteg folyadékot igyál!', 'Nagyon erős a hőségérzet, ne tartózkodj a napon!']);
             }
             if (heatIndex > 30) {
-                if (isMorning) return getRandomItem(['Már reggel is erős a meleg.', 'Hamar beindult a hőség.', 'Egy hűsítő zuhannyal indul a nap.']);
-                if (isLunchTime || isAfternoon) return getRandomItem(['Igazi kánikula ebédidőben.', 'Erősen meleg, izzasztó idő.', 'Az aszfalt szinte olvad a hőségben.']);
-                if (isEvening) return getRandomItem(['Forró nyári este.', 'Meleg, fülledt idő vacsorához.', 'A nap lement, de a meleg maradt.']);
+                if (isMorning) return getRandomItem(['Már reggel is erős a meleg, a nap hamar erejére kapott.', 'Hamar beindult a hőség, irány a strand!', 'Egy hűsítő zuhany az Aquariusban most csodákat tenne.']);
+                if (isLunchTime || isLateLunchTime) return getRandomItem(['Igazi kánikula, a legjobb egy hűs teraszon ebédelni.', 'Erősen meleg, izzasztó idő. Ne felejts el inni!', 'Az aszfalt szinte olvad a hőségben a belvárosban.']);
+                if (isAfternoon) return getRandomItem(['Délutáni szieszta idő a hőségben.', 'Keress egy fát a Bujtosi tó partján az árnyékért!', 'Forró délután, a fagylalt most kötelező.']);
+                if (isEvening) return getRandomItem(['Forró nyári este, ideális egy könnyű vacsorához a szabadban.', 'Meleg, fülledt idő. A zenélő szökőkút fényeiben is meleg van.', 'A nap lement, de a meleg maradt.']);
                 if (isNight) return getRandomItem(['Meleg, fülledt éjszaka.', 'Nehéz lesz takaróval aludni.', 'Áll a levegő, és még meleg is.']);
-                return getRandomItem(['Intenzív, nyomasztó meleg.']);
+                return getRandomItem(['Intenzív, nyomasztó meleg.', 'Sóstó Zoo állatai is az árnyékot keresik.']);
             }
             if (heatIndex > 25) {
-                if (isMorning) return getRandomItem(['Kellemes reggeli meleg.', 'Ideális idő a reggeli teendőkhöz.', 'Pólóban indulhat a nap.']);
-                if (isLunchTime) return getRandomItem(['Tökéletes idő egy könnyű ebédhez a szabadban.', 'Ebédidőben kellemes a levegő.', 'Igazi nyár, élvezd ki!']);
-                if (isAfternoon) return getRandomItem(['Igazi uzsonnaidő a parkban.', 'Kellemes délutáni kikapcsolódás.', 'Fagyiért kiáltó délután.']);
-                if (isEvening) return getRandomItem(['Pompás nyáresti hangulat.', 'Jólesik kint ülni vacsora után.', 'Ideális egy esti sétához.']);
-                return getRandomItem(['Kellemesen meleg, igazi nyár.']);
-            }
-            if (heatIndex > 20) {
-                if (isMorning) return getRandomItem(['Friss, de kellemes reggel.', 'Jól indul a nap ilyen időben.', 'Kabát nélkül is el lehet indulni.']);
-                if (context.isDay) return getRandomItem(['Enyhe, kellemes tavaszias idő.', 'Pont jó, se túl meleg, se túl hideg.', 'Energiával tölt fel ez az idő.']);
-                if (isEvening) return getRandomItem(['Kellemes hőmérsékletű este.', 'Egy vékony kardigán elég lehet.', 'Frissítő esti levegő.']);
-                return getRandomItem(['Enyhe, kellemes idő.']);
+                if (isMorning) return getRandomItem(['Kellemes reggeli meleg, tökéletes egy kávéhoz a Kossuth téren.', 'Ideális idő a reggeli teendőkhöz.', 'Pólóban indulhat a nap, irány a piac!']);
+                if (isLunchTime) return getRandomItem(['Tökéletes idő egy könnyű ebédhez egy teraszon.', 'Ebédidőben kellemes a levegő.', 'Igazi nyár, élvezd ki a napsütést!']);
+                if (isLateLunchTime) return getRandomItem(['Remek idő egy késői ebédhez vagy egy fagyizáshoz.', 'Kellemes a délután, még nem túl forró.']);
+                if (isAfternoon) return getRandomItem(['Igazi kirándulóidő a Sóstói Múzeumfaluban.', 'Kellemes délutáni kikapcsolódás a tóparton.', 'Fagyiért kiáltó délután a belvárosban.']);
+                if (isEvening) return getRandomItem(['Pompás nyáresti hangulat, jó egyet sétálni a belvárosban.', 'Jólesik kint ülni vacsora után.', 'Ideális egy esti sétához a Sóstói tó körül.']);
+                return getRandomItem(['Kellemesen meleg, igazi nyár.', 'Tökéletes idő egy állatkerti sétához.']);
             }
             if (heatIndex > 15) {
-                if (isNearSunrise) return getRandomItem(['A napfelkelte még hűvös, de ígéretes.', 'Csípős a hajnal.']);
-                if (context.isDay) return getRandomItem(['Kellemesen friss, tiszta levegő.', 'Egy vékony pulóver pont jó.']);
-                if (isNearSunset) return getRandomItem(['Napnyugtával gyorsan hűl a levegő.', 'Kezd estére fordulni az idő.']);
-                if (isEvening) return getRandomItem(['Kezd hűvösre fordulni az este.', 'Jólesik behúzódni a meleg szobába.', 'Érdemes bezárni az ablakot éjszakára.']);
-                return getRandomItem(['Kellemesen hűvös.']);
+                if (isNearSunrise) return getRandomItem(['A napfelkelte még hűvös, de ígéretes.', 'Csípős a hajnal a Bujtosi tó felett.']);
+                if (isDay && isSpring) return getRandomItem(['Kellemesen friss, tavaszi levegő.', 'Egy vékony pulóver pont jó egy belvárosi sétához.', 'Virágba borul a város, energiával tölt fel ez az idő.']);
+                if (isDay && isAutumn) return getRandomItem(['Kellemes őszi nap, a Sóstói erdő színei csodásak.', 'Pont jó egy kiránduláshoz a környéken.', 'Élvezd ki a napsütést, amíg lehet.']);
+                if (isNearSunset) return getRandomItem(['Napnyugtával gyorsan hűl a levegő.', 'Kezd estére fordulni az idő a Kossuth tér felett.']);
+                if (isEvening) return getRandomItem(['Kezd hűvösre fordulni az este.', 'Jólesik behúzódni a meleg szobába egy jó film elé.', 'Érdemes bezárni az ablakot éjszakára.']);
+                return getRandomItem(['Enyhe, kellemes idő.', 'Pont jó egy városnézéshez.']);
             }
-            if (heatIndex < 5) {
-                if (isMorning) return getRandomItem(['Fagyos reggel, indul a kaparás.', 'Jól be kell öltözni a reggeli induláshoz.', 'A forró kávé most életet ment.']);
-                if (context.isDay) return getRandomItem(['Nagyon hideg, csípős időjárás.', 'Öltözz fel vastagon, rétegesen!', 'A nap fénye sem melegít sokat.']);
-                if (isNight) return getRandomItem(['Fagyos, metsző éjszaka.', 'A forró tea most aranyat ér.', 'Reggelre dér vagy zúzmara lehet.']);
-                return getRandomItem(['Igazi téli hideg.']);
+             if (heatIndex > 5) {
+                if (isMorning) return getRandomItem(['Hűvös reggel, elkél a sál és a kabát.', 'Csípős a reggeli levegő.', 'Egy forró tea vagy kávé most aranyat ér.']);
+                if (isDay) return getRandomItem(['Hűvös, kabátos idő.', 'Beköszöntött az ősz, a levelek már sárgulnak.', 'A nap süt, de már nem melegít igazán.']);
+                if (isNight) return getRandomItem(['Hideg éjszaka várható, a csillagok is fényesebbek.', 'Jobb a meleg szobában maradni, talán egy előadás a Móricz Zsigmond Színházban?', 'Bekapcsol a fűtés.']);
+                return getRandomItem(['Csípős, hűvös idő.', 'Réteges öltözködés javasolt.']);
             }
-            if (heatIndex < 10) {
-                if (isMorning) return getRandomItem(['Hűvös reggel, elkél a sál.', 'Csípős a reggeli levegő.']);
-                if (context.isDay) return getRandomItem(['Hűvös, kabátos idő.', 'Beköszöntött az ősz.', 'A szél is hidegebbnek érződik.']);
-                if (isNight) return getRandomItem(['Hideg éjszaka várható.', 'Jobb a meleg szobában maradni.', 'Bekapcsol a fűtés.']);
-                return getRandomItem(['Csípős, hideg idő.']);
+            if (heatIndex <= 5) {
+                if (isMorning) return getRandomItem(['Fagyos reggel, indul a jégkaparás.', 'Jól be kell öltözni a reggeli induláshoz. Sapka, sál, kesztyű!', 'A forró kávé most életet ment.']);
+                if (isDay) return getRandomItem(['Nagyon hideg, csípős téli idő.', 'Öltözz fel vastagon, rétegesen!', 'A befagyott Sóstói-tó látványa is hideget áraszt.']);
+                if (isNight) return getRandomItem(['Fagyos, metsző éjszaka.', 'A forró tea most aranyat ér.', 'Reggelre dér vagy zúzmara díszítheti a várost.']);
+                return getRandomItem(['Igazi téli hideg.', 'Zord idő, maradj meleg helyen!']);
             }
 
-            if (temp < 15 && diff < -3) return getRandomItem(['A szél miatt jóval hűvösebbnek érződik.', 'A szél belefúj a kabát alá.', 'Csontig hatoló, kellemetlen szél.']);
+            if (temp < 15 && diff < -3) return getRandomItem(['A szél miatt jóval hűvösebbnek érződik.', 'A szél belefúj a kabát alá, a Kossuth téren is süvít.', 'Csontig hatoló, kellemetlen szél.']);
             if (diff < -2) return getRandomItem(['Csípősebbnek érződik a mértnél.', 'Frissítően hűvösnek hat a levegő.']);
             if (diff > 3) return getRandomItem(['Fülledt, ragacsos idő.', 'Mintha egy üvegházban lennénk.', 'Szauna-hatás a szabadban.']);
             if (diff > 2) return getRandomItem(['Melegebbnek hat a levegő.', 'Párás, fülledt érzet.']);
@@ -470,12 +469,13 @@
         }
 
         function getWindDescription(windSpeed, gustSpeed, context) {
-            const { isRainingInRegion, isSummer, isDay, isEvening, isNight } = context;
+            const { isRainingInRegion, isSummer, isAutumn, isDay, isEvening, isNight } = context;
 
              if (isRainingInRegion) {
                 if (windSpeed > 30) {
-                    if (isSummer) return getRandomItem(['Viharos szél korbácsolja a nyári záport.', 'Zivatar csapott le, süvít a szél.']);
-                    return getRandomItem(['Zord, szeles, esős idő.', 'A szél az arcunkba vágja az esőcseppeket.']);
+                    if (isSummer) return getRandomItem(['Viharos szél korbácsolja a nyári záport.', 'Zivatar csapott le, süvít a szél a belvárosban.']);
+                    if (isAutumn) return getRandomItem(['Zord, őszi szél hajtja az esőt.', 'A szél az arcunkba vágja az esőcseppeket.']);
+                    return getRandomItem(['Zord, szeles, esős idő.', 'Az esernyővel is nehéz bánni.']);
                 }
                 if (isDay) return getRandomItem(['Az esővel együtt a szél is megjött.', 'Széllel bélelt eső.', 'Frissítő, esős fuvallat.']);
                 if (isNight) return getRandomItem(['Az éjszakai esőt halk szél kíséri.', 'A szél susogása keveredik az eső hangjával.']);
@@ -485,26 +485,26 @@
             if (windSpeed == null) return 'n/a';
 
             if (windSpeed <= 2) {
-                if (gustSpeed != null && gustSpeed > 7) return getRandomItem(['alapvetően szélcsendes, de lökéses', 'szinte semmi, aztán hirtelen egy lökés', 'változékony, gyenge szellő']);
-                return getRandomItem(['szélcsend', 'mozdulatlan levegő', 'rezdületlen', 'teljesen nyugodt']);
+                if (gustSpeed != null && gustSpeed > 7) return getRandomItem(['Alapvetően szélcsendes, de lökéses', 'Szinte semmi, aztán hirtelen egy lökés', 'Változékony, gyenge szellő']);
+                return getRandomItem(['Szélcsend', 'Mozdulatlan levegő', 'Rezdületlen, mint a Bujtosi tó vize', 'Teljesen nyugodt']);
             }
             if (windSpeed <= 6) {
-                if (isDay) return getRandomItem(['gyenge fuvallat', 'lágy szellő', 'finoman rezdülő']);
-                else return getRandomItem(['enyhe éjszakai szellő', 'halk susogás', 'alig érezhető']);
+                if (isDay) return getRandomItem(['Gyenge fuvallat', 'Lágy szellő simogat', 'Finoman rezdülnek a falevelek a Sóstói erdőben']);
+                else return getRandomItem(['Enyhe éjszakai szellő', 'Halk susogás', 'Alig érezhető légmozgás']);
             }
             if (windSpeed <= 12) {
-                if (isDay) return getRandomItem(['könnyű szellő', 'frissítő légmozgás', 'kellemesen lengedező']);
-                else return getRandomItem(['mérsékelt esti szellő', 'frissítő éjszakai légáramlat', 'kiszellőztető']);
+                if (isDay) return getRandomItem(['Könnyű szellő', 'Frissítő légmozgás', 'Kellemesen lengedező, pont jó egy sétához']);
+                else return getRandomItem(['Mérsékelt esti szellő', 'Frissítő éjszakai légáramlat', 'Érdemes kiszellőztetni']);
             }
-            if (windSpeed <= 20) return getRandomItem(['mérsékelt szél', 'érezhetően fújó', 'lengő ágak', 'kócoló']);
-            if (windSpeed <= 30) return getRandomItem(['élénk szél', 'markáns, frissítő', 'folyamatosan mozgó', 'erősödő']);
-            if (windSpeed <= 40) return getRandomItem(['erős szél', 'nehezíti a gyaloglást', 'zúgó', 'barátságtalan']);
-            if (windSpeed <= 50) return getRandomItem(['nagyon erős szél', 'viharos közeli', 'ágakat letörő', 'jobb óvatosnak lenni']);
-            return getRandomItem(['viharos erejű', 'veszélyes szél', 'károkat okozó', 'maradj bent']);
+            if (windSpeed <= 20) return getRandomItem(['Mérsékelt szél', 'Érezhetően fúj', 'Lengenek az ágak a parkokban', 'Kócolja a hajat']);
+            if (windSpeed <= 30) return getRandomItem(['Élénk szél', 'Markáns, frissítő', 'Süvít a Korzó üvegfolyosóján', 'Erősödő légmozgás']);
+            if (windSpeed <= 40) return getRandomItem(['Erős szél', 'Nehezíti a gyaloglást', 'Zúgnak a fák a Sóstói erdőben', 'Barátságtalan idő']);
+            if (windSpeed <= 50) return getRandomItem(['Nagyon erős szél', 'Viharos közeli', 'Letörhet kisebb ágakat', 'Jobb óvatosnak lenni']);
+            return getRandomItem(['Viharos erejű', 'Veszélyes szél', 'Károkat okozhat', 'Maradj inkább bent!']);
         }
 
         function getWindGustDescription(gustSpeed, windSpeed, context) {
-            const { isRainingInRegion, isDay } = context;
+            const { isRainingInRegion, isDay, isNight } = context;
 
              if (isRainingInRegion) {
                 if (gustSpeed > 45) return getRandomItem(['Viharos lökések kísérik a zivatart.', 'A szél tépi a fákat az esőben.']);
@@ -512,21 +512,21 @@
                 return getRandomItem(['Az esőt néha élénkebb lökések kísérik.', 'Lökéses szél az esőben.']);
             }
             
-            if (gustSpeed == null || windSpeed == null || gustSpeed < windSpeed + 3) {
-                return getRandomItem(['Egyenletes', 'Nincsenek kiugró lökések', 'Lényegében lökésmentes', 'Nyugodt a légmozgás.']);
+            if (gustSpeed == null || windSpeed == null || gustSpeed < windSpeed + 5) {
+                return getRandomItem(['Egyenletes', 'Nincsenek kiugró lökések', 'Lényegében lökésmentes', 'Nyugodt a légmozgás']);
             }
-            if (gustSpeed < 15) return getRandomItem(['Jelentéktelen lökések', 'Alig érezhető lökések', 'Néha meg-meglibben valami.']);
+            if (gustSpeed < 15) return getRandomItem(['Jelentéktelen lökések', 'Alig érezhetőek', 'Néha meg-meglibben valami', 'Gyenge lökés']);
             if (gustSpeed < 30) {
-                if (isDay) return getRandomItem(['Mérsékelt lökések', 'Hirtelen megélénkül', 'Vigyázni kell a papírokkal.']);
-                else return getRandomItem(['Éjszakai lökések', 'Néha hirtelen feltámad', 'Hallani, ahogy megcsapja a ház falát.']);
+                if (isDay) return getRandomItem(['Mérsékelt lökések', 'Hirtelen megélénkül', 'Vigyázni kell a papírokkal', 'Egy-egy erősebb fuvallat']);
+                else return getRandomItem(['Éjszakai lökések', 'Néha hirtelen feltámad', 'Hallani, ahogy megcsapja a ház falát']);
             }
             if (gustSpeed < 45) {
-                if (isDay) return getRandomItem(['Élénk lökések', 'Vigyázz a kalapodra!', 'Hirtelen, erős széllökések.']);
-                else return getRandomItem(['Erős éjszakai lökések', 'Zörgeti a redőnyt', 'Fel lehet rá ébredni.']);
+                if (isDay) return getRandomItem(['Élénk lökések', 'Vigyázz a kalapodra a Kossuth téren!', 'Hirtelen, erős széllökések', 'Meg-megingat']);
+                else return getRandomItem(['Erős éjszakai lökések', 'Zörgeti a redőnyt', 'Fel lehet rá ébredni', 'Süvít a kéményekben']);
             }
-            if (gustSpeed < 60) return getRandomItem(['Erős, viharos lökések', 'Megingatja az embert', 'Zörögnek a cserepek.']);
-            if (gustSpeed < 80) return getRandomItem(['Nagyon erős, viharos lökések', 'Biztonságosabb fedél alatt', 'Gallyakat törhet le.']);
-            return getRandomItem(['Orkán erejű lökések', 'Veszélyes!', 'Pusztító erejű lökések.']);
+            if (gustSpeed < 60) return getRandomItem(['Erős, viharos lökések', 'Megingatja az embert', 'Zörögnek a cserepek', 'Kapaszkodj!']);
+            if (gustSpeed < 80) return getRandomItem(['Nagyon erős, viharos lökések', 'Biztonságosabb fedél alatt', 'Gallyakat törhet le', 'Veszélyes lehet']);
+            return getRandomItem(['Orkán erejű lökések', 'Veszélyes!', 'Pusztító erejű lökések', 'Maradj biztonságos helyen!']);
         }
         
         function getUVDescription(uvIndex) {
@@ -1107,13 +1107,16 @@
 
             const context = {
                 isRainingInRegion: isRainingInRegion,
-                isSummer: month >= 6 && month <= 8,
-                isAutumn: month >= 9 && month <= 11,
+                isWinter: [12, 1, 2].includes(month),
+                isSpring: [3, 4, 5].includes(month),
+                isSummer: [6, 7, 8].includes(month),
+                isAutumn: [9, 10, 11].includes(month),
                 isDay: general.dayOrNight === 'D',
                 hour: hour,
                 isMorning: hour >= 6 && hour < 11,
-                isLunchTime: hour >= 11 && hour < 14,
-                isAfternoon: hour >= 14 && hour < 18,
+                isLunchTime: hour >= 11 && hour < 13,
+                isLateLunchTime: hour >=13 && hour < 15,
+                isAfternoon: hour >= 15 && hour < 18,
                 isEvening: hour >= 18 && hour < 22,
                 isNight: hour >= 22 || hour < 6,
                 isNearSunrise: sunCalcData.sunriseDateForPath ? Math.abs(now.getTime() - sunCalcData.sunriseDateForPath.getTime()) < 60 * 60 * 1000 : false,
