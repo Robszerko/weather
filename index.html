@@ -133,20 +133,9 @@
         .path-refresh-btn:hover { opacity: 1; color: var(--current-icon-color); }
         .path-refresh-btn.is-refreshing { transform: rotate(360deg); transition: transform 0.8s; }
         
-        .nowcast-section, .regional-precip-section { margin: 20px auto 0; padding: 16px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); border-radius: 12px; width: 100%; max-width: 600px; box-sizing: border-box; }
-        .nowcast-section h3, .regional-precip-section h3 { font-size: 15px; color: var(--current-text-color); margin-top: 0; margin-bottom: 12px; text-align: center; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .regional-precip-section { margin: 20px auto 0; padding: 16px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); border-radius: 12px; width: 100%; max-width: 600px; box-sizing: border-box; }
+        .regional-precip-section h3 { font-size: 15px; color: var(--current-text-color); margin-top: 0; margin-bottom: 12px; text-align: center; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; }
         
-        #nowcast-summary { font-size: 14px; font-weight: 500; color: var(--current-text-color); margin-bottom: 16px; transition: color 0.6s; }
-        #nowcast-summary strong { font-weight: 700; color: var(--current-icon-color); }
-        #nowcast-graph { display: flex; height: 50px; width: 100%; gap: 2px; align-items: flex-end; justify-content: space-between; border-bottom: 1px solid var(--current-container-border-color); padding-bottom: 4px; }
-        .nowcast-bar { flex-grow: 1; background-color: var(--current-icon-color); border-radius: 2px 2px 0 0; transition: height 0.4s ease-out, background-color 0.4s; opacity: 0.7; }
-        .nowcast-bar:hover { opacity: 1; transform: scaleY(1.05); }
-        .nowcast-bar.intensity-0 { background-color: transparent; }
-        .nowcast-bar.intensity-1 { background-color: #3b82f6; } /* Light Rain */
-        .nowcast-bar.intensity-2 { background-color: #22c55e; } /* Moderate Rain */
-        .nowcast-bar.intensity-3 { background-color: #f97316; } /* Heavy Rain */
-        .nowcast-bar.intensity-4 { background-color: #ef4444; } /* Violent Rain */
-
         .regional-precip-grid { display: flex; flex-direction: column; gap: 8px; }
         .precip-station-item { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; padding: 8px 12px; background-color: rgba(0,0,0,0.12); border-radius: 8px; transition: all 0.3s; border-left: 3px solid transparent; }
         .precip-station-item .station-name { font-size: 14px; font-weight: 700; color: var(--current-text-color); margin-right: 15px; }
@@ -281,7 +270,6 @@
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 20 * 60 * 1000;
         const REFRESH_INTERVAL_AIR_QUALITY = 30 * 60 * 1000;
         const REFRESH_INTERVAL_FORECAST = 15 * 60 * 1000;
-        const REFRESH_INTERVAL_NOWCAST = 2 * 60 * 1000;
         const SKY_COLOR_UPDATE_INTERVAL = 1 * 60 * 1000;
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
@@ -311,12 +299,11 @@
         };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT';
 
-        let lastApiCallTimes = { generalConditions: 0, forecast: 0, nowcast: 0, issPasses: 0, airQuality: 0 };
+        let lastApiCallTimes = { generalConditions: 0, forecast: 0, issPasses: 0, airQuality: 0 };
         let cachedData = {
             displayPws: null,
             generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null },
             hourlyForecast: [],
-            nowcast: null,
             sunCalc: null,
             issPasses: [],
             airQuality: null,
@@ -390,7 +377,6 @@
             el_cardHeatIndexValue, el_cardHeatIndexDesc, el_cardWindValue, el_cardWindDesc, el_cardGustValue, el_cardGustDesc,
             el_dewpointValue, el_humidityValue, el_pressureValue, el_pressureTrendIcon, el_visibilityValue, el_solarRadiationValue, el_uvIndexValue, el_uvDescription,
             el_detailsSunriseValue, el_detailsSunsetValue, el_moonriseValue, el_moonsetValue,
-            el_nowcastSection, el_nowcastSummary, el_nowcastGraph,
             el_aqiValue, el_aqiDescription, el_pm10Value, el_pm25Value, el_ozoneValue, el_ragweedPollenValue, el_grassPollenValue,
             el_ragweedPollenDescription, el_grassPollenDescription,
             el_regionalPrecipGrid;
@@ -762,20 +748,6 @@
             } catch (error) { throw error; }
         }
 
-        async function fetchNowcastData(lat, lon) {
-            const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&minutely_15=precipitation&timezone=auto`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`Percre pontos előrejelzés API hiba: ${response.status}`);
-                const data = await response.json();
-                lastApiCallTimes.nowcast = Date.now();
-                return data;
-            } catch (error) {
-                console.warn(`Hiba a percre pontos előrejelzés lekérésekor: ${error.message}`);
-                return null;
-            }
-        }
-
         function initializeWeatherDisplayDOM() {
             const tooltipContent = `<strong>Panel Információ</strong>
             <p>Ez a felület egy személyes projekt, melyet Robi készített AI segítségével azzal a céllal, hogy egy modern és részletes időjárás-megjelenítőt hozzon létre Nyíregyháza számára.</p>
@@ -784,8 +756,8 @@
             <strong>Adatforrások Részletesen:</strong>
             <ul>
                 <li><b>Helyi adatok:</b> A Weather.com személyes időjárás-állomás (PWS) hálózatából származnak. Ezek a Nyíregyházán és környékén található amatőr meteorológiai állomások (pl. a Nyíregyházi úton vagy a Honvéd utcán) által mért, szinte élő adatok (hőmérséklet, csapadék, szél stb.).</li>
-                <li><b>Előrejelzés:</b> Az órás előrejelzést a Weather.com, a percre pontos közeli előrejelzést az Open-Meteo szolgáltatja.</li>
-                <li><b>Levegő & Pollen:</b> Szintén az Open-Meteo API-ból érkeznek a levegőminőségi (PM10, PM2.5), ózon- és pollenterhelési (parlagfű, fűfélék) adatok.</li>
+                <li><b>Előrejelzés:</b> Az órás előrejelzést a Weather.com szolgáltatja.</li>
+                <li><b>Levegő & Pollen:</b> Az Open-Meteo API-ból érkeznek a levegőminőségi (PM10, PM2.5), ózon- és pollenterhelési (parlagfű, fűfélék) adatok.</li>
                 <li><b>Csillagászat:</b> A Nap és a Hold pontos helyzetét, a kelési és nyugvási időket, valamint a holdfázist a böngésző helyben, a <i>SunCalc.js</i> könyvtár segítségével számolja ki a földrajzi koordináták és a pontos idő alapján.</li>
                 <li><b>Űrállomás (ISS):</b> Ha engedélyezve van, a N2YO.com API-n keresztül kérdezi le a Nemzetközi Űrállomás következő, Nyíregyháza felett látható áthaladásainak idejét és pályáját.</li>
             </ul>
@@ -797,7 +769,6 @@
             <strong>Frissítési Idők:</strong>
             <ul>
                 <li>Mérőállomások: ${REFRESH_INTERVAL_PWS / 1000} másodpercenként</li>
-                <li>Közeli előrejelzés: ${REFRESH_INTERVAL_NOWCAST / 60000} percenként</li>
                 <li>Órás előrejelzés: ${REFRESH_INTERVAL_FORECAST / 60000} percenként</li>
                 <li>Levegő & Pollen: ${REFRESH_INTERVAL_AIR_QUALITY / 60000} percenként</li>
             </ul>
@@ -893,12 +864,6 @@
                 </div>
             </div>
             
-            <div class="nowcast-section is-hidden" id="nowcast-section">
-                <h3><i class="fas fa-cloud-showers-heavy"></i> Percre Pontos Előrejelzés</h3>
-                <div id="nowcast-summary">Adatok betöltése...</div>
-                <div id="nowcast-graph"></div>
-            </div>
-
             <div class="regional-precip-section" id="regional-precip-section">
                 <h3><i class="fas fa-map-marked-alt"></i>Regionális Csapadék Adatok</h3>
                 <div class="regional-precip-grid" id="regional-precip-grid"></div>
@@ -917,9 +882,6 @@
             el_gridMoonriseItem = document.getElementById('grid-moonrise-item');
             el_gridMoonsetItem = document.getElementById('grid-moonset-item');
             
-            el_nowcastSection = document.getElementById('nowcast-section');
-            el_nowcastSummary = document.getElementById('nowcast-summary');
-            el_nowcastGraph = document.getElementById('nowcast-graph');
             el_regionalPrecipGrid = document.getElementById('regional-precip-grid');
 
             el_sunPathVisual = document.getElementById('sun-path-visual');
@@ -1038,7 +1000,6 @@
             if (windDataSource) { cachedData.displayPws.windSpeed = windDataSource.metric.windSpeed; cachedData.displayPws.windGust = windDataSource.metric.windGust; cachedData.displayPws.winddir = windDataSource.winddir; }
             renderWeatherData();
             renderHourlyForecastData();
-            renderNowcastData();
             renderAirQualityData();
             renderRegionalPrecipitation();
         }
@@ -1074,76 +1035,6 @@
             if (rate > 16.0 && rate <= 50.0) return 'Heves zápor';
             return 'Felhőszakadás';
         }
-
-        function renderNowcastData() {
-            if (!el_nowcastSection || !el_nowcastSummary || !el_nowcastGraph) return;
-
-            const nowcastData = cachedData.nowcast;
-            const hourlyForecast = cachedData.hourlyForecast;
-
-            if (!nowcastData || !nowcastData.minutely_15 || !nowcastData.minutely_15.time || nowcastData.minutely_15.time.length === 0) {
-                el_nowcastSection.classList.add('is-hidden');
-                return;
-            }
-            
-            el_nowcastSection.classList.remove('is-hidden');
-            const now = new Date();
-            const precipValues = nowcastData.minutely_15.precipitation;
-            const timeValues = nowcastData.minutely_15.time;
-            
-            let firstPrecipIndex = -1;
-            for (let i = 0; i < precipValues.length; i++) {
-                if (new Date(timeValues[i]) > now && precipValues[i] > 0.05) { 
-                    firstPrecipIndex = i;
-                    break;
-                }
-            }
-            
-            if (firstPrecipIndex !== -1) {
-                const eventTime = new Date(timeValues[firstPrecipIndex]);
-                const intensity = precipValues[firstPrecipIndex];
-                const description = getPrecipIntensityDescription(intensity).toLowerCase();
-                let summaryHTML = `Várhatóan ${description} kezdődik <strong>${formatTime(eventTime)}</strong>-kor. A közeli előrejelzés alapján az érkezése <strong>szinte biztos</strong>.`;
-                el_nowcastSummary.innerHTML = summaryHTML;
-
-            } else {
-                let laterChance = null;
-                if (hourlyForecast && hourlyForecast.length > 0) {
-                     for (const hour of hourlyForecast) {
-                        if (new Date(hour.time) > now && hour.precipChance > 25) {
-                           laterChance = hour;
-                           break;
-                        }
-                     }
-                }
-                if(laterChance) {
-                    el_nowcastSummary.innerHTML = `A következő két órában nem várható csapadék, de később, <strong>${formatTime(laterChance.time)}</strong> körül <strong>${laterChance.precipChance}%</strong> eséllyel kialakulhat.`;
-                } else {
-                    el_nowcastSummary.textContent = "A következő órákban nem várható csapadék.";
-                }
-            }
-
-            let graphHTML = '';
-            const maxGraphPrecip = Math.max(...precipValues, 2.5); 
-            
-            for (let i = 0; i < timeValues.length; i++) {
-                const precipValue = precipValues[i];
-                const barHeight = Math.min(100, (precipValue / maxGraphPrecip) * 100);
-                
-                let intensityClass = 'intensity-0';
-                if (precipValue > 8.0) intensityClass = 'intensity-4';
-                else if (precipValue > 4.0) intensityClass = 'intensity-3';
-                else if (precipValue > 1.0) intensityClass = 'intensity-2';
-                else if (precipValue > 0.05) intensityClass = 'intensity-1';
-                
-                const timeLabel = formatTime(timeValues[i]);
-                const title = `${timeLabel} - ${formatValue(precipValue, 'mm/h')}`;
-                
-                graphHTML += `<div class="nowcast-bar ${intensityClass}" style="height: ${barHeight}%;" title="${title}"></div>`;
-            }
-            el_nowcastGraph.innerHTML = graphHTML;
-        }
-
 
         function renderRegionalPrecipitation() {
             if (!el_regionalPrecipGrid) return;
@@ -1355,20 +1246,6 @@
             if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden');
         }
 
-        async function fetchAndRefreshAllForecasts() {
-            try {
-                await Promise.all([
-                    fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) cachedData.hourlyForecast = data; }),
-                    fetchNowcastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) cachedData.nowcast = data; })
-                ]);
-                
-                renderHourlyForecastData();
-                renderNowcastData();
-            } catch (e) {
-                console.warn("Hiba az előrejelzések frissítésekor:", e);
-            }
-        }
-
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
             await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
@@ -1378,7 +1255,6 @@
             if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) independentPromises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => {console.warn("Ált. adatok lekérése sikertelen", e)}));
             if (isInitialLoad || now - lastApiCallTimes.airQuality > REFRESH_INTERVAL_AIR_QUALITY) independentPromises.push(fetchAirQualityData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.airQuality = data; }).catch(e => {console.warn("Levegőminőség adatok lekérése sikertelen", e)}));
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) independentPromises.push(fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if(data) cachedData.hourlyForecast = data}));
-            if (isInitialLoad || now - lastApiCallTimes.nowcast > REFRESH_INTERVAL_NOWCAST) independentPromises.push(fetchNowcastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if(data) cachedData.nowcast = data}));
             if (ENABLE_ISS_TRACKING && (isInitialLoad || now - (lastApiCallTimes.issPasses || 0) > REFRESH_INTERVAL_ISS)) { independentPromises.push( fetchIssPasses(N2YO_API_KEY, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon, OBSERVER_ALTITUDE, ISS_NORAD_ID, 3, 15).then(passes => { cachedData.issPasses = passes; lastApiCallTimes.issPasses = Date.now(); }).catch(e => {}) ); }
             
             await Promise.allSettled(independentPromises);
@@ -1540,7 +1416,6 @@
             masterAnimationLoop();
             
             const PWS_INTERVAL_S = REFRESH_INTERVAL_PWS / 1000;
-            const NOWCAST_INTERVAL_S = REFRESH_INTERVAL_NOWCAST / 1000;
             const SKY_UPDATE_S = SKY_COLOR_UPDATE_INTERVAL / 1000;
             const MIDNIGHT_CHECK_S = 30;
             
@@ -1548,12 +1423,6 @@
                 masterTickCounter++;
                 if (masterTickCounter % PWS_INTERVAL_S === 0) {
                     fetchAllDataAndUpdateDisplay(false);
-                }
-                if (masterTickCounter % NOWCAST_INTERVAL_S === 0) {
-                     fetchNowcastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { 
-                        if(data) cachedData.nowcast = data;
-                        renderNowcastData();
-                    });
                 }
                 if (masterTickCounter % SKY_UPDATE_S === 0) {
                     if (cachedData.generalConditions?.sunriseTimeLocal && cachedData.generalConditions?.sunsetTimeLocal) {
