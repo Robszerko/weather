@@ -80,7 +80,7 @@
         .station-status-indicator.offline { background-color: #ef4444; }
 
         .top-info-cards-container { display: flex; flex-direction: row; justify-content: center; align-items: stretch; flex-wrap: nowrap; gap: 12px; margin: 20px 0; width: 100%; }
-        .info-card { display: flex; flex-direction: column; flex: 1 1 0; padding: 12px; color: var(--current-text-color); background: rgba(0,0,0,0.1); border: 1px solid var(--current-widget-border); transition: all 0.6s ease; border-radius: 12px; justify-content: center; align-items: center; }
+        .info-card { display: flex; flex-direction: column; flex: 1 1 0; padding: 12px; color: var(--current-text-color); background: rgba(0,0,0,0.1); border: 1px solid var(--current-widget-border); transition: all 0.6s ease; border-radius: 12px; justify-content: center; align-items: center; min-width: 0; }
         .temp-card { background: linear-gradient(145deg, var(--current-temp-bg-color), color-mix(in srgb, var(--current-temp-bg-color) 70%, black)) !important; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .temp-card .card-main-value { font-size: 52px; font-weight: 800; line-height: 1; }
         .heat-index-secondary { font-size: 14px; font-weight: 600; color: white; opacity: 0.8; margin-top: 8px; }
@@ -101,23 +101,20 @@
         .precip-intensity-text { font-size: 18px; font-weight: 700; color: var(--current-text-color); margin-bottom: 4px; }
         .precip-total-text { font-size: 13px; font-weight: 500; color: var(--current-text-muted-color); }
 
-        .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 8px 12px; margin-bottom: 16px; }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .section-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); text-align: left; }
-        .section-timestamp { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
+        .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 8px 10px; margin-bottom: 16px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .section-title { font-size: 14px; font-weight: 700; color: var(--current-text-color); text-align: left; }
+        .section-timestamp { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
         .precipitation-chart-container { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        .precipitation-chart-container::-webkit-scrollbar { height: 6px; }
-        .precipitation-chart-container::-webkit-scrollbar-thumb { background: var(--current-container-border-color); border-radius: 3px; }
-        
-        /* JAVÍTÁS: Padding hozzáadva a görgethető sáv tartalmához */
-        .precipitation-chart { display: flex; flex-wrap: nowrap; gap: 12px; padding: 0 12px 8px 12px; min-width: 480px; box-sizing: content-box; }
-        
-        .precip-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 40px; flex-shrink: 0; gap: 4px; }
-        .precip-chance-text { font-size: 12px; font-weight: 700; color: var(--current-text-color); }
-        .bar-container { width: 100%; height: 50px; background-color: rgba(0,0,0,0.2); border-radius: 5px; display: flex; align-items: flex-end; }
-        .bar-fill { width: 100%; background-color: var(--current-icon-color); border-radius: 5px; transition: height 0.6s ease-out, opacity 0.6s ease-out; }
-        .precip-amount-text { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
-        .precip-hour-label { font-size: 12px; font-weight: 500; color: var(--current-text-color); }
+        .precipitation-chart-container::-webkit-scrollbar { height: 5px; }
+        .precipitation-chart-container::-webkit-scrollbar-thumb { background: var(--current-container-border-color); border-radius: 2px; }
+        .precipitation-chart { display: flex; flex-wrap: nowrap; gap: 8px; padding: 0 10px 6px 10px; min-width: 480px; box-sizing: content-box; }
+        .precip-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; width: 36px; flex-shrink: 0; gap: 4px; }
+        .precip-chance-text { font-size: 11px; font-weight: 600; color: var(--current-text-color); }
+        .bar-container { width: 100%; height: 40px; background-color: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: flex-end; }
+        .bar-fill { width: 100%; background-color: var(--current-icon-color); border-radius: 4px; transition: height 0.6s ease-out, opacity 0.6s ease-out; }
+        .precip-amount-text { font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); }
+        .precip-hour-label { font-size: 11px; font-weight: 500; color: var(--current-text-color); }
 
         .weather-details-grid { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 8px; transition: all 0.6s; margin-bottom: 20px; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; padding: 4px 0; }
@@ -131,7 +128,10 @@
         .flippable-value.is-flipping { transform: rotateX(90deg); }
         
         .forecast-title { width: 100%; max-width: 800px; font-size: 16px; font-weight: 700; color: var(--current-text-color); margin-top: 24px; margin-bottom: 12px; text-align: center; transition: color 0.6s; }
-        .hourly-forecast-container { width: 100%; max-width: 800px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
+        
+        /* JAVÍTÁS: Mobil-első rács az órás előrejelzéshez */
+        .hourly-forecast-container { width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr; /* Alapértelmezett: 1 oszlop */ gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
+        
         .hourly-forecast-card { display: flex; flex-direction: column; align-items: stretch; gap: 10px; padding: 10px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
         .hourly-primary-info { display: flex; flex-direction: row; align-items: center; justify-content: space-around; gap: 8px; }
         .hourly-time { font-size: 13px; font-weight: 700; flex-shrink: 0; }
@@ -144,14 +144,33 @@
         .hourly-detail-row span { display: flex; align-items: center; gap: 5px; }
         .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.7; }
         
+        /* JAVÍTÁS: Töréspontok a reszponzív rácshoz */
+        @media (min-width: 420px) {
+            .hourly-forecast-container { grid-template-columns: repeat(2, 1fr); }
+        }
         @media (min-width: 640px) {
             .hourly-forecast-container { grid-template-columns: repeat(3, 1fr); }
         }
         @media (min-width: 1000px) {
             .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); }
         }
+        
         @media (max-width: 768px) { .weather-details-grid { grid-template-columns: 1fr; } }
-        @media (max-width: 480px) { .top-info-cards-container { flex-direction: column; height: auto; } }
+        
+        @media (max-width: 480px) {
+            .top-info-cards-container { gap: 8px; }
+            .info-card { padding: 8px; }
+            .temp-card .card-main-value { font-size: 44px; }
+            .heat-index-secondary { font-size: 11px; margin-top: 4px; }
+            .wind-card-title { font-size: 11px; margin-bottom: 4px; }
+            .wind-gauge { width: 100px; height: 100px; }
+            .wind-data-center { width: 75px; height: 75px; }
+            .wind-speed-main { font-size: 24px; }
+            .wind-speed-unit { font-size: 11px; }
+            .wind-data-bottom { margin-top: 4px; }
+            .wind-direction-bottom { font-size: 12px; }
+            .wind-gust-bottom { font-size: 10px; }
+        }
     </style>
 </head>
 <body data-theme="night">
@@ -344,7 +363,7 @@
             const lowerCaseKey = stationKey.toLowerCase();
             const radioEl = document.getElementById(`station-select-${lowerCaseKey}`);
             const selectorContainerEl = document.getElementById(`${lowerCaseKey}-selector-container`);
-            const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`);
+            const statusIndicatorEl = document.getElementById(`status-indicator-${key}`);
             if (!radioEl || !selectorContainerEl || !statusIndicatorEl) return;
             
             radioEl.checked = (stationKey === activeDisplayStationKey); 
