@@ -286,24 +286,17 @@
                 const hourlyForecasts = [];
                 const now = new Date();
 
-                // --- START MODIFICATION ---
-                // Célzottan megkeressük az AKTUÁLIS órára vonatkozó adat indexét.
                 let startIndex = data.validTimeLocal.findIndex(timeStr => {
                     const forecastDate = new Date(timeStr);
-                    // Ellenőrizzük, hogy az előrejelzés dátuma és órája egyezik-e a jelenlegi dátummal és órával.
                     return forecastDate.getDate() === now.getDate() && forecastDate.getHours() === now.getHours();
                 });
 
-                // Tartalék megoldás: ha az aktuális óra nem található (pl. az API a következő órával indít),
-                // keressük meg az első, jövőbeli időpontot.
                 if (startIndex === -1) {
                     startIndex = data.validTimeLocal.findIndex(timeStr => new Date(timeStr) > now);
                 }
-                // Végső tartalék: ha még mindig nincs találat, induljunk az elejéről.
                 if (startIndex === -1) {
                     startIndex = 0;
                 }
-                // --- END MODIFICATION ---
 
                 for (let i = startIndex; i < startIndex + 12 && i < data.validTimeLocal.length; i++) {
                     hourlyForecasts.push({
@@ -367,7 +360,7 @@
                             <span id="summary-precip-rate" class="value">-- mm/h</span>
                         </div>
                         <div class="summary-detail-item">
-                            <span class="label">Csapadék esély (aktuális óra):</span>
+                            <span class="label">Csap.esély:</span>
                             <span id="summary-precip-chance" class="value">--%</span>
                         </div>
                     </div>
