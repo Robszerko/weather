@@ -99,18 +99,58 @@
         .wind-direction-bottom { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
-        .current-precip-summary { display: flex; align-items: center; gap: 15px; background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        .precip-icon-container i { font-size: 32px; color: var(--current-icon-color); }
-        .precip-text-container { text-align: left; }
-        .precip-intensity-text { font-size: 18px; font-weight: 700; color: var(--current-text-color); margin-bottom: 4px; }
-        .precip-total-text { font-size: 13px; font-weight: 500; color: var(--current-text-muted-color); }
+        /* JAVÍTÁS: Újratervezett csapadék sáv progressziós háttérrel */
+        .precip-summary-card {
+            --rain-bg-color: rgba(0,0,0,0.08);
+            --rain-fill-color: rgba(from var(--current-icon-color) r g b / 0.2);
+            --precip-total-fill-percent: 0%; /* JS fogja beállítani */
+            
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background-color: var(--rain-bg-color);
+            background-image: linear-gradient(to right, var(--rain-fill-color) var(--precip-total-fill-percent), var(--rain-bg-color) var(--precip-total-fill-percent));
+            border: 1px solid var(--current-container-border-color);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            transition: background-image 0.8s ease, border-color 0.5s ease;
+        }
+        .precip-summary-card.is-raining {
+            border-color: rgba(from var(--current-icon-color) r g b / 0.5);
+        }
+        .precip-summary-icon i {
+            font-size: 32px;
+            color: var(--current-icon-color);
+            transition: color 0.5s ease, text-shadow 0.5s ease;
+        }
+        .precip-summary-card.is-raining .precip-summary-icon i {
+            text-shadow: 0 0 10px rgba(from var(--current-icon-color) r g b / 0.7);
+        }
+        .precip-summary-text {
+            text-align: left;
+        }
+        #precip-summary-main-text {
+            font-size: 17px;
+            font-weight: 500;
+            color: var(--current-text-color);
+            line-height: 1.3;
+        }
+        #precip-summary-main-text strong {
+            font-weight: 800;
+        }
+        #precip-summary-total-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--current-text-muted-color);
+            margin-top: 2px;
+        }
 
-        /* JAVÍTÁS: Csapadék sáv méret és elrendezés módosítva */
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .section-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); text-align: left; }
         .section-timestamp { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
-        .precipitation-chart-container { width: 100%; overflow-x: hidden; } /* Scrollbar eltávolítva */
+        .precipitation-chart-container { width: 100%; overflow-x: hidden; }
         .precipitation-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .precip-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; }
         .precip-chance-text { font-size: 12px; font-weight: 700; color: var(--current-text-color); }
@@ -323,11 +363,11 @@
                     </div>
                 </div>
             </div>
-            <div class="current-precip-summary" id="current-precip-summary">
-                <div class="precip-icon-container"><i class="fas fa-tint"></i></div>
-                <div class="precip-text-container">
-                    <div class="precip-intensity-text is-hidden" id="precip-intensity-text">--</div>
-                    <div class="precip-total-text" id="precip-total-text">--</div>
+            <div class="precip-summary-card" id="precip-summary-card">
+                <div class="precip-summary-icon"><i class="fas fa-tint"></i></div>
+                <div class="precip-summary-text">
+                    <div id="precip-summary-main-text"></div>
+                    <div id="precip-summary-total-text"></div>
                 </div>
             </div>
             <div class="precipitation-forecast-section">
@@ -412,12 +452,26 @@
                 updateAnimatedValue(document.getElementById('wind-gust-value'), formatValue(obs.windGust, '', 1));
             }
 
-            const intensityEl = document.getElementById('precip-intensity-text');
-            const totalEl = document.getElementById('precip-total-text');
+            const precipCardEl = document.getElementById('precip-summary-card');
+            const mainTextEl = document.getElementById('precip-summary-main-text');
+            const totalTextEl = document.getElementById('precip-summary-total-text');
             const precipRate = obs.precipRate || 0;
-            if(intensityEl && totalEl) {
-                if (precipRate > 0) { intensityEl.textContent = `Intenzitás: ${getPrecipIntensityDescription(precipRate)}`; intensityEl.classList.remove('is-hidden'); } else { intensityEl.classList.add('is-hidden'); }
-                totalEl.textContent = `Ennyi esett eddig a mai napon: ${formatValue(obs.precipTotal, ' mm', 1)}`;
+            const precipTotal = obs.precipTotal || 0;
+
+            if(precipCardEl && mainTextEl && totalTextEl) {
+                const intensityDescription = getPrecipIntensityDescription(precipRate);
+                mainTextEl.innerHTML = `Jelenleg: <strong>${intensityDescription}</strong>`;
+                totalTextEl.textContent = `Ma eddig ennyi esett: ${formatValue(precipTotal, ' mm', 1)}`;
+                
+                const MAX_PRECIP_FOR_GAUGE = 25.0; // 25mm = 100%
+                const fillPercent = Math.min(100, (precipTotal / MAX_PRECIP_FOR_GAUGE) * 100);
+                precipCardEl.style.setProperty('--precip-total-fill-percent', `${fillPercent}%`);
+
+                if (precipRate > 0) {
+                    precipCardEl.classList.add('is-raining');
+                } else {
+                    precipCardEl.classList.remove('is-raining');
+                }
             }
 
             const detailsGrid = document.getElementById('weather-details-grid');
