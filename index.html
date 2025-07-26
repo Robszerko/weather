@@ -99,11 +99,10 @@
         .wind-direction-bottom { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
-        /* JAVÍTÁS: Újratervezett csapadék sáv progressziós háttérrel */
         .precip-summary-card {
             --rain-bg-color: rgba(0,0,0,0.08);
             --rain-fill-color: rgba(from var(--current-icon-color) r g b / 0.2);
-            --precip-total-fill-percent: 0%; /* JS fogja beállítani */
+            --precip-total-fill-percent: 0%;
             
             display: flex;
             align-items: center;
@@ -254,7 +253,18 @@
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function mapIconCodeToHungarianText(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const textMap = { 32: 'Napos', 36: 'Napos', 31: 'Tiszta ég', 33: 'Tiszta ég', 34: isDay ? 'Részben napos' : 'Részben felhős', 29: isDay ? 'Részben napos' : 'Részben felhős', 30: isDay ? 'Részben napos' : 'Részben felhős', 27: 'Felhős', 28: 'Felhős', 26: 'Borult', 11: 'Zápor', 12: 'Zápor', 40: 'Zápor', 39: isDay ? 'Zápor' : 'Éjjeli zápor', 45: isDay ? 'Zápor' : 'Éjjeli zápor', 3: 'Zivatar', 4: 'Zivatar', 37: 'Zivatar', 38: 'Zivatar', 47: 'Zivatar', 5: 'Havas eső', 6: 'Ónos eső', 7: 'Havas eső', 8: 'Ónos eső', 10: 'Ónos eső', 18: 'Havas eső', 13: 'Hózápor', 14: 'Hózápor', 15: 'Hófúvás', 16: 'Havazás', 41: 'Havazás', 42: 'Havazás', 43: 'Hófúvás', 46: 'Hózápor', 9: 'Eső', 19: 'Párás', 20: 'Ködös', 21: 'Párás', 22: 'Füstös', 23: 'Szeles', 24: 'Szeles' }; return textMap[iconCode] || 'Ismeretlen'; }
 
-        function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nem esik'; if (rate > 0 && rate <= 0.25) return 'Szitálás'; if (rate > 0.25 && rate <= 1.0) return 'Gyenge eső'; if (rate > 1.0 && rate <= 4.0) return 'Mérsékelt eső'; if (rate > 4.0 && rate <= 16.0) return 'Intenzív eső'; if (rate > 16.0 && rate <= 50.0) return 'Heves zápor'; return 'Felhőszakadás'; }
+        // JAVÍTÁS: Részletesebb csapadékintenzitás-skála
+        function getPrecipIntensityDescription(rate) {
+            if (rate == null || rate <= 0) return 'Nem esik';
+            if (rate > 0 && rate <= 0.2) return 'Szitálás';
+            if (rate > 0.2 && rate <= 0.5) return 'Csepergő eső';
+            if (rate > 0.5 && rate <= 2.5) return 'Gyenge eső';
+            if (rate > 2.5 && rate <= 7.5) return 'Mérsékelt eső';
+            if (rate > 7.5 && rate <= 15) return 'Intenzív eső';
+            if (rate > 15 && rate <= 30) return 'Zápor';
+            if (rate > 30 && rate <= 50) return 'Heves zápor';
+            return 'Felhőszakadás';
+        }
 
         function getWindColorName(speed) { if (speed == null) return 'calm'; if (speed < 5) return 'calm'; if (speed < 20) return 'light'; if (speed < 40) return 'moderate'; return 'strong'; }
 
