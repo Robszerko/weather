@@ -277,13 +277,52 @@
         
         async function fetchHourlyForecastData(lat, lon) {
             const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
-            try { const response = await fetch(url); if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`); const data = await response.json(); if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); }
-                const hourlyForecasts = []; const now = new Date();
-                let startIndex = data.validTimeLocal.findIndex(timeStr => new Date(timeStr) > now);
-                if (startIndex === -1) { startIndex = data.validTimeLocal.length > 0 ? data.validTimeLocal.length -1 : 0; } else if (startIndex > 0) { const prevTime = new Date(data.validTimeLocal[startIndex-1]); if (now.getTime() - prevTime.getTime() < 30 * 60 * 1000) { startIndex--; } }
-                for (let i = startIndex; i < startIndex + 12 && i < data.validTimeLocal.length; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], uvIndex: data.uvIndex[i], wxPhraseShort: data.wxPhraseShort[i] }); }
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`Órás előrejelzés API hiba: ${response.status}`);
+                const data = await response.json();
+                if (!data || !data.validTimeLocal) { throw new Error('Hiányos órás előrejelzési adatok.'); }
+                
+                const hourlyForecasts = [];
+                const now = new Date();
+
+                // --- START MODIFICATION ---
+                // Célzottan megkeressük az AKTUÁLIS órára vonatkozó adat indexét.
+                let startIndex = data.validTimeLocal.findIndex(timeStr => {
+                    const forecastDate = new Date(timeStr);
+                    // Ellenőrizzük, hogy az előrejelzés dátuma és órája egyezik-e a jelenlegi dátummal és órával.
+                    return forecastDate.getDate() === now.getDate() && forecastDate.getHours() === now.getHours();
+                });
+
+                // Tartalék megoldás: ha az aktuális óra nem található (pl. az API a következő órával indít),
+                // keressük meg az első, jövőbeli időpontot.
+                if (startIndex === -1) {
+                    startIndex = data.validTimeLocal.findIndex(timeStr => new Date(timeStr) > now);
+                }
+                // Végső tartalék: ha még mindig nincs találat, induljunk az elejéről.
+                if (startIndex === -1) {
+                    startIndex = 0;
+                }
+                // --- END MODIFICATION ---
+
+                for (let i = startIndex; i < startIndex + 12 && i < data.validTimeLocal.length; i++) {
+                    hourlyForecasts.push({
+                        time: data.validTimeLocal[i],
+                        temp: data.temperature[i],
+                        iconCode: data.iconCode[i],
+                        precipChance: data.precipChance[i],
+                        dayOrNight: data.dayOrNight[i],
+                        windSpeed: data.windSpeed[i],
+                        windDirection: data.windDirection[i],
+                        humidity: data.relativeHumidity[i],
+                        uvIndex: data.uvIndex[i],
+                        wxPhraseShort: data.wxPhraseShort[i]
+                    });
+                }
                 return hourlyForecasts;
-            } catch (error) { throw error; }
+            } catch (error) {
+                throw error;
+            }
         }
 
         function initializeWeatherDisplayDOM() {
@@ -328,7 +367,7 @@
                             <span id="summary-precip-rate" class="value">-- mm/h</span>
                         </div>
                         <div class="summary-detail-item">
-                            <span class="label">Csapadék esély (1ó):</span>
+                            <span class="label">Csapadék esély (aktuális óra):</span>
                             <span id="summary-precip-chance" class="value">--%</span>
                         </div>
                     </div>
