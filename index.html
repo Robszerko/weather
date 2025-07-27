@@ -69,7 +69,7 @@
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
         .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.7; line-height: 1.4; }
         
-        .station-status-container { display: flex; justify-content: center; align-items: center; gap: 6px; background-color: rgba(0,0,0,0.2); border-radius: 10px; padding: 5px; margin: 10px auto 0 auto; max-width: max-content; }
+        .station-status-container { display: flex; justify-content: center; align-items: center; gap: 6px; background-color: rgba(0,0,0,0.2); border-radius: 10px; padding: 5px; margin: 10px auto 0 auto; max-width: max-content; flex-wrap: wrap;}
         .station-selector { display: flex; align-items: center; }
         .station-selector input[type="radio"] { display: none; }
         .station-selector label { cursor: pointer; padding: 6px 14px; border-radius: 8px; transition: all 0.3s; font-size: 12px; font-weight: 600; color: var(--current-text-muted-color); display: flex; align-items: center; gap: 6px; }
@@ -99,51 +99,134 @@
         .wind-direction-bottom { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
+        /* ======================================== */
+        /* ==  ÚJ CSAPADÉKRADAR DIZÁJN  == */
+        /* ======================================== */
+
+        /* Az alap konténer átalakítása */
         .precip-summary-card {
-            --rain-bg-color: rgba(0,0,0,0.08);
-            --rain-fill-color: rgba(from var(--current-icon-color) r g b / 0.2);
-            --precip-total-fill-percent: 0%;
-            
             display: flex;
-            align-items: center;
-            gap: 16px;
-            background-color: var(--rain-bg-color);
-            background-image: linear-gradient(to right, var(--rain-fill-color) var(--precip-total-fill-percent), var(--rain-bg-color) var(--precip-total-fill-percent));
+            flex-direction: column; /* Belső elrendezés oszloposra váltása */
+            gap: 0; /* A régi gap eltávolítása */
+            background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); /* Finomabb háttér */
             border: 1px solid var(--current-container-border-color);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 0; /* A belső paddinget a gyerek elemek kapják */
             margin-bottom: 20px;
-            transition: background-image 0.8s ease, border-color 0.5s ease;
+            transition: all 0.5s ease;
+            overflow: hidden; /* A belső elemek ne lógjanak ki a border-radius miatt */
         }
-        .precip-summary-card.is-raining {
-            border-color: rgba(from var(--current-icon-color) r g b / 0.5);
+
+        /* Új animáció, ha esik valahol */
+        .precip-summary-card.is-raining-somewhere {
+            border-color: rgba(from var(--current-icon-color) r g b / 0.6);
+            box-shadow: 0 0 15px -3px rgba(from var(--current-icon-color) r g b / 0.45);
         }
-        .precip-summary-icon i {
-            font-size: 32px;
+
+        /* Az új kártya-fejléc */
+        .precip-card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4);
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .precip-header-icon i {
+            font-size: 24px; /* Nagyobb ikon */
             color: var(--current-icon-color);
-            transition: color 0.5s ease, text-shadow 0.5s ease;
+            transition: color 0.5s ease;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
-        .precip-summary-card.is-raining .precip-summary-icon i {
-            text-shadow: 0 0 10px rgba(from var(--current-icon-color) r g b / 0.7);
-        }
-        .precip-summary-text {
-            text-align: left;
-        }
-        #precip-summary-main-text {
+
+        .precip-header-title {
             font-size: 17px;
-            font-weight: 500;
+            font-weight: 800; /* Félkövér, hangsúlyos cím */
             color: var(--current-text-color);
-            line-height: 1.3;
+            margin: 0;
+            letter-spacing: 0.5px;
         }
-        #precip-summary-main-text strong {
-            font-weight: 800;
+
+        /* A kártya dinamikus tartalmi része */
+        .precip-card-content {
+            padding: 12px 16px;
+            width: 100%;
+            box-sizing: border-box;
         }
-        #precip-summary-total-text {
-            font-size: 12px;
+
+        /* Állomások listája, ha esik */
+        .precip-station-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px; /* Kisebb rés a lista elemei között */
+        }
+        
+        .precip-station-list-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 3px solid transparent; /* Hely előkészítése a highlightnak */
+            transition: background-color 0.3s ease, border-left-color 0.3s ease;
+        }
+        .precip-station-list-item:hover {
+            background-color: rgba(from var(--current-text-color) r g b / 0.08);
+        }
+
+        /* Kiemelés, ha az adott állomáson esik */
+        .precip-station-list-item.is-raining-now {
+            border-left: 3px solid var(--current-icon-color);
+            background: linear-gradient(90deg, rgba(from var(--current-icon-color) r g b / 0.2) 0%, rgba(from var(--current-icon-color) r g b / 0.05) 100%);
+        }
+
+        .precip-station-list-item:not(:last-child) {
+             border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.2);
+        }
+
+        .station-main-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .precip-station-name { font-weight: 600; font-size: 14px; color: var(--current-text-color); }
+        .precip-station-value { font-weight: 500; font-size: 13px; color: var(--current-text-muted-color); }
+        .precip-station-value strong { font-weight: 700; font-size: 14px; color: var(--current-text-color); margin-left: 4px; }
+        .rain-intensity-text { font-size: 11.5px; font-style: italic; color: var(--current-text-muted-color); margin-top: 3px; }
+
+        /* "Nincs eső" állapot stílusai */
+        .no-rain-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 16px 0;
+        }
+
+        .no-rain-icon {
+            font-size: 48px;
+            color: var(--current-text-muted-color);
+            opacity: 0.2;
+        }
+
+        .no-rain-message {
+            font-size: 15px;
             font-weight: 500;
             color: var(--current-text-muted-color);
-            margin-top: 2px;
+            margin-bottom: 0;
         }
+
+        .station-tooltip-container { position: relative; display: inline-block; }
+        .station-list-trigger {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--current-icon-color);
+            border-bottom: 1px dashed var(--current-icon-color);
+            cursor: help;
+            padding: 4px;
+        }
+        .station-tooltip-content { visibility: hidden; opacity: 0; width: 280px; background-color: var(--bg-widget-night); color: var(--text-primary-night); padding: 10px; border-radius: 8px; border: 1px solid var(--border-widget-night); position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s, visibility 0.3s; pointer-events: none; font-size: 12px; line-height: 1.5; }
+        .station-tooltip-container:hover .station-tooltip-content { visibility: visible; opacity: 1; }
+        .rain-rules-box { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); }
+        .rain-rules-box h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--current-text-muted-color); margin: 0 0 6px 0; }
+        .rain-rules-box p { font-size: 12px; color: var(--current-text-muted-color); margin: 2px 0; line-height: 1.5; text-align: left; padding-left: 10px; }
+        
+        /* ======================================== */
 
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -164,7 +247,6 @@
         .detail-item .label i { margin-right: 6px; width: 14px; font-size: 0.9em; text-align: center; opacity: 0.8; color: var(--current-icon-color); transition: color 0.6s; }
         .detail-item .value { color: var(--current-text-muted-color); font-weight: 500; transition: color 0.6s; display: flex; align-items: center; text-align: right; flex-shrink: 0; margin-left: 3px; }
         .pressure-trend-icon { margin-left: 4px; font-weight: 700; }
-        .uv-description-text { margin-left: 4px; font-size: 0.88em; font-style: italic; }
         
         .flippable-value { display: inline-block; transition: transform 0.6s cubic-bezier(0.45, 0, 0.55, 1); transform-style: preserve-3d; will-change: transform; }
         .flippable-value.is-flipping { transform: rotateX(90deg); }
@@ -186,9 +268,7 @@
         @media (min-width: 420px) { .hourly-forecast-container { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 640px) { .hourly-forecast-container { grid-template-columns: repeat(3, 1fr); } }
         @media (min-width: 1000px) { .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); } }
-        
         @media (max-width: 768px) { .weather-details-grid { grid-template-columns: 1fr; } }
-        
         @media (max-width: 480px) {
             .top-info-cards-container { gap: 8px; }
             .info-card { padding: 8px; }
@@ -220,23 +300,24 @@
         const REFRESH_INTERVAL_PWS = 30 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 20 * 60 * 1000;
         const REFRESH_INTERVAL_FORECAST = 5 * 60 * 1000;
-        const SKY_COLOR_UPDATE_INTERVAL = 1 * 60 * 1000;
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
         const STATIONS = {
-            NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyháza Nyíregyházi úti állomás', displayName: 'Nyíregyházi út', provides: ['precip', 'temp'], isOnline: false, data: null },
-            KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50 állomás', displayName: 'Kossuth út 50', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
-            HONVED: { id: 'INYREG37', name: 'Nyíregyháza Honvéd utcai állomás', displayName: 'Honvéd u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
+            NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip'], isOnline: false, data: null },
+            KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50', displayName: 'Kossuth út 50', displayNameShort: 'Kossuth út', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
+            KERT_UTCA: { id: 'INYREG37', name: 'Nyíregyháza Kert utca', displayName: 'Kert u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
+            SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy', displayName: 'Sóstóhegy', provides: ['precip'], isOnline: false, data: null },
+            BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', provides: ['precip'], isOnline: false, data: null },
+            KEMECSE: { id: 'IKEMEC1', name: 'Kemecse', displayName: 'Kemecse', provides: ['precip'], isOnline: false, data: null },
+            NAGYHALASZ: { id: 'INAGYH4', name: 'Nagyhalász', displayName: 'Nagyhalász', provides: ['precip'], isOnline: false, data: null },
+            RAMOCSAHAZA: { id: 'IRAMOC1', name: 'Ramocsaháza', displayName: 'Ramocsaháza', provides: ['precip'], isOnline: false, data: null },
+            SENYO: { id: 'ISNY1', name: 'Sényő', displayName: 'Sényő', provides: ['precip'], isOnline: false, data: null },
+            SZAKOLY: { id: 'ISZAKO1', name: 'Szakoly', displayName: 'Szakoly', provides: ['precip'], isOnline: false, data: null },
         };
-        let activeDisplayStationKey = 'NYIREGYHAZI_UT';
+        let activeDisplayStationKey = 'NYIREGYHAZI_UT'; // Elsődleges állomás
 
         let lastApiCallTimes = { generalConditions: 0, forecast: 0, forecastSuccess: 0 };
-        let cachedData = {
-            displayPws: null,
-            generalConditions: { skyCoverPhrase: null, pressureAltimeter: null, visibility: null, sunriseTimeLocal: null, sunsetTimeLocal: null, dayOrNight: null, pressureTendencyCode: null, uvDescription: null, iconCode: null, wxPhraseLong: null },
-            hourlyForecast: [],
-            sunCalc: null,
-        };
+        let cachedData = { displayPws: null, generalConditions: {}, hourlyForecast: [], sunCalc: null };
         let isWeatherDisplayInitialized = false;
 
         let weatherDisplayEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
@@ -245,32 +326,18 @@
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if (includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
         function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + 'h'; } catch (e) { return '--'; } }
-
-        function getUVDescription(uvIndex) { if (uvIndex == null) return ''; if (uvIndex <= 2) return '(Alacsony)'; if (uvIndex <= 5) return '(Mérsékelt)'; if (uvIndex <= 7) return '(Magas)'; if (uvIndex <= 10) return '(Nagyon magas)'; return '(Extrém)'; }
         
+        function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nem esik'; if (rate > 0 && rate <= 0.2) return 'Szitálás'; if (rate > 0.2 && rate <= 0.5) return 'Csepergő eső'; if (rate > 0.5 && rate <= 2.5) return 'Gyenge eső'; if (rate > 2.5 && rate <= 7.5) return 'Mérsékelt eső'; if (rate > 7.5 && rate <= 15) return 'Intenzív eső'; if (rate > 15 && rate <= 30) return 'Zápor'; if (rate > 30 && rate <= 50) return 'Heves zápor'; return 'Felhőszakadás'; }
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
-
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function mapIconCodeToHungarianText(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const textMap = { 32: 'Napos', 36: 'Napos', 31: 'Tiszta ég', 33: 'Tiszta ég', 34: isDay ? 'Részben napos' : 'Részben felhős', 29: isDay ? 'Részben napos' : 'Részben felhős', 30: isDay ? 'Részben napos' : 'Részben felhős', 27: 'Felhős', 28: 'Felhős', 26: 'Borult', 11: 'Zápor', 12: 'Zápor', 40: 'Zápor', 39: isDay ? 'Zápor' : 'Éjjeli zápor', 45: isDay ? 'Zápor' : 'Éjjeli zápor', 3: 'Zivatar', 4: 'Zivatar', 37: 'Zivatar', 38: 'Zivatar', 47: 'Zivatar', 5: 'Havas eső', 6: 'Ónos eső', 7: 'Havas eső', 8: 'Ónos eső', 10: 'Ónos eső', 18: 'Havas eső', 13: 'Hózápor', 14: 'Hózápor', 15: 'Hófúvás', 16: 'Havazás', 41: 'Havazás', 42: 'Havazás', 43: 'Hófúvás', 46: 'Hózápor', 9: 'Eső', 19: 'Párás', 20: 'Ködös', 21: 'Párás', 22: 'Füstös', 23: 'Szeles', 24: 'Szeles' }; return textMap[iconCode] || 'Ismeretlen'; }
-
-        // JAVÍTÁS: Részletesebb csapadékintenzitás-skála
-        function getPrecipIntensityDescription(rate) {
-            if (rate == null || rate <= 0) return 'Nem esik';
-            if (rate > 0 && rate <= 0.2) return 'Szitálás';
-            if (rate > 0.2 && rate <= 0.5) return 'Csepergő eső';
-            if (rate > 0.5 && rate <= 2.5) return 'Gyenge eső';
-            if (rate > 2.5 && rate <= 7.5) return 'Mérsékelt eső';
-            if (rate > 7.5 && rate <= 15) return 'Intenzív eső';
-            if (rate > 15 && rate <= 30) return 'Zápor';
-            if (rate > 30 && rate <= 50) return 'Heves zápor';
-            return 'Felhőszakadás';
-        }
-
-        function getWindColorName(speed) { if (speed == null) return 'calm'; if (speed < 5) return 'calm'; if (speed < 20) return 'light'; if (speed < 40) return 'moderate'; return 'strong'; }
-
         function mapTwcIconToFontAwesome(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const iconMap = { 32:'fas fa-sun',36:'fas fa-sun',31:'fas fa-moon',33:'fas fa-moon',34:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',29:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',30:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',27:'fas fa-cloud',28:'fas fa-cloud',26:'fas fa-cloud',11:'fas fa-cloud-showers-heavy',12:'fas fa-cloud-showers-heavy',40:'fas fa-cloud-showers-heavy',39:isDay ?'fas fa-cloud-sun-rain':'fas fa-cloud-moon-rain',45:isDay ?'fas fa-cloud-sun-rain':'fas fa-cloud-moon-rain',3:'fas fa-cloud-bolt',4:'fas fa-cloud-bolt',37:'fas fa-cloud-bolt',38:'fas fa-cloud-bolt',47:'fas fa-cloud-bolt',5:'fas fa-snowflake',6:'fas fa-snowflake',7:'fas fa-snowflake',8:'fas fa-snowflake',10:'fas fa-cloud-sleet',18:'fas fa-smog',13:'fas fa-snowflake',14:'fas fa-snowflake',15:'fas fa-snowflake',16:'fas fa-snowflake',41:'fas fa-snowflake',42:'fas fa-snowflake',43:'fas fa-snowflake',46:'fas fa-snowflake',9:'fas fa-cloud-rain',19:'fas fa-smog',20:'fas fa-smog',21:'fas fa-smog',22:'fas fa-smog',23:'fas fa-wind',24:'fas fa-wind' }; return iconMap[iconCode] || 'fas fa-question-circle'; }
+        
+        function getUVDescription(uvIndex) { if (uvIndex == null) return ''; if (uvIndex <= 2) return '(Alacsony)'; if (uvIndex <= 5) return '(Mérsékelt)'; if (uvIndex <= 7) return '(Magas)'; if (uvIndex <= 10) return '(Nagyon magas)'; return '(Extrém)'; }
+        function getWindColorName(speed) { if (speed == null) return 'calm'; if (speed < 5) return 'calm'; if (speed < 20) return 'light'; if (speed < 40) return 'moderate'; return 'strong'; }
+        function getTemperatureColorName(temp) { if (temp === null || isNaN(temp)) return 'mild'; if (temp >= 35) return 'hot'; if (temp >= 25) return 'warm'; if (temp >= 10) return 'mild'; if (temp >= 0) return 'cool'; return 'cold'; }
 
-        function updateThemeAndSky(currentTime, sunriseTimeIso, sunsetTimeIso) {
+        async function updateThemeAndSky(currentTime, sunriseTimeIso, sunsetTimeIso) {
             const fallbackTheme = (new Date().getHours() >= 7 && new Date().getHours() < 18) ? 'day' : 'night';
             let theme = fallbackTheme;
             if (sunriseTimeIso && sunsetTimeIso) {
@@ -301,50 +368,32 @@
             }
             if (document.body.dataset.theme !== theme) document.body.dataset.theme = theme;
         }
-
         async function fetchAdvancedSunCalcData(lat, lon) { const now = new Date(); const sunTimes = SunCalc.getTimes(now, lat, lon); const moonTimes = SunCalc.getMoonTimes(now, lat, lon, true); let nextMoonrise = moonTimes.rise; let nextMoonset = moonTimes.set; if (!nextMoonrise || nextMoonrise < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonrise = SunCalc.getMoonTimes(tomorrow, lat, lon, true).rise; } if (!nextMoonset || nextMoonset < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonset = SunCalc.getMoonTimes(tomorrow, lat, lon, true).set; } return { sunrise: formatTime(sunTimes.sunrise), sunset: formatTime(sunTimes.sunset), moonrise: formatTime(nextMoonrise), moonset: formatTime(nextMoonset) }; }
-
-        async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); stationConfig.isOnline = true; stationConfig.data = data.observations[0]; } catch (error) { stationConfig.isOnline = false; stationConfig.data = null; throw error; } finally { updateStationStatusUI(stationKey); } }
-
+        async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); stationConfig.isOnline = true; stationConfig.data = data.observations[0]; } catch (error) { stationConfig.isOnline = false; stationConfig.data = null; } finally { updateStationStatusUI(stationKey); } }
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); lastApiCallTimes.generalConditions = Date.now(); return { skyCoverPhrase: data.cloudCoverPhrase || data.wxPhraseLong || null, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, sunriseTimeLocal: data.sunriseTimeLocal, sunsetTimeLocal: data.sunsetTimeLocal, iconCode: data.iconCode }; }
-        
         async function fetchHourlyForecastData(lat, lon) {
             const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`API hiba`);
-                const data = await response.json();
-                if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) {
-                    throw new Error('Hiányos vagy érvénytelen előrejelzési adat.');
-                }
-                
-                const hourlyForecasts = [];
-                const nowMs = new Date().getTime();
-
-                let startIndex = data.validTimeLocal
-                    .map(timeStr => new Date(timeStr).getTime())
-                    .findLastIndex(timeMs => timeMs <= nowMs);
-
+                const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`);
+                const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); }
+                const hourlyForecasts = []; const nowMs = new Date().getTime();
+                let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs);
                 if (startIndex === -1) { startIndex = 0; }
-
                 const forecastLimit = Math.min(startIndex + 12, data.validTimeLocal.length);
-
                 for (let i = startIndex; i < forecastLimit; i++) {
-                    hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], uvIndex: data.uvIndex[i], wxPhraseShort: data.wxPhraseShort[i] });
+                    hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] });
                 }
                 return hourlyForecasts;
-            } catch (error) {
-                throw error;
-            }
+            } catch (error) { throw error; }
         }
 
         function initializeWeatherDisplayDOM() {
             weatherDisplayEl.innerHTML = `<div class="widget-header">
-                <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza</div><div class="station-subtitle" id="station-subtitle-text"></div></div>
+                <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div><div class="station-subtitle" id="station-subtitle-text"></div></div>
                 <div class="timestamp-container"><span class="timestamp" id="timestamp-text">--:--:--</span><div class="attribution-line">© Copyright by: Robi</div></div>
             </div>
             <div class="station-status-container">
-                ${Object.keys(STATIONS).map(key => `
+                ${Object.keys(STATIONS).filter(key => STATIONS[key].provides.length > 1).map(key => `
                 <div class="station-selector" id="${key.toLowerCase()}-selector-container">
                     <input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}">
                     <label for="station-select-${key.toLowerCase()}">
@@ -355,12 +404,12 @@
             </div>
             <div class="top-info-cards-container">
                 <div class="info-card temp-card">
-                    <div class="card-label">Jelenlegi hőmérséklet</div>
+                    <div class="card-label">Hőmérséklet</div>
                     <div class="card-main-value"><span id="top-temp-card-value" class="flippable-value">--</span>°</div>
                     <div id="heat-index-secondary" class="heat-index-secondary">Hőérzet: --°</div>
                 </div>
                 <div class="info-card wind-card" id="wind-card">
-                    <div class="wind-card-title">Szél adatok jelenleg</div>
+                    <div class="wind-card-title">Szél adatok</div>
                     <div class="wind-gauge">
                         <div class="wind-data-center" id="wind-data-center">
                             <div class="wind-speed-main"><span id="wind-speed-main-value" class="flippable-value">--</span></div>
@@ -374,15 +423,11 @@
                 </div>
             </div>
             <div class="precip-summary-card" id="precip-summary-card">
-                <div class="precip-summary-icon"><i class="fas fa-tint"></i></div>
-                <div class="precip-summary-text">
-                    <div id="precip-summary-main-text"></div>
-                    <div id="precip-summary-total-text"></div>
-                </div>
+                <!-- Ezt a részt a JavaScript tölti fel az új dizájnnal -->
             </div>
             <div class="precipitation-forecast-section">
                 <div class="section-header">
-                    <div class="section-title">Órás Csapadék Előrejelzés</div>
+                    <div class="section-title">Órás csapadék előrejelzés Nyíregyházán</div>
                     <div class="section-timestamp" id="forecast-timestamp">--:--</div>
                 </div>
                 <div class="precipitation-chart-container">
@@ -404,16 +449,15 @@
 
         function updateStationStatusUI(stationKey) {
             const stationConfig = STATIONS[stationKey]; if (!stationConfig) return;
-            const lowerCaseKey = stationKey.toLowerCase();
-            const radioEl = document.getElementById(`station-select-${lowerCaseKey}`);
-            const selectorContainerEl = document.getElementById(`${lowerCaseKey}-selector-container`);
             const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`);
-            if (!radioEl || !selectorContainerEl || !statusIndicatorEl) return;
-            
-            radioEl.checked = (stationKey === activeDisplayStationKey); 
-            selectorContainerEl.classList.toggle('disabled', !stationConfig.isOnline);
-            statusIndicatorEl.classList.remove('online', 'offline');
-            statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline');
+            if(statusIndicatorEl) {
+                 statusIndicatorEl.classList.remove('online', 'offline');
+                 statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline');
+            }
+            const selectorContainer = document.getElementById(`${stationKey.toLowerCase()}-selector-container`);
+            if(selectorContainer) { selectorContainer.classList.toggle('disabled', !stationConfig.isOnline); }
+            const radioEl = document.getElementById(`station-select-${stationKey.toLowerCase()}`);
+            if(radioEl) { radioEl.checked = (stationKey === activeDisplayStationKey); }
         }
 
         function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
@@ -421,15 +465,23 @@
             const selectedStationKey = event.target.value; if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) { activeDisplayStationKey = selectedStationKey; compileAndRenderDisplayData(); } else if (!STATIONS[selectedStationKey].isOnline) { event.target.checked = false; document.querySelector(`input[value="${activeDisplayStationKey}"]`).checked = true; }
         }
 
-        function getPreferredStationData(dataType) { const priorityOrder = { precip: ['KOSSUTH', 'NYIREGYHAZI_UT'], wind: ['KOSSUTH', 'HONVED'] }; const order = priorityOrder[dataType]; if (!order) return null; for (const stationKey of order) { const station = STATIONS[stationKey]; if (station && station.isOnline && station.provides.includes(dataType) && station.data) return station.data; } return null; }
-
+        // JAVÍTVA: Az adatösszeállítási logika javítása a fallback eltávolításával.
         function compileAndRenderDisplayData() {
-            const activeStationConfig = STATIONS[activeDisplayStationKey];
-            if (!activeStationConfig.data) { if (weatherDisplayEl) weatherDisplayEl.innerHTML = `<div class="loading">⚠️ Az állomás (${activeStationConfig.displayName}) adatai nem érhetők el.</div>`; return; }
-            cachedData.displayPws = { ...activeStationConfig.data.metric, ...activeStationConfig.data };
-            const precipDataSource = getPreferredStationData('precip'); const windDataSource = getPreferredStationData('wind');
-            if (precipDataSource) { cachedData.displayPws.precipTotal = precipDataSource.metric.precipTotal; cachedData.displayPws.precipRate = precipDataSource.metric.precipRate; }
-            if (windDataSource) { cachedData.displayPws.windSpeed = windDataSource.metric.windSpeed; cachedData.displayPws.windGust = windDataSource.metric.windGust; cachedData.displayPws.winddir = windDataSource.winddir; }
+            const activeStation = STATIONS[activeDisplayStationKey];
+            
+            // Csak akkor folytatjuk, ha az aktív állomás online és rendelkezik adattal.
+            if (!activeStation?.isOnline || !activeStation.data) {
+                // Lehetne egy "offline" nézetet is renderelni, de egyelőre a visszatérés elegendő.
+                return;
+            }
+
+            // Közvetlenül az aktív állomás adatait használjuk, mindenféle pótlás nélkül.
+            const displayData = { ...activeStation.data.metric, ...activeStation.data };
+
+            // A feldolgozott adatokat elmentjük a cache-be.
+            cachedData.displayPws = displayData;
+
+            // Elindítjuk a renderelő függvényeket a tiszta adatokkal.
             renderWeatherData();
             renderPrecipitationForecast();
             renderHourlyForecastData();
@@ -439,20 +491,23 @@
 
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
-            if (!obs || !general || !sunCalc) return;
-            
-            document.getElementById('station-subtitle-text').textContent = `Aktív: ${STATIONS[activeDisplayStationKey].displayName}`; 
-            document.getElementById('timestamp-text').textContent = `Adatok: ${formatTime(obs.obsTimeLocal, true)}`;
+            if (!general || !sunCalc || !obs) return;
+
+            document.getElementById('station-subtitle-text').textContent = `Kiválasztott állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
+            document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`;
             
             const tempCardEl = document.querySelector('.temp-card');
-            if(tempCardEl) {
+            if (tempCardEl && obs.temp !== undefined) {
                 updateAnimatedValue(document.getElementById('top-temp-card-value'), formatValue(obs.temp, '', 1));
                 tempCardEl.style.setProperty('--current-temp-bg-color', `var(--${getTemperatureColorName(obs.temp)})`);
                 document.getElementById('heat-index-secondary').textContent = `Hőérzet: ${formatValue(obs.heatIndex, '°', 1)}`;
+            } else {
+                updateAnimatedValue(document.getElementById('top-temp-card-value'), NO_DATA_STRING);
+                 document.getElementById('heat-index-secondary').textContent = `Hőérzet: ${NO_DATA_STRING}°`;
             }
 
             const windCenterEl = document.getElementById('wind-data-center');
-            if(windCenterEl) {
+            if (windCenterEl && obs.windSpeed !== undefined && obs.windSpeed !== null) {
                 const windSpeed = obs.windSpeed || 0;
                 windCenterEl.style.borderColor = `var(--wind-${getWindColorName(windSpeed)})`;
                 const speedMainEl = document.getElementById('wind-speed-main-value');
@@ -460,78 +515,96 @@
                 updateAnimatedValue(speedMainEl, formatValue(windSpeed, '', 1));
                 updateAnimatedValue(document.getElementById('wind-direction-bottom'), degreesToCompass(obs.winddir));
                 updateAnimatedValue(document.getElementById('wind-gust-value'), formatValue(obs.windGust, '', 1));
+            } else {
+                 updateAnimatedValue(document.getElementById('wind-speed-main-value'), NO_DATA_STRING);
+                 updateAnimatedValue(document.getElementById('wind-direction-bottom'), '-');
+                 updateAnimatedValue(document.getElementById('wind-gust-value'), NO_DATA_STRING);
+                 windCenterEl.style.borderColor = `var(--wind-calm)`;
+                 document.getElementById('wind-speed-main-value').style.color = `var(--wind-calm)`;
+
             }
 
-            // === KÉRT MÓDOSÍTÁS KEZDETE ===
+            // CSAPADÉKRADAR (JAVÍTOTT DIZÁJNNAL)
             const precipCardEl = document.getElementById('precip-summary-card');
-            const mainTextEl = document.getElementById('precip-summary-main-text');
-            const totalTextEl = document.getElementById('precip-summary-total-text');
             
-            if (precipCardEl && mainTextEl && totalTextEl) {
-                // Az összes online, csapadékot szolgáltató állomás keresése, ahol éppen esik.
-                const rainingStations = Object.values(STATIONS).filter(station =>
-                    station.isOnline &&
-                    station.provides.includes('precip') &&
-                    station.data?.metric?.precipRate > 0
-                );
+            if (precipCardEl) {
+                const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
+                const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0);
 
-                if (rainingStations.length > 0) {
-                    // 1. ESET: Esik az eső egy vagy több állomáson.
-                    const precipDetailsHTML = rainingStations.map(station => {
-                        const intensityDescription = getPrecipIntensityDescription(station.data.metric.precipRate);
-                        return `<div style="line-height: 1.4; margin-bottom: 5px;">
-                                    <strong>${station.displayName}:</strong> most <strong>${intensityDescription.toLowerCase()}</strong>. Ma eddig lehullott csapadék: <strong>${formatValue(station.data.metric.precipTotal, ' mm', 1)}</strong>.
-                                </div>`;
-                    }).join('');
+                let contentHTML = '';
+
+                if (stationsWithRainToday.length === 0) {
+                    const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
                     
-                    mainTextEl.innerHTML = precipDetailsHTML;
-                    totalTextEl.innerHTML = ''; // Másodlagos szöveg törlése, mert az infó összevonásra került.
-                    precipCardEl.classList.add('is-raining');
-
-                    // A háttérsávot az esős állomások közül a legmagasabb napi összeghez igazítjuk.
-                    const maxPrecipTotal = Math.max(...rainingStations.map(s => s.data.metric.precipTotal || 0));
-                    const MAX_PRECIP_FOR_GAUGE = 25.0; // 25mm = 100%
-                    const fillPercent = Math.min(100, (maxPrecipTotal / MAX_PRECIP_FOR_GAUGE) * 100);
-                    precipCardEl.style.setProperty('--precip-total-fill-percent', `${fillPercent}%`);
-
+                    const explanationHTML = `<div class="rain-rules-box">
+                        <h5>Hogyan működik?</h5>
+                        <p>• Egy állomás akkor jelenik meg, amint csapadékot rögzít.</p>
+                        <p>• A listán szereplő állomások éjfélig láthatóak maradnak.</p>
+                    </div>`;
+                    
+                    contentHTML = `
+                        <div class="no-rain-container">
+                            <i class="fas fa-cloud-sun no-rain-icon"></i>
+                            <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
+                            <div class="station-tooltip-container">
+                                <span class="station-list-trigger">Figyelt állomások listája</span>
+                                <div class="station-tooltip-content">${allMonitoredNames}</div>
+                            </div>
+                            ${explanationHTML}
+                        </div>`;
+                    precipCardEl.classList.remove('is-raining-somewhere');
                 } else {
-                    // 2. ESET: Egyik állomáson sem esik.
-                    mainTextEl.innerHTML = '<strong>Jelenleg nem esik a város közvetlen környékén.</strong>';
+                    const priorityOrder = ['KOSSUTH', 'NYIREGYHAZI_UT', 'SOSTOHEGY', 'BORBANYA'];
+                    const getPriority = (station) => {
+                        const key = Object.keys(STATIONS).find(k => STATIONS[k].id === station.id);
+                        const index = priorityOrder.indexOf(key);
+                        return index === -1 ? Infinity : index;
+                    };
 
-                    // Az összes online, csapadékot szolgáltató állomás keresése a napi összegzéshez.
-                    const allPrecipStations = Object.values(STATIONS).filter(station =>
-                        station.isOnline &&
-                        station.provides.includes('precip') &&
-                        station.data &&
-                        typeof station.data.metric.precipTotal === 'number'
-                    );
-                    
-                    if (allPrecipStations.length > 0) {
-                        const totalsList = allPrecipStations.map(s => `<strong>${s.displayName}:</strong> ${formatValue(s.data.metric.precipTotal, ' mm', 1)}`).join('  |  ');
-                        totalTextEl.innerHTML = `Ma eddig esett: ${totalsList}`;
-                        
-                        // A háttérsávot az összes állomás közül a legmagasabb napi összeghez igazítjuk.
-                        const maxTotal = Math.max(...allPrecipStations.map(s => s.data.metric.precipTotal || 0));
-                        const MAX_PRECIP_FOR_GAUGE = 25.0; // 25mm = 100%
-                        const fillPercent = Math.min(100, (maxTotal / MAX_PRECIP_FOR_GAUGE) * 100);
-                        precipCardEl.style.setProperty('--precip-total-fill-percent', `${fillPercent}%`);
-                    } else {
-                        totalTextEl.innerHTML = 'Nincs elérhető napi csapadék adat.';
-                        precipCardEl.style.setProperty('--precip-total-fill-percent', '0%');
-                    }
+                    const stationListHTML = stationsWithRainToday
+                        .sort((a, b) => {
+                            const priorityA = getPriority(a);
+                            const priorityB = getPriority(b);
+                            if (priorityA !== priorityB) return priorityA - priorityB;
+                            return b.data.metric.precipTotal - a.data.metric.precipTotal;
+                        })
+                        .map(station => {
+                            const isRainingNow = station.data.metric.precipRate > 0;
+                            const itemClass = isRainingNow ? 'precip-station-list-item is-raining-now' : 'precip-station-list-item';
+                            const intensityText = getPrecipIntensityDescription(station.data.metric.precipRate);
+                            const displayName = station.displayNameShort || station.displayName;
 
-                    precipCardEl.classList.remove('is-raining');
+                            return `<div class="${itemClass}">
+                                        <div class="station-main-row">
+                                            <span class="precip-station-name">${displayName}</span>
+                                            <span class="precip-station-value" title="Ennyi esett ma eddig">Ma eddig: <strong>${formatValue(station.data.metric.precipTotal, ' mm', 1)}</strong></span>
+                                        </div>
+                                        ${isRainingNow ? `<div class="rain-intensity-text">${intensityText} (${formatValue(station.data.metric.precipRate, ' mm/h', 1)})</div>` : ''}
+                                    </div>`;
+                        }).join('');
+
+                    contentHTML = `<div class="precip-station-list">${stationListHTML}</div>`;
+                    precipCardEl.classList.add('is-raining-somewhere');
                 }
+                
+                // A teljes kártya HTML-jének összeállítása az új struktúrával
+                precipCardEl.innerHTML = `
+                    <div class="precip-card-header">
+                        <div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div>
+                        <h4 class="precip-header-title">CsapadékRadar</h4>
+                    </div>
+                    <div class="precip-card-content">
+                        ${contentHTML}
+                    </div>
+                `;
             }
-            // === KÉRT MÓDOSÍTÁS VÉGE ===
-
-            const detailsGrid = document.getElementById('weather-details-grid');
-            const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→'; 
             
-            detailsGrid.innerHTML = `<div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value">${formatValue(obs.dewpt, '°C', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value">${formatValue(obs.humidity, '%', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value">${formatValue(general.pressureAltimeter || obs.pressure, ' hPa', 0)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div> <div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value">${formatValue(obs.solarRadiation, ' W/m²', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value">${formatValue(obs.uv, '', 1)} ${getUVDescription(obs.uv)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value">${sunCalc.sunrise}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value">${sunCalc.sunset}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte:</span><span class="value">${sunCalc.moonrise}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta:</span><span class="value">${sunCalc.moonset}</span></div>`;
+            const detailsGrid = document.getElementById('weather-details-grid');
+            if (detailsGrid) {
+                 const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→'; 
+                 detailsGrid.innerHTML = `<div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value">${formatValue(obs.dewpt, '°C', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value">${formatValue(obs.humidity, '%', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value">${formatValue(general.pressureAltimeter || obs.pressure, ' hPa', 0)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div> <div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value">${formatValue(obs.solarRadiation, ' W/m²', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value">${formatValue(obs.uv, '', 1)} ${getUVDescription(obs.uv)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value">${sunCalc.sunrise}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value">${sunCalc.sunset}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte:</span><span class="value">${sunCalc.moonrise}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta:</span><span class="value">${sunCalc.moonset}</span></div>`;
+            }
         }
-        
-        function getTemperatureColorName(temp) { if (temp === null || isNaN(temp)) return 'mild'; if (temp >= 35) return 'hot'; if (temp >= 25) return 'warm'; if (temp >= 10) return 'mild'; if (temp >= 0) return 'cool'; return 'cold'; }
         
         function renderPrecipitationForecast() {
             const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull) return;
@@ -598,18 +671,21 @@
                 lastApiCallTimes.forecast = Date.now(); 
                 renderPrecipitationForecast(); 
                 renderHourlyForecastData();
-            } catch (e) { 
-                console.warn("Előrejelzés hiba:", e); 
-            } 
+            } catch (e) { /* Hiba csendes kezelése */ } 
         }
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
             await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
-            if (!STATIONS[activeDisplayStationKey].isOnline) { const onlineStations = Object.keys(STATIONS).filter(k => STATIONS[k].isOnline); if(onlineStations.length > 0) activeDisplayStationKey = onlineStations[0]; }
+            
+            const onlineMainStations = Object.keys(STATIONS).filter(k => STATIONS[k].isOnline && STATIONS[k].provides.length > 1);
+            if (!STATIONS[activeDisplayStationKey].isOnline && onlineMainStations.length > 0) {
+                 const fallbackOrder = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'];
+                 activeDisplayStationKey = fallbackOrder.find(key => STATIONS[key].isOnline) || onlineMainStations[0];
+            }
             
             const promises = [];
-            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => {console.warn("Ált. adatok hiba", e)})); }
+            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => {})); }
             if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); }
             
             promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; }));
@@ -617,14 +693,8 @@
             await Promise.allSettled(promises);
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             
-            const isDataReady = STATIONS[activeDisplayStationKey]?.isOnline && STATIONS[activeDisplayStationKey]?.data && cachedData.sunCalc;
-
-            if (isDataReady) { 
-                if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
-                compileAndRenderDisplayData(); 
-            } else { 
-                if (weatherDisplayEl && !isWeatherDisplayInitialized) weatherDisplayEl.innerHTML = `<div class="loading" style="padding: 20px;">Adatok betöltése...</div>`; 
-            }
+            if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
+            compileAndRenderDisplayData();
         }
         
         function startMasterLoop() {
@@ -636,8 +706,6 @@
             weatherDisplayEl = document.getElementById('weather-display'); 
             hourlyForecastContainerEl = document.getElementById('hourly-forecast-container');
             hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
-            
-            initializeWeatherDisplayDOM();
             startMasterLoop();
         }
 
