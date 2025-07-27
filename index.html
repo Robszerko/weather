@@ -100,79 +100,73 @@
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
         /* ======================================== */
-        /* ==  ÚJ CSAPADÉKRADAR DIZÁJN  == */
+        /* ==  CSAPADÉKRADAR DIZÁJN (KOMPAKTEBB) == */
         /* ======================================== */
 
-        /* Az alap konténer átalakítása */
         .precip-summary-card {
             display: flex;
-            flex-direction: column; /* Belső elrendezés oszloposra váltása */
-            gap: 0; /* A régi gap eltávolítása */
-            background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); /* Finomabb háttér */
+            flex-direction: column;
+            gap: 0;
+            background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18));
             border: 1px solid var(--current-container-border-color);
             border-radius: 12px;
-            padding: 0; /* A belső paddinget a gyerek elemek kapják */
+            padding: 0;
             margin-bottom: 20px;
             transition: all 0.5s ease;
-            overflow: hidden; /* A belső elemek ne lógjanak ki a border-radius miatt */
+            overflow: hidden;
         }
 
-        /* Új animáció, ha esik valahol */
         .precip-summary-card.is-raining-somewhere {
             border-color: rgba(from var(--current-icon-color) r g b / 0.6);
-            box-shadow: 0 0 15px -3px rgba(from var(--current-icon-color) r g b / 0.45);
+            box-shadow: 0 0 12px -3px rgba(from var(--current-icon-color) r g b / 0.4);
         }
 
-        /* Az új kártya-fejléc */
         .precip-card-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
+            padding: 10px 16px;
             border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4);
             background-color: rgba(0,0,0,0.1);
         }
 
         .precip-header-icon i {
-            font-size: 24px; /* Nagyobb ikon */
+            font-size: 22px;
             color: var(--current-icon-color);
             transition: color 0.5s ease;
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .precip-header-title {
-            font-size: 17px;
-            font-weight: 800; /* Félkövér, hangsúlyos cím */
+            font-size: 16px;
+            font-weight: 800;
             color: var(--current-text-color);
             margin: 0;
             letter-spacing: 0.5px;
         }
 
-        /* A kártya dinamikus tartalmi része */
         .precip-card-content {
-            padding: 12px 16px;
+            padding: 10px 16px;
             width: 100%;
             box-sizing: border-box;
         }
 
-        /* Állomások listája, ha esik */
         .precip-station-list {
             display: flex;
             flex-direction: column;
-            gap: 4px; /* Kisebb rés a lista elemei között */
+            gap: 4px;
         }
         
         .precip-station-list-item {
-            padding: 8px 12px;
+            padding: 6px 12px;
             border-radius: 6px;
-            border-left: 3px solid transparent; /* Hely előkészítése a highlightnak */
+            border-left: 3px solid transparent;
             transition: background-color 0.3s ease, border-left-color 0.3s ease;
         }
         .precip-station-list-item:hover {
             background-color: rgba(from var(--current-text-color) r g b / 0.08);
         }
 
-        /* Kiemelés, ha az adott állomáson esik */
         .precip-station-list-item.is-raining-now {
             border-left: 3px solid var(--current-icon-color);
             background: linear-gradient(90deg, rgba(from var(--current-icon-color) r g b / 0.2) 0%, rgba(from var(--current-icon-color) r g b / 0.05) 100%);
@@ -186,20 +180,19 @@
         .precip-station-name { font-weight: 600; font-size: 14px; color: var(--current-text-color); }
         .precip-station-value { font-weight: 500; font-size: 13px; color: var(--current-text-muted-color); }
         .precip-station-value strong { font-weight: 700; font-size: 14px; color: var(--current-text-color); margin-left: 4px; }
-        .rain-intensity-text { font-size: 11.5px; font-style: italic; color: var(--current-text-muted-color); margin-top: 3px; }
+        .rain-intensity-text { font-size: 12px; font-weight: 600; font-style: italic; color: var(--current-text-color); margin-top: 3px; }
 
-        /* "Nincs eső" állapot stílusai */
         .no-rain-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 12px;
-            padding: 16px 0;
+            gap: 10px;
+            padding: 12px 0;
         }
 
         .no-rain-icon {
-            font-size: 48px;
+            font-size: 44px;
             color: var(--current-text-muted-color);
             opacity: 0.2;
         }
@@ -222,7 +215,7 @@
         }
         .station-tooltip-content { visibility: hidden; opacity: 0; width: 280px; background-color: var(--bg-widget-night); color: var(--text-primary-night); padding: 10px; border-radius: 8px; border: 1px solid var(--border-widget-night); position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s, visibility 0.3s; pointer-events: none; font-size: 12px; line-height: 1.5; }
         .station-tooltip-container:hover .station-tooltip-content { visibility: visible; opacity: 1; }
-        .rain-rules-box { margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); }
+        .rain-rules-box { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); }
         .rain-rules-box h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--current-text-muted-color); margin: 0 0 6px 0; }
         .rain-rules-box p { font-size: 12px; color: var(--current-text-muted-color); margin: 2px 0; line-height: 1.5; text-align: left; padding-left: 10px; }
         
@@ -231,7 +224,7 @@
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .section-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); text-align: left; }
-        .section-timestamp { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
+        .section-timestamp { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); display: none; }
         .precipitation-chart-container { width: 100%; overflow-x: hidden; }
         .precipitation-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
         .precip-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 5px; }
@@ -240,6 +233,14 @@
         .bar-fill { width: 100%; background-color: var(--current-icon-color); border-radius: 5px; transition: height 0.6s ease-out, opacity 0.6s ease-out; }
         .precip-amount-text { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
         .precip-hour-label { font-size: 13px; font-weight: 500; color: var(--current-text-color); }
+
+        .section-footer {
+            text-align: right;
+            font-size: 11px;
+            color: var(--current-text-muted-color);
+            opacity: 0.8;
+            margin-top: 8px;
+        }
 
         .weather-details-grid { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 8px; transition: all 0.6s; margin-bottom: 20px; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; padding: 4px 0; }
@@ -427,8 +428,8 @@
             </div>
             <div class="precipitation-forecast-section">
                 <div class="section-header">
-                    <div class="section-title">Órás csapadék előrejelzés Nyíregyházán</div>
-                    <div class="section-timestamp" id="forecast-timestamp">--:--</div>
+                    <div class="section-title">Órás csapadék előrejelzés</div>
+                    <div class="section-timestamp" id="forecast-timestamp"></div>
                 </div>
                 <div class="precipitation-chart-container">
                     <div class="precipitation-chart">
@@ -440,6 +441,9 @@
                             <div class="precip-hour-label" id="precip-hour-label-${i}">--</div>
                         </div>`).join('')}
                     </div>
+                </div>
+                <div class="section-footer">
+                    <span id="forecast-live-timestamp"></span>
                 </div>
             </div>
             <div class="weather-details-grid" id="weather-details-grid"></div>`;
@@ -465,23 +469,11 @@
             const selectedStationKey = event.target.value; if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) { activeDisplayStationKey = selectedStationKey; compileAndRenderDisplayData(); } else if (!STATIONS[selectedStationKey].isOnline) { event.target.checked = false; document.querySelector(`input[value="${activeDisplayStationKey}"]`).checked = true; }
         }
 
-        // JAVÍTVA: Az adatösszeállítási logika javítása a fallback eltávolításával.
         function compileAndRenderDisplayData() {
             const activeStation = STATIONS[activeDisplayStationKey];
-            
-            // Csak akkor folytatjuk, ha az aktív állomás online és rendelkezik adattal.
-            if (!activeStation?.isOnline || !activeStation.data) {
-                // Lehetne egy "offline" nézetet is renderelni, de egyelőre a visszatérés elegendő.
-                return;
-            }
-
-            // Közvetlenül az aktív állomás adatait használjuk, mindenféle pótlás nélkül.
+            if (!activeStation?.isOnline || !activeStation.data) { return; }
             const displayData = { ...activeStation.data.metric, ...activeStation.data };
-
-            // A feldolgozott adatokat elmentjük a cache-be.
             cachedData.displayPws = displayData;
-
-            // Elindítjuk a renderelő függvényeket a tiszta adatokkal.
             renderWeatherData();
             renderPrecipitationForecast();
             renderHourlyForecastData();
@@ -521,29 +513,22 @@
                  updateAnimatedValue(document.getElementById('wind-gust-value'), NO_DATA_STRING);
                  windCenterEl.style.borderColor = `var(--wind-calm)`;
                  document.getElementById('wind-speed-main-value').style.color = `var(--wind-calm)`;
-
             }
 
-            // CSAPADÉKRADAR (JAVÍTOTT DIZÁJNNAL)
             const precipCardEl = document.getElementById('precip-summary-card');
-            
             if (precipCardEl) {
                 const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
                 const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0);
-
                 let contentHTML = '';
 
                 if (stationsWithRainToday.length === 0) {
                     const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
-                    
                     const explanationHTML = `<div class="rain-rules-box">
                         <h5>Hogyan működik?</h5>
                         <p>• Egy állomás akkor jelenik meg, amint csapadékot rögzít.</p>
                         <p>• A listán szereplő állomások éjfélig láthatóak maradnak.</p>
                     </div>`;
-                    
-                    contentHTML = `
-                        <div class="no-rain-container">
+                    contentHTML = `<div class="no-rain-container">
                             <i class="fas fa-cloud-sun no-rain-icon"></i>
                             <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
                             <div class="station-tooltip-container">
@@ -560,7 +545,6 @@
                         const index = priorityOrder.indexOf(key);
                         return index === -1 ? Infinity : index;
                     };
-
                     const stationListHTML = stationsWithRainToday
                         .sort((a, b) => {
                             const priorityA = getPriority(a);
@@ -573,13 +557,14 @@
                             const itemClass = isRainingNow ? 'precip-station-list-item is-raining-now' : 'precip-station-list-item';
                             const intensityText = getPrecipIntensityDescription(station.data.metric.precipRate);
                             const displayName = station.displayNameShort || station.displayName;
-
+                            
+                            // MÓDOSÍTOTT RÉSZ
                             return `<div class="${itemClass}">
                                         <div class="station-main-row">
                                             <span class="precip-station-name">${displayName}</span>
                                             <span class="precip-station-value" title="Ennyi esett ma eddig">Ma eddig: <strong>${formatValue(station.data.metric.precipTotal, ' mm', 1)}</strong></span>
                                         </div>
-                                        ${isRainingNow ? `<div class="rain-intensity-text">${intensityText} (${formatValue(station.data.metric.precipRate, ' mm/h', 1)})</div>` : ''}
+                                        ${isRainingNow ? `<div class="rain-intensity-text">Most: ${intensityText}</div>` : ''}
                                     </div>`;
                         }).join('');
 
@@ -587,16 +572,13 @@
                     precipCardEl.classList.add('is-raining-somewhere');
                 }
                 
-                // A teljes kártya HTML-jének összeállítása az új struktúrával
-                precipCardEl.innerHTML = `
-                    <div class="precip-card-header">
+                precipCardEl.innerHTML = `<div class="precip-card-header">
                         <div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div>
                         <h4 class="precip-header-title">CsapadékRadar</h4>
                     </div>
                     <div class="precip-card-content">
                         ${contentHTML}
-                    </div>
-                `;
+                    </div>`;
             }
             
             const detailsGrid = document.getElementById('weather-details-grid');
@@ -608,8 +590,12 @@
         
         function renderPrecipitationForecast() {
             const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull) return;
-            const forecastTimestampEl = document.getElementById('forecast-timestamp');
-            if (forecastTimestampEl && lastApiCallTimes.forecastSuccess > 0) { forecastTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess))}`; }
+            
+            const forecastLiveTimestampEl = document.getElementById('forecast-live-timestamp');
+            if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) {
+                forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess), true)}`;
+            }
+
             for (let i = 0; i < 7; i++) {
                 const chanceEl = document.getElementById(`precip-chance-text-${i}`); const barEl = document.getElementById(`precip-bar-${i}`); const amountEl = document.getElementById(`precip-amount-text-${i}`); const labelEl = document.getElementById(`precip-hour-label-${i}`);
                 if (chanceEl && barEl && amountEl && labelEl) {
