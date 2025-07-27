@@ -462,27 +462,68 @@
                 updateAnimatedValue(document.getElementById('wind-gust-value'), formatValue(obs.windGust, '', 1));
             }
 
+            // === KÉRT MÓDOSÍTÁS KEZDETE ===
             const precipCardEl = document.getElementById('precip-summary-card');
             const mainTextEl = document.getElementById('precip-summary-main-text');
             const totalTextEl = document.getElementById('precip-summary-total-text');
-            const precipRate = obs.precipRate || 0;
-            const precipTotal = obs.precipTotal || 0;
+            
+            if (precipCardEl && mainTextEl && totalTextEl) {
+                // Az összes online, csapadékot szolgáltató állomás keresése, ahol éppen esik.
+                const rainingStations = Object.values(STATIONS).filter(station =>
+                    station.isOnline &&
+                    station.provides.includes('precip') &&
+                    station.data?.metric?.precipRate > 0
+                );
 
-            if(precipCardEl && mainTextEl && totalTextEl) {
-                const intensityDescription = getPrecipIntensityDescription(precipRate);
-                mainTextEl.innerHTML = `Jelenleg: <strong>${intensityDescription}</strong>`;
-                totalTextEl.textContent = `Ma eddig ennyi esett: ${formatValue(precipTotal, ' mm', 1)}`;
-                
-                const MAX_PRECIP_FOR_GAUGE = 25.0; // 25mm = 100%
-                const fillPercent = Math.min(100, (precipTotal / MAX_PRECIP_FOR_GAUGE) * 100);
-                precipCardEl.style.setProperty('--precip-total-fill-percent', `${fillPercent}%`);
-
-                if (precipRate > 0) {
+                if (rainingStations.length > 0) {
+                    // 1. ESET: Esik az eső egy vagy több állomáson.
+                    const precipDetailsHTML = rainingStations.map(station => {
+                        const intensityDescription = getPrecipIntensityDescription(station.data.metric.precipRate);
+                        return `<div style="line-height: 1.4; margin-bottom: 5px;">
+                                    <strong>${station.displayName}:</strong> most <strong>${intensityDescription.toLowerCase()}</strong>. Ma eddig lehullott csapadék: <strong>${formatValue(station.data.metric.precipTotal, ' mm', 1)}</strong>.
+                                </div>`;
+                    }).join('');
+                    
+                    mainTextEl.innerHTML = precipDetailsHTML;
+                    totalTextEl.innerHTML = ''; // Másodlagos szöveg törlése, mert az infó összevonásra került.
                     precipCardEl.classList.add('is-raining');
+
+                    // A háttérsávot az esős állomások közül a legmagasabb napi összeghez igazítjuk.
+                    const maxPrecipTotal = Math.max(...rainingStations.map(s => s.data.metric.precipTotal || 0));
+                    const MAX_PRECIP_FOR_GAUGE = 25.0; // 25mm = 100%
+                    const fillPercent = Math.min(100, (maxPrecipTotal / MAX_PRECIP_FOR_GAUGE) * 100);
+                    precipCardEl.style.setProperty('--precip-total-fill-percent', `${fillPercent}%`);
+
                 } else {
+                    // 2. ESET: Egyik állomáson sem esik.
+                    mainTextEl.innerHTML = '<strong>Jelenleg nem esik a város közvetlen környékén.</strong>';
+
+                    // Az összes online, csapadékot szolgáltató állomás keresése a napi összegzéshez.
+                    const allPrecipStations = Object.values(STATIONS).filter(station =>
+                        station.isOnline &&
+                        station.provides.includes('precip') &&
+                        station.data &&
+                        typeof station.data.metric.precipTotal === 'number'
+                    );
+                    
+                    if (allPrecipStations.length > 0) {
+                        const totalsList = allPrecipStations.map(s => `<strong>${s.displayName}:</strong> ${formatValue(s.data.metric.precipTotal, ' mm', 1)}`).join('  |  ');
+                        totalTextEl.innerHTML = `Ma eddig esett: ${totalsList}`;
+                        
+                        // A háttérsávot az összes állomás közül a legmagasabb napi összeghez igazítjuk.
+                        const maxTotal = Math.max(...allPrecipStations.map(s => s.data.metric.precipTotal || 0));
+                        const MAX_PRECIP_FOR_GAUGE = 25.0; // 25mm = 100%
+                        const fillPercent = Math.min(100, (maxTotal / MAX_PRECIP_FOR_GAUGE) * 100);
+                        precipCardEl.style.setProperty('--precip-total-fill-percent', `${fillPercent}%`);
+                    } else {
+                        totalTextEl.innerHTML = 'Nincs elérhető napi csapadék adat.';
+                        precipCardEl.style.setProperty('--precip-total-fill-percent', '0%');
+                    }
+
                     precipCardEl.classList.remove('is-raining');
                 }
             }
+            // === KÉRT MÓDOSÍTÁS VÉGE ===
 
             const detailsGrid = document.getElementById('weather-details-grid');
             const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→'; 
