@@ -194,8 +194,10 @@
         .no-rain-icon {
             font-size: 44px;
             color: var(--current-text-muted-color);
-            opacity: 0.2;
+            opacity: 0.25;
+            line-height: 1;
         }
+
 
         .no-rain-message {
             font-size: 15px;
@@ -304,16 +306,32 @@
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
         const STATIONS = {
+            // Fő nyíregyházi állomások
             NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip'], isOnline: false, data: null },
             KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50', displayName: 'Kossuth út 50', displayNameShort: 'Kossuth út', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
             KERT_UTCA: { id: 'INYREG37', name: 'Nyíregyháza Kert utca', displayName: 'Kert u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
-            SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy', displayName: 'Sóstóhegy', provides: ['precip'], isOnline: false, data: null },
+            
+            // Csapadékfigyelő állomások
+            SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy (Állatpark)', displayName: 'Sóstóhegy', provides: ['precip'], isOnline: false, data: null },
             BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', provides: ['precip'], isOnline: false, data: null },
+            OROS_DERUS: { id: 'INYREG35', name: 'Oros Derűs utca', displayName: 'Oros', provides: ['precip'], isOnline: false, data: null },
             KEMECSE: { id: 'IKEMEC1', name: 'Kemecse', displayName: 'Kemecse', provides: ['precip'], isOnline: false, data: null },
             NAGYHALASZ: { id: 'INAGYH4', name: 'Nagyhalász', displayName: 'Nagyhalász', provides: ['precip'], isOnline: false, data: null },
             RAMOCSAHAZA: { id: 'IRAMOC1', name: 'Ramocsaháza', displayName: 'Ramocsaháza', provides: ['precip'], isOnline: false, data: null },
             SENYO: { id: 'ISNY1', name: 'Sényő', displayName: 'Sényő', provides: ['precip'], isOnline: false, data: null },
             SZAKOLY: { id: 'ISZAKO1', name: 'Szakoly', displayName: 'Szakoly', provides: ['precip'], isOnline: false, data: null },
+            NYIRADONY: { id: 'INYRAD1', name: 'Nyíradony', displayName: 'Nyíradony', provides: ['precip'], isOnline: false, data: null },
+            NYIRBOGAT: { id: 'INYRBO3', name: 'Nyírbogát', displayName: 'Nyírbogát', provides: ['precip'], isOnline: false, data: null },
+            NAPKOR: { id: 'INAPKO1', name: 'Napkor', displayName: 'Napkor', provides: ['precip'], isOnline: false, data: null },
+            GAVAVENCSELLO: { id: 'IGVAVE1', name: 'Gávavencsellő', displayName: 'Gávavencsellő', provides: ['precip'], isOnline: false, data: null },
+            PATROHA: { id: 'IPTROH1', name: 'Pátroha', displayName: 'Pátroha', provides: ['precip'], isOnline: false, data: null },
+            AJAK: { id: 'IAJAK4', name: 'Ajak', displayName: 'Ajak', provides: ['precip'], isOnline: false, data: null },
+            KISVARDA: { id: 'IKISVR2', name: 'Kisvárda', displayName: 'Kisvárda', provides: ['precip'], isOnline: false, data: null },
+            VASAROSNAMENY: { id: 'IVSROS2', name: 'Vásárosnamény', displayName: 'Vásárosnamény', provides: ['precip'], isOnline: false, data: null },
+            FEHERGYARMAT: { id: 'IFEHRG1', name: 'Fehérgyarmat', displayName: 'Fehérgyarmat', provides: ['precip'], isOnline: false, data: null },
+            PORCSALMA: { id: 'IPORCS2', name: 'Porcsalma', displayName: 'Porcsalma', provides: ['precip'], isOnline: false, data: null },
+            CSENGER: { id: 'ICSENG10', name: 'Csenger', displayName: 'Csenger', provides: ['precip'], isOnline: false, data: null },
+            MATESZALKA: { id: 'IMTSZALK4', name: 'Mátészalka', displayName: 'Mátészalka', provides: ['precip'], isOnline: false, data: null },
         };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT'; // Elsődleges állomás
 
@@ -523,13 +541,17 @@
 
                 if (stationsWithRainToday.length === 0) {
                     const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
+                    
                     const explanationHTML = `<div class="rain-rules-box">
                         <h5>Hogyan működik?</h5>
                         <p>• Egy állomás akkor jelenik meg, amint csapadékot rögzít.</p>
                         <p>• A listán szereplő állomások éjfélig láthatóak maradnak.</p>
+                        <p>• A panel automatikusan frissül, ha esni kezd.</p>
+                        <p>• Az adatok 30 másodpercenként frissülnek.</p>
                     </div>`;
+
                     contentHTML = `<div class="no-rain-container">
-                            <i class="fas fa-cloud-sun no-rain-icon"></i>
+                            <i class="fas fa-droplet no-rain-icon"></i>
                             <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
                             <div class="station-tooltip-container">
                                 <span class="station-list-trigger">Figyelt állomások listája</span>
@@ -558,7 +580,6 @@
                             const intensityText = getPrecipIntensityDescription(station.data.metric.precipRate);
                             const displayName = station.displayNameShort || station.displayName;
                             
-                            // MÓDOSÍTOTT RÉSZ
                             return `<div class="${itemClass}">
                                         <div class="station-main-row">
                                             <span class="precip-station-name">${displayName}</span>
@@ -567,7 +588,6 @@
                                         ${isRainingNow ? `<div class="rain-intensity-text">Most: ${intensityText}</div>` : ''}
                                     </div>`;
                         }).join('');
-
                     contentHTML = `<div class="precip-station-list">${stationListHTML}</div>`;
                     precipCardEl.classList.add('is-raining-somewhere');
                 }
