@@ -100,7 +100,7 @@
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
         /* ======================================== */
-        /* ==  CSAPADÉKRADAR DIZÁJN (KOMPAKTEBB) == */
+        /* ==     CSAPADÉKRADAR DIZÁJN VÉGSŐ     == */
         /* ======================================== */
 
         .precip-summary-card {
@@ -150,6 +150,19 @@
             width: 100%;
             box-sizing: border-box;
         }
+        
+        /* ÚJ: A kártya láblécének stílusa */
+        .precip-card-footer {
+            padding: 8px 16px 12px 16px;
+            border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3);
+        }
+        .precip-footer-note {
+            font-size: 11px;
+            font-style: italic;
+            color: var(--current-text-muted-color);
+            margin-bottom: 8px;
+            text-align: center;
+        }
 
         .precip-station-list {
             display: flex;
@@ -189,6 +202,7 @@
             justify-content: center;
             gap: 10px;
             padding: 12px 0;
+            text-align: center;
         }
 
         .no-rain-icon {
@@ -197,7 +211,6 @@
             opacity: 0.25;
             line-height: 1;
         }
-
 
         .no-rain-message {
             font-size: 15px;
@@ -333,7 +346,7 @@
             CSENGER: { id: 'ICSENG10', name: 'Csenger', displayName: 'Csenger', provides: ['precip'], isOnline: false, data: null },
             MATESZALKA: { id: 'IMTSZALK4', name: 'Mátészalka', displayName: 'Mátészalka', provides: ['precip'], isOnline: false, data: null },
         };
-        let activeDisplayStationKey = 'NYIREGYHAZI_UT'; // Elsődleges állomás
+        let activeDisplayStationKey = 'NYIREGYHAZI_UT';
 
         let lastApiCallTimes = { generalConditions: 0, forecast: 0, forecastSuccess: 0 };
         let cachedData = { displayPws: null, generalConditions: {}, hourlyForecast: [], sunCalc: null };
@@ -537,29 +550,27 @@
             if (precipCardEl) {
                 const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
                 const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0);
-                let contentHTML = '';
+                
+                let mainContentHTML = '';
+                let footerHTML = '';
+
+                const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
+                const tooltipHTML = `<div class="station-tooltip-container">
+                                        <span class="station-list-trigger">Figyelt állomások listája</span>
+                                        <div class="station-tooltip-content">${allMonitoredNames}</div>
+                                    </div>`;
 
                 if (stationsWithRainToday.length === 0) {
-                    const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
-                    
-                    const explanationHTML = `<div class="rain-rules-box">
-                        <h5>Hogyan működik?</h5>
-                        <p>• Egy állomás akkor jelenik meg, amint csapadékot rögzít.</p>
-                        <p>• A listán szereplő állomások éjfélig láthatóak maradnak.</p>
-                        <p>• A panel automatikusan frissül, ha esni kezd.</p>
-                        <p>• Az adatok 30 másodpercenként frissülnek.</p>
-                    </div>`;
-
-                    contentHTML = `<div class="no-rain-container">
+                    mainContentHTML = `<div class="no-rain-container">
                             <i class="fas fa-droplet no-rain-icon"></i>
                             <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
-                            <div class="station-tooltip-container">
-                                <span class="station-list-trigger">Figyelt állomások listája</span>
-                                <div class="station-tooltip-content">${allMonitoredNames}</div>
-                            </div>
-                            ${explanationHTML}
                         </div>`;
+                    
+                    footerHTML = `<div class="precip-card-footer">
+                                    ${tooltipHTML}
+                                  </div>`;
                     precipCardEl.classList.remove('is-raining-somewhere');
+
                 } else {
                     const priorityOrder = ['KOSSUTH', 'NYIREGYHAZI_UT', 'SOSTOHEGY', 'BORBANYA'];
                     const getPriority = (station) => {
@@ -567,7 +578,8 @@
                         const index = priorityOrder.indexOf(key);
                         return index === -1 ? Infinity : index;
                     };
-                    const stationListHTML = stationsWithRainToday
+
+                    mainContentHTML = `<div class="precip-station-list">${stationsWithRainToday
                         .sort((a, b) => {
                             const priorityA = getPriority(a);
                             const priorityB = getPriority(b);
@@ -587,8 +599,15 @@
                                         </div>
                                         ${isRainingNow ? `<div class="rain-intensity-text">Most: ${intensityText}</div>` : ''}
                                     </div>`;
-                        }).join('');
-                    contentHTML = `<div class="precip-station-list">${stationListHTML}</div>`;
+                        }).join('')}</div>`;
+                    
+                    const isAnyStationRainingNow = stationsWithRainToday.some(s => s.data.metric.precipRate > 0);
+                    
+                    footerHTML = `<div class="precip-card-footer">
+                                    <div class="precip-footer-note">Ezen a kártyán azokat az állomásokat látod ahol ma már esett, vagy éppen most esik.</div>
+                                    ${tooltipHTML}
+                                  </div>`;
+
                     precipCardEl.classList.add('is-raining-somewhere');
                 }
                 
@@ -597,8 +616,9 @@
                         <h4 class="precip-header-title">CsapadékRadar</h4>
                     </div>
                     <div class="precip-card-content">
-                        ${contentHTML}
-                    </div>`;
+                        ${mainContentHTML}
+                    </div>
+                    ${footerHTML}`;
             }
             
             const detailsGrid = document.getElementById('weather-details-grid');
