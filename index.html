@@ -151,7 +151,6 @@
             box-sizing: border-box;
         }
         
-        /* ÚJ: A kártya láblécének stílusa */
         .precip-card-footer {
             padding: 8px 16px 12px 16px;
             border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3);
@@ -561,14 +560,23 @@
                                     </div>`;
 
                 if (stationsWithRainToday.length === 0) {
-                    mainContentHTML = `<div class="no-rain-container">
-                            <i class="fas fa-droplet no-rain-icon"></i>
-                            <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
+                     mainContentHTML = `<div class="no-rain-container" style="padding: 10px 0;">
+                            <i class="fas fa-cloud-sun no-rain-icon" style="font-size: 38px; opacity: 0.25;"></i>
+                            <div class="no-rain-message" style="margin-top: 6px;">A környéken jelenleg száraz az idő.</div>
+                        </div>
+                        <div class="rain-rules-box" style="margin-top: 0; padding: 12px 14px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); text-align: left;">
+                            <h5 style="text-align: center; margin-bottom: 12px; letter-spacing: 0.5px;">A CSAPADÉKRADAR MŰKÖDÉSE</h5>
+                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 10px; display: flex; align-items: flex-start;"><i class="fas fa-desktop" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Panel tartalma:</strong> Ez a kártya azokat a környező állomásokat listázza, ahol a mai nap folyamán (éjféltől) csapadékot észleltek.</span></p>
+                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 10px; display: flex; align-items: flex-start;"><i class="fas fa-tint" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Élő adatok:</strong> Ha egy állomásnál éppen esik, azt élénk kiemelés és a 'Most:' felirat jelzi az aktuális intenzitással.</span></p>
+                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 10px; display: flex; align-items: flex-start;"><i class="fas fa-balance-scale-right" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Mérés elve:</strong> Az állomások egy 'billenővödrös' eszközt használnak. Ez egy apró mérleghinta, ami összegyűjti az esőt. Amikor egy adott mennyiség (pl. 0.2 mm) összegyűlik, a vödör megbillen, jelet küld, és a másik fele kezd gyűjteni. Emiatt az első esőcseppek és az adat megjelenése között eltelhet egy kis idő.</span></p>
+                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 0; display: flex; align-items: flex-start;"><i class="fas fa-sync-alt" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Frissítés:</strong> Az állomások adatai ~30 másodpercenként frissülnek, így közel valós idejű képet kaphatsz.</span></p>
                         </div>`;
                     
                     footerHTML = `<div class="precip-card-footer">
+                                    <div class="precip-footer-note">A panelen akkor jelenik meg egy állomás, ha aznap már esett ott eső.</div>
                                     ${tooltipHTML}
                                   </div>`;
+
                     precipCardEl.classList.remove('is-raining-somewhere');
 
                 } else {
@@ -600,8 +608,6 @@
                                         ${isRainingNow ? `<div class="rain-intensity-text">Most: ${intensityText}</div>` : ''}
                                     </div>`;
                         }).join('')}</div>`;
-                    
-                    const isAnyStationRainingNow = stationsWithRainToday.some(s => s.data.metric.precipRate > 0);
                     
                     footerHTML = `<div class="precip-card-footer">
                                     <div class="precip-footer-note">Ezen a kártyán azokat az állomásokat látod ahol ma már esett, vagy éppen most esik.</div>
