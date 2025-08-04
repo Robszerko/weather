@@ -62,10 +62,11 @@
         .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 800px; box-sizing: border-box; margin: 0 auto; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); transition: all 0.6s ease-in-out; }
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
-        .header-container { display: inline-block; background-color: rgba(0, 0, 0, 0.1); padding: 8px 24px; border-radius: 12px; margin-bottom: 4px; box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2); transition: all 0.6s; }
+        .header-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
-        .station-subtitle { font-size: 13px; font-weight: 500; color: var(--current-text-muted-color); line-height: 1.2; margin-top: 2px; }
-        .timestamp-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .sky-description { font-size: 15px; font-weight: 500; color: var(--current-text-color); line-height: 1.4; min-height: 2.8em; }
+        .station-subtitle { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); line-height: 1.2; opacity: 0.8; }
+        .timestamp-container { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px;}
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
         .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.7; line-height: 1.4; }
         
@@ -154,6 +155,7 @@
         .precip-card-footer {
             padding: 8px 16px 12px 16px;
             border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3);
+            text-align: center;
         }
         .precip-footer-note {
             font-size: 11px;
@@ -211,6 +213,7 @@
             line-height: 1;
         }
 
+
         .no-rain-message {
             font-size: 15px;
             font-weight: 500;
@@ -229,9 +232,6 @@
         }
         .station-tooltip-content { visibility: hidden; opacity: 0; width: 280px; background-color: var(--bg-widget-night); color: var(--text-primary-night); padding: 10px; border-radius: 8px; border: 1px solid var(--border-widget-night); position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s, visibility 0.3s; pointer-events: none; font-size: 12px; line-height: 1.5; }
         .station-tooltip-container:hover .station-tooltip-content { visibility: visible; opacity: 1; }
-        .rain-rules-box { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); }
-        .rain-rules-box h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; color: var(--current-text-muted-color); margin: 0 0 6px 0; }
-        .rain-rules-box p { font-size: 12px; color: var(--current-text-muted-color); margin: 2px 0; line-height: 1.5; text-align: left; padding-left: 10px; }
         
         /* ======================================== */
 
@@ -418,10 +418,57 @@
             } catch (error) { throw error; }
         }
 
+        // ÚJ: Intelligens égkép generáló függvény
+        function generateIntelligentSkyDescription(pwsData, generalData) {
+            if (!pwsData || !generalData) return "Adatok betöltése...";
+
+            let baseDescription = generalData.wxPhraseLong || "Az égkép jelenleg nem meghatározható.";
+            
+            // 1. Prioritás: Csapadék
+            if (pwsData.metric && pwsData.metric.precipRate > 0) {
+                const intensityText = getPrecipIntensityDescription(pwsData.metric.precipRate);
+                baseDescription = `Jelenleg ${intensityText.toLowerCase()} esik.`;
+                // Ha esik, a légnyomás tendenciája extra kontextust ad
+                 if (generalData.pressureTendencyCode === 1) baseDescription += " Egy frontrendszer van a közelben.";
+                 return baseDescription;
+            }
+
+            // 2. Prioritás: Köd, pára
+            if (pwsData.humidity > 95 && (pwsData.metric.temp - pwsData.metric.dewpt) < 2) {
+                if (generalData.visibility < 1) return "Sűrű köd képződött, a látótávolság jelentősen lecsökkent.";
+                if (generalData.visibility < 5) return "Párás, ködfátyolos idő, csökkent látási viszonyokkal.";
+            }
+
+            // 3. Prioritás: Nappali égkép napsugárzás alapján
+            if (generalData.dayOrNight === 'D' && pwsData.solarRadiation != null && STATIONS[activeDisplayStationKey].provides.includes('solar')) {
+                const solar = pwsData.solarRadiation;
+                if (solar > 700) baseDescription = "A nap zavartalanul süt, az égbolt tiszta.";
+                else if (solar > 300) baseDescription = "Változóan felhős az ég, a nap időnként előbújik.";
+                else if (solar > 100) baseDescription = "Erősen felhős az ég, a napot felhők takarják.";
+                else baseDescription = "Borult az ég, vastag felhőzet takarja a napot.";
+            }
+
+            // 4. Kiegészítés a légnyomás-tendenciával
+            let pressureText = "";
+            if (generalData.pressureTendencyCode === 0) pressureText = "A légnyomás emelkedik, ami nyugodt, stabil időt jelez.";
+            if (generalData.pressureTendencyCode === 1) pressureText = "A légnyomás csökken, ami időjárás-változást jelezhet.";
+            if (generalData.pressureTendencyCode === 2) pressureText = "A légnyomás stabil, nem várható hirtelen változás.";
+
+            return `${baseDescription} ${pressureText}`;
+        }
+
+
         function initializeWeatherDisplayDOM() {
             weatherDisplayEl.innerHTML = `<div class="widget-header">
-                <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div><div class="station-subtitle" id="station-subtitle-text"></div></div>
-                <div class="timestamp-container"><span class="timestamp" id="timestamp-text">--:--:--</span><div class="attribution-line">© Copyright by: Robi</div></div>
+                <div class="header-container">
+                    <div class="location-title" id="location-title-text">Nyíregyháza és környéke</div>
+                    <div class="sky-description" id="sky-description-text">Adatok betöltése...</div>
+                    <div class="station-subtitle" id="station-subtitle-text"></div>
+                </div>
+                <div class="timestamp-container">
+                    <span class="timestamp" id="timestamp-text">--:--:--</span>
+                    <div class="attribution-line">© Copyright by: Robi</div>
+                </div>
             </div>
             <div class="station-status-container">
                 ${Object.keys(STATIONS).filter(key => STATIONS[key].provides.length > 1).map(key => `
@@ -515,7 +562,9 @@
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
             if (!general || !sunCalc || !obs) return;
 
-            document.getElementById('station-subtitle-text').textContent = `Kiválasztott állomás: ${STATIONS[activeDisplayStationKey].displayName}`;
+            // Intelligens égkép és forrás kijelzése
+            document.getElementById('sky-description-text').textContent = generateIntelligentSkyDescription(obs, general);
+            document.getElementById('station-subtitle-text').textContent = `Adatok forrása: ${STATIONS[activeDisplayStationKey].displayName}`;
             document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`;
             
             const tempCardEl = document.querySelector('.temp-card');
@@ -560,23 +609,12 @@
                                     </div>`;
 
                 if (stationsWithRainToday.length === 0) {
-                     mainContentHTML = `<div class="no-rain-container" style="padding: 10px 0;">
-                            <i class="fas fa-cloud-sun no-rain-icon" style="font-size: 38px; opacity: 0.25;"></i>
-                            <div class="no-rain-message" style="margin-top: 6px;">A környéken jelenleg száraz az idő.</div>
-                        </div>
-                        <div class="rain-rules-box" style="margin-top: 0; padding: 12px 14px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); text-align: left;">
-                            <h5 style="text-align: center; margin-bottom: 12px; letter-spacing: 0.5px;">A CSAPADÉKRADAR MŰKÖDÉSE</h5>
-                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 10px; display: flex; align-items: flex-start;"><i class="fas fa-desktop" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Panel tartalma:</strong> Ez a kártya azokat a környező állomásokat listázza, ahol a mai nap folyamán (éjféltől) csapadékot észleltek.</span></p>
-                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 10px; display: flex; align-items: flex-start;"><i class="fas fa-tint" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Élő adatok:</strong> Ha egy állomásnál éppen esik, azt élénk kiemelés és a 'Most:' felirat jelzi az aktuális intenzitással.</span></p>
-                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 10px; display: flex; align-items: flex-start;"><i class="fas fa-balance-scale-right" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Mérés elve:</strong> Az állomások egy 'billenővödrös' eszközt használnak. Ez egy apró mérleghinta, ami összegyűjti az esőt. Amikor egy adott mennyiség (pl. 0.2 mm) összegyűlik, a vödör megbillen, jelet küld, és a másik fele kezd gyűjteni. Emiatt az első esőcseppek és az adat megjelenése között eltelhet egy kis idő.</span></p>
-                            <p style="font-size: 12.5px; line-height: 1.7; font-weight: 500; margin-bottom: 0; display: flex; align-items: flex-start;"><i class="fas fa-sync-alt" style="margin-right: 10px; width: 14px; text-align: center; opacity: 0.7; margin-top: 5px;"></i><span><strong>Frissítés:</strong> Az állomások adatai ~30 másodpercenként frissülnek, így közel valós idejű képet kaphatsz.</span></p>
+                    mainContentHTML = `<div class="no-rain-container">
+                            <i class="fas fa-droplet no-rain-icon"></i>
+                            <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
                         </div>`;
                     
-                    footerHTML = `<div class="precip-card-footer">
-                                    <div class="precip-footer-note">A panelen akkor jelenik meg egy állomás, ha aznap már esett ott eső.</div>
-                                    ${tooltipHTML}
-                                  </div>`;
-
+                    footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`;
                     precipCardEl.classList.remove('is-raining-somewhere');
 
                 } else {
@@ -610,7 +648,7 @@
                         }).join('')}</div>`;
                     
                     footerHTML = `<div class="precip-card-footer">
-                                    <div class="precip-footer-note">Ezen a kártyán azokat az állomásokat látod ahol ma már esett, vagy éppen most esik.</div>
+                                    <div class="precip-footer-note">Azok az állomások is láthatóak, ahol ma már esett az eső.</div>
                                     ${tooltipHTML}
                                   </div>`;
 
