@@ -64,7 +64,8 @@
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
         .header-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
-        .sky-description { font-size: 15px; font-weight: 500; color: var(--current-text-color); line-height: 1.4; min-height: 2.8em; }
+        .sky-description-container { min-height: 4.2em; text-align: center; } /* Új konténer az égképnek */
+        .sky-description { font-size: 15px; font-weight: 500; color: var(--current-text-color); line-height: 1.4; }
         .station-subtitle { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); line-height: 1.2; opacity: 0.8; }
         .timestamp-container { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px;}
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
@@ -418,29 +419,24 @@
             } catch (error) { throw error; }
         }
 
-        // ÚJ: Intelligens égkép generáló függvény
         function generateIntelligentSkyDescription(pwsData, generalData) {
             if (!pwsData || !generalData) return "Adatok betöltése...";
 
             let baseDescription = generalData.wxPhraseLong || "Az égkép jelenleg nem meghatározható.";
             
-            // 1. Prioritás: Csapadék
             if (pwsData.metric && pwsData.metric.precipRate > 0) {
                 const intensityText = getPrecipIntensityDescription(pwsData.metric.precipRate);
                 baseDescription = `Jelenleg ${intensityText.toLowerCase()} esik.`;
-                // Ha esik, a légnyomás tendenciája extra kontextust ad
                  if (generalData.pressureTendencyCode === 1) baseDescription += " Egy frontrendszer van a közelben.";
                  return baseDescription;
             }
 
-            // 2. Prioritás: Köd, pára
             if (pwsData.humidity > 95 && (pwsData.metric.temp - pwsData.metric.dewpt) < 2) {
                 if (generalData.visibility < 1) return "Sűrű köd képződött, a látótávolság jelentősen lecsökkent.";
                 if (generalData.visibility < 5) return "Párás, ködfátyolos idő, csökkent látási viszonyokkal.";
             }
 
-            // 3. Prioritás: Nappali égkép napsugárzás alapján
-            if (generalData.dayOrNight === 'D' && pwsData.solarRadiation != null && STATIONS[activeDisplayStationKey].provides.includes('solar')) {
+            if (generalData.dayOrNight === 'D' && pwsData.solarRadiation != null) {
                 const solar = pwsData.solarRadiation;
                 if (solar > 700) baseDescription = "A nap zavartalanul süt, az égbolt tiszta.";
                 else if (solar > 300) baseDescription = "Változóan felhős az ég, a nap időnként előbújik.";
@@ -448,7 +444,6 @@
                 else baseDescription = "Borult az ég, vastag felhőzet takarja a napot.";
             }
 
-            // 4. Kiegészítés a légnyomás-tendenciával
             let pressureText = "";
             if (generalData.pressureTendencyCode === 0) pressureText = "A légnyomás emelkedik, ami nyugodt, stabil időt jelez.";
             if (generalData.pressureTendencyCode === 1) pressureText = "A légnyomás csökken, ami időjárás-változást jelezhet.";
@@ -462,8 +457,10 @@
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza és környéke</div>
-                    <div class="sky-description" id="sky-description-text">Adatok betöltése...</div>
-                    <div class="station-subtitle" id="station-subtitle-text"></div>
+                    <div class="sky-description-container" id="sky-description-container">
+                        <div class="sky-description" id="sky-description-text"></div>
+                        <div class="station-subtitle" id="station-subtitle-text"></div>
+                    </div>
                 </div>
                 <div class="timestamp-container">
                     <span class="timestamp" id="timestamp-text">--:--:--</span>
@@ -562,9 +559,24 @@
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
             if (!general || !sunCalc || !obs) return;
 
-            // Intelligens égkép és forrás kijelzése
-            document.getElementById('sky-description-text').textContent = generateIntelligentSkyDescription(obs, general);
-            document.getElementById('station-subtitle-text').textContent = `Adatok forrása: ${STATIONS[activeDisplayStationKey].displayName}`;
+            // --- Intelligens égkép logika (prioritással és elrejtéssel) ---
+            const skyDescContainer = document.getElementById('sky-description-container');
+            const skyDescEl = document.getElementById('sky-description-text');
+            const skySourceEl = document.getElementById('station-subtitle-text');
+
+            const priorityOrder = ['KOSSUTH', 'KERT_UTCA'];
+            const skyDataSourceKey = priorityOrder.find(key => STATIONS[key] && STATIONS[key].isOnline && STATIONS[key].data);
+
+            if (skyDataSourceKey) {
+                const skyDataSource = STATIONS[skyDataSourceKey].data;
+                skyDescEl.textContent = generateIntelligentSkyDescription(skyDataSource, general);
+                skySourceEl.textContent = `Égkép forrása: ${STATIONS[skyDataSourceKey].displayName}`;
+                skyDescContainer.classList.remove('is-hidden');
+            } else {
+                skyDescContainer.classList.add('is-hidden');
+            }
+            // --- Logika vége ---
+            
             document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`;
             
             const tempCardEl = document.querySelector('.temp-card');
@@ -598,7 +610,6 @@
             if (precipCardEl) {
                 const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
                 const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0);
-                
                 let mainContentHTML = '';
                 let footerHTML = '';
 
@@ -613,31 +624,16 @@
                             <i class="fas fa-droplet no-rain-icon"></i>
                             <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
                         </div>`;
-                    
                     footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`;
                     precipCardEl.classList.remove('is-raining-somewhere');
-
                 } else {
-                    const priorityOrder = ['KOSSUTH', 'NYIREGYHAZI_UT', 'SOSTOHEGY', 'BORBANYA'];
-                    const getPriority = (station) => {
-                        const key = Object.keys(STATIONS).find(k => STATIONS[k].id === station.id);
-                        const index = priorityOrder.indexOf(key);
-                        return index === -1 ? Infinity : index;
-                    };
-
                     mainContentHTML = `<div class="precip-station-list">${stationsWithRainToday
-                        .sort((a, b) => {
-                            const priorityA = getPriority(a);
-                            const priorityB = getPriority(b);
-                            if (priorityA !== priorityB) return priorityA - priorityB;
-                            return b.data.metric.precipTotal - a.data.metric.precipTotal;
-                        })
+                        .sort((a, b) => (b.data.metric.precipTotal - a.data.metric.precipTotal))
                         .map(station => {
                             const isRainingNow = station.data.metric.precipRate > 0;
                             const itemClass = isRainingNow ? 'precip-station-list-item is-raining-now' : 'precip-station-list-item';
                             const intensityText = getPrecipIntensityDescription(station.data.metric.precipRate);
                             const displayName = station.displayNameShort || station.displayName;
-                            
                             return `<div class="${itemClass}">
                                         <div class="station-main-row">
                                             <span class="precip-station-name">${displayName}</span>
@@ -651,7 +647,6 @@
                                     <div class="precip-footer-note">Azok az állomások is láthatóak, ahol ma már esett az eső.</div>
                                     ${tooltipHTML}
                                   </div>`;
-
                     precipCardEl.classList.add('is-raining-somewhere');
                 }
                 
@@ -659,9 +654,7 @@
                         <div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div>
                         <h4 class="precip-header-title">CsapadékRadar</h4>
                     </div>
-                    <div class="precip-card-content">
-                        ${mainContentHTML}
-                    </div>
+                    <div class="precip-card-content">${mainContentHTML}</div>
                     ${footerHTML}`;
             }
             
@@ -674,12 +667,10 @@
         
         function renderPrecipitationForecast() {
             const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull) return;
-            
             const forecastLiveTimestampEl = document.getElementById('forecast-live-timestamp');
             if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) {
                 forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess), true)}`;
             }
-
             for (let i = 0; i < 7; i++) {
                 const chanceEl = document.getElementById(`precip-chance-text-${i}`); const barEl = document.getElementById(`precip-bar-${i}`); const amountEl = document.getElementById(`precip-amount-text-${i}`); const labelEl = document.getElementById(`precip-hour-label-${i}`);
                 if (chanceEl && barEl && amountEl && labelEl) {
@@ -696,7 +687,6 @@
                 if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); 
                 return; 
             }
-            
             let forecastHTML = '';
             hourlyDataFull.forEach(hour => {
                 let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight);
@@ -725,7 +715,6 @@
                     </div>
                 </div>`;
             });
-            
             if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; 
             if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); 
             if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden');
