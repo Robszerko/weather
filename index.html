@@ -64,9 +64,6 @@
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
         .header-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
-        .sky-description-container { min-height: 4.2em; text-align: center; } /* Új konténer az égképnek */
-        .sky-description { font-size: 15px; font-weight: 500; color: var(--current-text-color); line-height: 1.4; }
-        .station-subtitle { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); line-height: 1.2; opacity: 0.8; }
         .timestamp-container { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px;}
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
         .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.7; line-height: 1.4; }
@@ -197,29 +194,40 @@
         .precip-station-value strong { font-weight: 700; font-size: 14px; color: var(--current-text-color); margin-left: 4px; }
         .rain-intensity-text { font-size: 12px; font-weight: 600; font-style: italic; color: var(--current-text-color); margin-top: 3px; }
 
-        .no-rain-container {
+        /* ÚJ: Részletes magyarázó doboz stílusai */
+        .precip-explanation-container {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-start;
+            text-align: left;
             gap: 10px;
-            padding: 12px 0;
-            text-align: center;
+            padding: 12px 4px;
         }
-
-        .no-rain-icon {
-            font-size: 44px;
-            color: var(--current-text-muted-color);
-            opacity: 0.25;
-            line-height: 1;
-        }
-
-
-        .no-rain-message {
+        .explanation-title {
             font-size: 15px;
-            font-weight: 500;
+            font-weight: 700;
+            color: var(--current-text-color);
+            margin: 0;
+            width: 100%;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3);
+        }
+        .explanation-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--current-text-color);
+            margin: 5px 0 -5px 0;
+        }
+        .explanation-text {
+            font-size: 12.5px;
+            line-height: 1.6;
             color: var(--current-text-muted-color);
-            margin-bottom: 0;
+            margin: 0;
+        }
+        .explanation-text strong {
+            color: var(--current-text-color);
+            font-weight: 600;
         }
 
         .station-tooltip-container { position: relative; display: inline-block; }
@@ -419,48 +427,10 @@
             } catch (error) { throw error; }
         }
 
-        function generateIntelligentSkyDescription(pwsData, generalData) {
-            if (!pwsData || !generalData) return "Adatok betöltése...";
-
-            let baseDescription = generalData.wxPhraseLong || "Az égkép jelenleg nem meghatározható.";
-            
-            if (pwsData.metric && pwsData.metric.precipRate > 0) {
-                const intensityText = getPrecipIntensityDescription(pwsData.metric.precipRate);
-                baseDescription = `Jelenleg ${intensityText.toLowerCase()} esik.`;
-                 if (generalData.pressureTendencyCode === 1) baseDescription += " Egy frontrendszer van a közelben.";
-                 return baseDescription;
-            }
-
-            if (pwsData.humidity > 95 && (pwsData.metric.temp - pwsData.metric.dewpt) < 2) {
-                if (generalData.visibility < 1) return "Sűrű köd képződött, a látótávolság jelentősen lecsökkent.";
-                if (generalData.visibility < 5) return "Párás, ködfátyolos idő, csökkent látási viszonyokkal.";
-            }
-
-            if (generalData.dayOrNight === 'D' && pwsData.solarRadiation != null) {
-                const solar = pwsData.solarRadiation;
-                if (solar > 700) baseDescription = "A nap zavartalanul süt, az égbolt tiszta.";
-                else if (solar > 300) baseDescription = "Változóan felhős az ég, a nap időnként előbújik.";
-                else if (solar > 100) baseDescription = "Erősen felhős az ég, a napot felhők takarják.";
-                else baseDescription = "Borult az ég, vastag felhőzet takarja a napot.";
-            }
-
-            let pressureText = "";
-            if (generalData.pressureTendencyCode === 0) pressureText = "A légnyomás emelkedik, ami nyugodt, stabil időt jelez.";
-            if (generalData.pressureTendencyCode === 1) pressureText = "A légnyomás csökken, ami időjárás-változást jelezhet.";
-            if (generalData.pressureTendencyCode === 2) pressureText = "A légnyomás stabil, nem várható hirtelen változás.";
-
-            return `${baseDescription} ${pressureText}`;
-        }
-
-
         function initializeWeatherDisplayDOM() {
             weatherDisplayEl.innerHTML = `<div class="widget-header">
                 <div class="header-container">
                     <div class="location-title" id="location-title-text">Nyíregyháza és környéke</div>
-                    <div class="sky-description-container" id="sky-description-container">
-                        <div class="sky-description" id="sky-description-text"></div>
-                        <div class="station-subtitle" id="station-subtitle-text"></div>
-                    </div>
                 </div>
                 <div class="timestamp-container">
                     <span class="timestamp" id="timestamp-text">--:--:--</span>
@@ -559,24 +529,6 @@
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
             if (!general || !sunCalc || !obs) return;
 
-            // --- Intelligens égkép logika (prioritással és elrejtéssel) ---
-            const skyDescContainer = document.getElementById('sky-description-container');
-            const skyDescEl = document.getElementById('sky-description-text');
-            const skySourceEl = document.getElementById('station-subtitle-text');
-
-            const priorityOrder = ['KOSSUTH', 'KERT_UTCA'];
-            const skyDataSourceKey = priorityOrder.find(key => STATIONS[key] && STATIONS[key].isOnline && STATIONS[key].data);
-
-            if (skyDataSourceKey) {
-                const skyDataSource = STATIONS[skyDataSourceKey].data;
-                skyDescEl.textContent = generateIntelligentSkyDescription(skyDataSource, general);
-                skySourceEl.textContent = `Égkép forrása: ${STATIONS[skyDataSourceKey].displayName}`;
-                skyDescContainer.classList.remove('is-hidden');
-            } else {
-                skyDescContainer.classList.add('is-hidden');
-            }
-            // --- Logika vége ---
-            
             document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`;
             
             const tempCardEl = document.querySelector('.temp-card');
@@ -620,10 +572,20 @@
                                     </div>`;
 
                 if (stationsWithRainToday.length === 0) {
-                    mainContentHTML = `<div class="no-rain-container">
-                            <i class="fas fa-droplet no-rain-icon"></i>
-                            <div class="no-rain-message">Jelenleg egyetlen figyelt állomáson sem esik.</div>
-                        </div>`;
+                    mainContentHTML = `<div class="precip-explanation-container">
+                        <h5 class="explanation-title">Hogyan működik a Csapadékfigyelő?</h5>
+                        <p class="explanation-text">
+                            Ez a modul nem egy hagyományos, nagy hatótávolságú radar. Ehelyett egy <strong>mikro-hálózatot</strong> használ, amely Nyíregyháza környéki privát időjárás-állomások (PWS) valós idejű adatait gyűjti össze. Amikor valamelyik figyelt állomáson csapadékot észlel a rendszer, az azonnal megjelenik itt.
+                        </p>
+                        <h6 class="explanation-subtitle">A mérés elve és a frissítés</h6>
+                        <p class="explanation-text">
+                            Az állomások egy úgynevezett <strong>billenővödrös csapadékmérővel</strong> vannak felszerelve. Ez egy kis edény, amely meghatározott mennyiségű (pl. 0.2 mm) esővíz összegyűlése után megbillen, és egy elektromos jelet küld. A billenések gyakorisága adja a csapadék intenzitását (mm/óra), az összes billenés pedig a napi összeget. A rendszer <strong>30 másodpercenként</strong> kéri le az adatokat az összes állomásról a maximális pontosság érdekében.
+                        </p>
+                        <h6 class="explanation-subtitle">Mit fog látni, ha esni kezd?</h6>
+                        <p class="explanation-text">
+                            Amint egy állomás esőt jelez, ez a tájékoztató eltűnik, és helyette egy lista jelenik meg. A listában azok az állomások szerepelnek majd, ahol aznap éjfél óta esett az eső. Külön kiemelve láthatja, ha egy helyen <strong>éppen most is esik</strong>, az aktuális intenzitással és a mai napon lehullott teljes csapadékmennyiséggel együtt.
+                        </p>
+                    </div>`;
                     footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`;
                     precipCardEl.classList.remove('is-raining-somewhere');
                 } else {
