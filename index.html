@@ -98,10 +98,6 @@
         .wind-direction-bottom { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
-        /* ======================================== */
-        /* ==     CSAPADÉKRADAR DIZÁJN VÉGSŐ     == */
-        /* ======================================== */
-
         .precip-summary-card {
             display: flex;
             flex-direction: column;
@@ -194,7 +190,6 @@
         .precip-station-value strong { font-weight: 700; font-size: 14px; color: var(--current-text-color); margin-left: 4px; }
         .rain-intensity-text { font-size: 12px; font-weight: 600; font-style: italic; color: var(--current-text-color); margin-top: 3px; }
 
-        /* ÚJ: Részletes magyarázó doboz stílusai */
         .precip-explanation-container {
             display: flex;
             flex-direction: column;
@@ -242,8 +237,6 @@
         .station-tooltip-content { visibility: hidden; opacity: 0; width: 280px; background-color: var(--bg-widget-night); color: var(--text-primary-night); padding: 10px; border-radius: 8px; border: 1px solid var(--border-widget-night); position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s, visibility 0.3s; pointer-events: none; font-size: 12px; line-height: 1.5; }
         .station-tooltip-container:hover .station-tooltip-content { visibility: visible; opacity: 1; }
         
-        /* ======================================== */
-
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .section-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); text-align: left; }
@@ -327,15 +320,15 @@
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
 
         const STATIONS = {
-            // Fő nyíregyházi állomások
-            NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip'], isOnline: false, data: null },
+            // Fő, választható állomások
+            NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
             KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50', displayName: 'Kossuth út 50', displayNameShort: 'Kossuth út', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
             KERT_UTCA: { id: 'INYREG37', name: 'Nyíregyháza Kert utca', displayName: 'Kert u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
             
-            // Csapadékfigyelő állomások
-            SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy (Állatpark)', displayName: 'Sóstóhegy', provides: ['precip'], isOnline: false, data: null },
-            BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', provides: ['precip'], isOnline: false, data: null },
-            OROS_DERUS: { id: 'INYREG35', name: 'Oros Derűs utca', displayName: 'Oros', provides: ['precip'], isOnline: false, data: null },
+            // Tartalék és csapadékfigyelő állomások
+            SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy (Állatpark)', displayName: 'Sóstóhegy', displayNameShort: 'Sóstóhegy', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
+            BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', displayNameShort: 'Borbánya', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
+            OROS_DERUS: { id: 'INYREG35', name: 'Oros Derűs utca', displayName: 'Oros', displayNameShort: 'Oros', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
             KEMECSE: { id: 'IKEMEC1', name: 'Kemecse', displayName: 'Kemecse', provides: ['precip'], isOnline: false, data: null },
             NAGYHALASZ: { id: 'INAGYH4', name: 'Nagyhalász', displayName: 'Nagyhalász', provides: ['precip'], isOnline: false, data: null },
             RAMOCSAHAZA: { id: 'IRAMOC1', name: 'Ramocsaháza', displayName: 'Ramocsaháza', provides: ['precip'], isOnline: false, data: null },
@@ -409,8 +402,34 @@
             if (document.body.dataset.theme !== theme) document.body.dataset.theme = theme;
         }
         async function fetchAdvancedSunCalcData(lat, lon) { const now = new Date(); const sunTimes = SunCalc.getTimes(now, lat, lon); const moonTimes = SunCalc.getMoonTimes(now, lat, lon, true); let nextMoonrise = moonTimes.rise; let nextMoonset = moonTimes.set; if (!nextMoonrise || nextMoonrise < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonrise = SunCalc.getMoonTimes(tomorrow, lat, lon, true).rise; } if (!nextMoonset || nextMoonset < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonset = SunCalc.getMoonTimes(tomorrow, lat, lon, true).set; } return { sunrise: formatTime(sunTimes.sunrise), sunset: formatTime(sunTimes.sunset), moonrise: formatTime(nextMoonrise), moonset: formatTime(nextMoonset) }; }
-        async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); stationConfig.isOnline = true; stationConfig.data = data.observations[0]; } catch (error) { stationConfig.isOnline = false; stationConfig.data = null; } finally { updateStationStatusUI(stationKey); } }
-        async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); lastApiCallTimes.generalConditions = Date.now(); return { skyCoverPhrase: data.cloudCoverPhrase || data.wxPhraseLong || null, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, sunriseTimeLocal: data.sunriseTimeLocal, sunsetTimeLocal: data.sunsetTimeLocal, iconCode: data.iconCode }; }
+        async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); stationConfig.isOnline = true; stationConfig.data = data.observations[0]; } catch (error) { stationConfig.isOnline = false; stationConfig.data = null; } finally { if(isWeatherDisplayInitialized) updateStationStatusUI(stationKey); } }
+        
+        async function fetchGeneralConditionsData(lat, lon) { 
+            const lang = 'hu-HU'; 
+            const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; 
+            const response = await fetch(url); 
+            if (!response.ok) { throw new Error(`API hiba`); } 
+            const data = await response.json(); 
+            lastApiCallTimes.generalConditions = Date.now(); 
+            return { 
+                temperature: data.temperature,
+                relativeHumidity: data.relativeHumidity,
+                windSpeed: data.windSpeed,
+                windDirection: data.windDirection,
+                dewpoint: data.temperatureDewPoint,
+                skyCoverPhrase: data.cloudCoverPhrase || data.wxPhraseLong || null, 
+                wxPhraseLong: data.wxPhraseLong || null, 
+                pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, 
+                visibility: data.visibility, 
+                dayOrNight: data.dayOrNight, 
+                pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), 
+                uvDescription: data.uvDescription || null, 
+                sunriseTimeLocal: data.sunriseTimeLocal, 
+                sunsetTimeLocal: data.sunsetTimeLocal, 
+                iconCode: data.iconCode 
+            }; 
+        }
+
         async function fetchHourlyForecastData(lat, lon) {
             const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
             try {
@@ -438,7 +457,7 @@
                 </div>
             </div>
             <div class="station-status-container">
-                ${Object.keys(STATIONS).filter(key => STATIONS[key].provides.length > 1).map(key => `
+                ${Object.keys(STATIONS).filter(key => ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'].includes(key)).map(key => `
                 <div class="station-selector" id="${key.toLowerCase()}-selector-container">
                     <input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}">
                     <label for="station-select-${key.toLowerCase()}">
@@ -514,10 +533,7 @@
         }
 
         function compileAndRenderDisplayData() {
-            const activeStation = STATIONS[activeDisplayStationKey];
-            if (!activeStation?.isOnline || !activeStation.data) { return; }
-            const displayData = { ...activeStation.data.metric, ...activeStation.data };
-            cachedData.displayPws = displayData;
+            if (!cachedData.displayPws) return;
             renderWeatherData();
             renderPrecipitationForecast();
             renderHourlyForecastData();
@@ -695,26 +711,78 @@
             } catch (e) { /* Hiba csendes kezelése */ } 
         }
 
+        // --- ÚJ, TÖBBSZINTŰ FALLBACK LOGIKÁVAL ELLÁTOTT FŐ FÜGGVÉNY ---
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
+
+            if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
+            
+            // 1. MINDEN állomás adatának lekérése egyszerre
             await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
             
-            const onlineMainStations = Object.keys(STATIONS).filter(k => STATIONS[k].isOnline && STATIONS[k].provides.length > 1);
-            if (!STATIONS[activeDisplayStationKey].isOnline && onlineMainStations.length > 0) {
-                 const fallbackOrder = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'];
-                 activeDisplayStationKey = fallbackOrder.find(key => STATIONS[key].isOnline) || onlineMainStations[0];
-            }
-            
+            // 2. Szükséges API hívások összegyűjtése (Előrejelzés, Általános, Nap/Hold)
             const promises = [];
-            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => {})); }
-            if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); }
-            
-            promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; }));
+            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { 
+                promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
+                    .then(data => { if (data) Object.assign(cachedData.generalConditions, data); })
+                    .catch(e => { console.error("General conditions fetch failed:", e); }));
+            }
+            if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { 
+                promises.push(fetchAndRefreshForecasts()); 
+            }
+            promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
+                .then(data => { cachedData.sunCalc = data; }));
             
             await Promise.allSettled(promises);
-            updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
+
+            // 3. DÖNTÉS: Melyik adatforrást használjuk? (Többszintű logika)
+            const stationSelectorContainer = document.querySelector('.station-status-container');
+            const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'];
+            const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline);
+
+            if (onlinePrimaryStations.length > 0) {
+                // *** 1. ESET: Van online FŐ állomás ***
+                stationSelectorContainer.classList.remove('is-hidden');
+                document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
+                
+                // Ha az aktív állomás offline lett, de van másik online, váltsunk
+                if (!STATIONS[activeDisplayStationKey].isOnline) {
+                     activeDisplayStationKey = onlinePrimaryStations[0];
+                }
+                const activeStation = STATIONS[activeDisplayStationKey];
+                cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
+
+            } else {
+                // *** Nincs online FŐ állomás, keressünk TARTALÉKOT ***
+                const secondaryFallbackOrder = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'];
+                const availableFallbackKey = secondaryFallbackOrder.find(key => STATIONS[key].isOnline);
+
+                if (availableFallbackKey) {
+                    // *** 2. ESET: Van online TARTALÉK állomás ***
+                    stationSelectorContainer.classList.add('is-hidden'); // Nincs választás, ez automatikus
+                    document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
+                    
+                    const fallbackStation = STATIONS[availableFallbackKey];
+                    cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data };
+
+                } else {
+                    // *** 3. ESET: Se fő, se tartalék PWS. Végső fallback a régiós adatra. ***
+                    stationSelectorContainer.classList.add('is-hidden');
+                    document.getElementById('location-title-text').textContent = "Nyíregyháza (Régiós adat)";
+
+                    const general = cachedData.generalConditions;
+                    cachedData.displayPws = {
+                        temp: general.temperature,
+                        heatIndex: null, windSpeed: general.windSpeed, winddir: general.windDirection,
+                        windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity,
+                        pressure: general.pressureAltimeter, solarRadiation: null, uv: null,
+                    };
+                }
+            }
             
-            if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
+            // 4. Frissítés és megjelenítés a kiválasztott adatforrás alapján
+            Object.keys(STATIONS).forEach(key => updateStationStatusUI(key));
+            updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             compileAndRenderDisplayData();
         }
         
