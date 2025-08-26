@@ -528,9 +528,32 @@
         }
 
         function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
+        
+        // ================= JAVÍTOTT RÉSZ =================
         function handleStationChange(event) {
-            const selectedStationKey = event.target.value; if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) { activeDisplayStationKey = selectedStationKey; compileAndRenderDisplayData(); } else if (!STATIONS[selectedStationKey].isOnline) { event.target.checked = false; document.querySelector(`input[value="${activeDisplayStationKey}"]`).checked = true; }
+            const selectedStationKey = event.target.value;
+            // Csak akkor válts, ha egy elérhető és nem azonos állomásra kattintottak
+            if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) {
+                activeDisplayStationKey = selectedStationKey;
+                
+                // Közvetlenül frissítjük a központi adatforrást a kiválasztott állomás adataival
+                const activeStation = STATIONS[activeDisplayStationKey];
+                if (activeStation && activeStation.data) {
+                    cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
+                }
+                
+                // Újrarendereljük a felületet az imént beállított, helyes adatokkal
+                compileAndRenderDisplayData();
+            } else if (!STATIONS[selectedStationKey].isOnline) {
+                // Ha offline állomásra kattint, megakadályozzuk a váltást és visszaállítjuk a régi kijelölést
+                event.target.checked = false;
+                const previouslyActiveRadio = document.querySelector(`input[value="${activeDisplayStationKey}"]`);
+                if (previouslyActiveRadio) {
+                    previouslyActiveRadio.checked = true;
+                }
+            }
         }
+        // ================= JAVÍTÁS VÉGE =================
 
         function compileAndRenderDisplayData() {
             if (!cachedData.displayPws) return;
@@ -738,45 +761,47 @@
             // 3. DÖNTÉS: Melyik adatforrást használjuk? (Többszintű logika)
             const stationSelectorContainer = document.querySelector('.station-status-container');
             const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'];
-            const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline);
-
-            if (onlinePrimaryStations.length > 0) {
-                // *** 1. ESET: Van online FŐ állomás ***
-                stationSelectorContainer.classList.remove('is-hidden');
-                document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
-                
-                // Ha az aktív állomás offline lett, de van másik online, váltsunk
-                if (!STATIONS[activeDisplayStationKey].isOnline) {
-                     activeDisplayStationKey = onlinePrimaryStations[0];
-                }
+            
+            // Itt a logika priorizálja a felhasználó által kiválasztott állomást, ha az online
+            const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline;
+            
+            if (activeStationIsOnline) {
+                // A felhasználó által választott állomás online, használjuk azt
                 const activeStation = STATIONS[activeDisplayStationKey];
                 cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-
+                stationSelectorContainer.classList.remove('is-hidden');
+                document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
             } else {
-                // *** Nincs online FŐ állomás, keressünk TARTALÉKOT ***
-                const secondaryFallbackOrder = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'];
-                const availableFallbackKey = secondaryFallbackOrder.find(key => STATIONS[key].isOnline);
-
-                if (availableFallbackKey) {
-                    // *** 2. ESET: Van online TARTALÉK állomás ***
-                    stationSelectorContainer.classList.add('is-hidden'); // Nincs választás, ez automatikus
+                // A választott állomás offline, keressünk másikat
+                const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline);
+                if (onlinePrimaryStations.length > 0) {
+                    // Van másik fő állomás, ami online. Váltsunk arra.
+                    activeDisplayStationKey = onlinePrimaryStations[0];
+                    const activeStation = STATIONS[activeDisplayStationKey];
+                    cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
+                    stationSelectorContainer.classList.remove('is-hidden');
                     document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
-                    
-                    const fallbackStation = STATIONS[availableFallbackKey];
-                    cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data };
-
                 } else {
-                    // *** 3. ESET: Se fő, se tartalék PWS. Végső fallback a régiós adatra. ***
-                    stationSelectorContainer.classList.add('is-hidden');
-                    document.getElementById('location-title-text').textContent = "Nyíregyháza (Régiós adat)";
+                    // Nincs online fő állomás, keressünk tartalékot
+                    const secondaryFallbackOrder = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'];
+                    const availableFallbackKey = secondaryFallbackOrder.find(key => STATIONS[key].isOnline);
 
-                    const general = cachedData.generalConditions;
-                    cachedData.displayPws = {
-                        temp: general.temperature,
-                        heatIndex: null, windSpeed: general.windSpeed, winddir: general.windDirection,
-                        windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity,
-                        pressure: general.pressureAltimeter, solarRadiation: null, uv: null,
-                    };
+                    if (availableFallbackKey) {
+                        const fallbackStation = STATIONS[availableFallbackKey];
+                        cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data };
+                        stationSelectorContainer.classList.add('is-hidden');
+                        document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
+                    } else {
+                        // Végső eset: régiós adatok használata
+                        stationSelectorContainer.classList.add('is-hidden');
+                        document.getElementById('location-title-text').textContent = "Nyíregyháza (Régiós adat)";
+                        const general = cachedData.generalConditions;
+                        cachedData.displayPws = {
+                            temp: general.temperature, heatIndex: null, windSpeed: general.windSpeed, winddir: general.windDirection,
+                            windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity,
+                            pressure: general.pressureAltimeter, solarRadiation: null, uv: null,
+                        };
+                    }
                 }
             }
             
