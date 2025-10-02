@@ -558,30 +558,29 @@
         
         function updateAnimatedValue(element, newValue) { if (!element) return; if (element.textContent.trim() !== newValue.toString().trim()) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newValue; element.classList.remove('is-flipping'); }, 300); } } }
 
-        // ================= JAVÍTOTT HŐÉRZET LOGIKA =================
+        // ================= JAVÍTOTT HŐÉRZET LOGIKA V2 =================
         function getFeltTemperatureData(obs) {
             const temp = obs.temp;
             const heatIndex = obs.heatIndex;
             const windChill = obs.windChill;
 
-            // Ha nincs hőmérséklet adat, nincs mit megjeleníteni
             if (temp === null || typeof temp === 'undefined') {
                 return { label: 'Hőérzet', value: null };
             }
 
-            // Hideg idő (< 10°C): a szélhűtés az elsődleges
-            // Csak akkor használjuk, ha valóban hidegebbet mutat a mért hőmérsékletnél
-            if (temp < 10 && windChill !== null && typeof windChill !== 'undefined' && windChill < temp) {
+            // Elsődleges: Szélhűtés. Az állomás csak akkor küld `windChill` adatot, ha az releváns.
+            // Ellenőrizzük, hogy a kapott érték valóban alacsonyabb-e, mint a hőmérséklet.
+            if (windChill !== null && typeof windChill !== 'undefined' && windChill < temp) {
                 return { label: 'Szélhűtés', value: windChill };
             }
 
-            // Meleg idő (> 25°C): a hőségindex a mérvadó
-            // Csak akkor használjuk, ha valóban melegebbet mutat a mért hőmérsékletnél
-            if (temp > 25 && heatIndex !== null && typeof heatIndex !== 'undefined' && heatIndex > temp) {
+            // Másodlagos: Hőségindex. Az állomás csak akkor küld `heatIndex` adatot, ha az releváns.
+            // Ellenőrizzük, hogy a kapott érték valóban magasabb-e, mint a hőmérséklet.
+            if (heatIndex !== null && typeof heatIndex !== 'undefined' && heatIndex > temp) {
                 return { label: 'Hőérzet', value: heatIndex };
             }
 
-            // Minden egyéb, mérsékelt esetben a hőérzet megegyezik a valós hőmérséklettel
+            // Végső eset: Ha egyik sem releváns, a hőérzet megegyezik a mért hőmérséklettel.
             return { label: 'Hőérzet', value: temp };
         }
 
@@ -594,24 +593,22 @@
             const tempCardEl = document.querySelector('.temp-card');
             const heatIndexEl = document.getElementById('heat-index-secondary');
 
-            if (tempCardEl && typeof obs.temp !== 'undefined') {
+            if (tempCardEl && typeof obs.temp !== 'undefined' && obs.temp !== null) {
                 updateAnimatedValue(document.getElementById('top-temp-card-value'), formatValue(obs.temp, '', 1));
                 tempCardEl.style.setProperty('--current-temp-bg-color', `var(--${getTemperatureColorName(obs.temp)})`);
                 
-                // Itt használjuk az új, javított logikát
+                // Az új, megbízhatóbb logika használata
                 const feltTempData = getFeltTemperatureData(obs);
                 const feltTempText = `${feltTempData.label}: ${formatValue(feltTempData.value, '°', 1)}`;
                 
                 if (heatIndexEl) {
                     heatIndexEl.textContent = feltTempText;
-                    heatIndexEl.classList.remove('is-hidden'); // Biztosítjuk, hogy mindig látható legyen
                 }
 
             } else {
                 updateAnimatedValue(document.getElementById('top-temp-card-value'), NO_DATA_STRING);
                  if(heatIndexEl) {
                     heatIndexEl.textContent = `Hőérzet: ${NO_DATA_STRING}°`;
-                    heatIndexEl.classList.remove('is-hidden');
                  }
             }
 
