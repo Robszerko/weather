@@ -529,23 +529,18 @@
 
         function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
         
-        // ================= JAVÍTOTT RÉSZ =================
         function handleStationChange(event) {
             const selectedStationKey = event.target.value;
-            // Csak akkor válts, ha egy elérhető és nem azonos állomásra kattintottak
             if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) {
                 activeDisplayStationKey = selectedStationKey;
                 
-                // Közvetlenül frissítjük a központi adatforrást a kiválasztott állomás adataival
                 const activeStation = STATIONS[activeDisplayStationKey];
                 if (activeStation && activeStation.data) {
                     cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
                 }
                 
-                // Újrarendereljük a felületet az imént beállított, helyes adatokkal
                 compileAndRenderDisplayData();
             } else if (!STATIONS[selectedStationKey].isOnline) {
-                // Ha offline állomásra kattint, megakadályozzuk a váltást és visszaállítjuk a régi kijelölést
                 event.target.checked = false;
                 const previouslyActiveRadio = document.querySelector(`input[value="${activeDisplayStationKey}"]`);
                 if (previouslyActiveRadio) {
@@ -553,7 +548,6 @@
                 }
             }
         }
-        // ================= JAVÍTÁS VÉGE =================
 
         function compileAndRenderDisplayData() {
             if (!cachedData.displayPws) return;
@@ -564,6 +558,33 @@
         
         function updateAnimatedValue(element, newValue) { if (!element) return; if (element.textContent.trim() !== newValue.toString().trim()) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newValue; element.classList.remove('is-flipping'); }, 300); } } }
 
+        // ================= JAVÍTOTT HŐÉRZET LOGIKA =================
+        function getFeltTemperatureData(obs) {
+            const temp = obs.temp;
+            const heatIndex = obs.heatIndex;
+            const windChill = obs.windChill;
+
+            // Ha nincs hőmérséklet adat, nincs mit megjeleníteni
+            if (temp === null || typeof temp === 'undefined') {
+                return { label: 'Hőérzet', value: null };
+            }
+
+            // Hideg idő (< 10°C): a szélhűtés az elsődleges
+            // Csak akkor használjuk, ha valóban hidegebbet mutat a mért hőmérsékletnél
+            if (temp < 10 && windChill !== null && typeof windChill !== 'undefined' && windChill < temp) {
+                return { label: 'Szélhűtés', value: windChill };
+            }
+
+            // Meleg idő (> 25°C): a hőségindex a mérvadó
+            // Csak akkor használjuk, ha valóban melegebbet mutat a mért hőmérsékletnél
+            if (temp > 25 && heatIndex !== null && typeof heatIndex !== 'undefined' && heatIndex > temp) {
+                return { label: 'Hőérzet', value: heatIndex };
+            }
+
+            // Minden egyéb, mérsékelt esetben a hőérzet megegyezik a valós hőmérséklettel
+            return { label: 'Hőérzet', value: temp };
+        }
+
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
             if (!general || !sunCalc || !obs) return;
@@ -571,17 +592,31 @@
             document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`;
             
             const tempCardEl = document.querySelector('.temp-card');
-            if (tempCardEl && obs.temp !== undefined) {
+            const heatIndexEl = document.getElementById('heat-index-secondary');
+
+            if (tempCardEl && typeof obs.temp !== 'undefined') {
                 updateAnimatedValue(document.getElementById('top-temp-card-value'), formatValue(obs.temp, '', 1));
                 tempCardEl.style.setProperty('--current-temp-bg-color', `var(--${getTemperatureColorName(obs.temp)})`);
-                document.getElementById('heat-index-secondary').textContent = `Hőérzet: ${formatValue(obs.heatIndex, '°', 1)}`;
+                
+                // Itt használjuk az új, javított logikát
+                const feltTempData = getFeltTemperatureData(obs);
+                const feltTempText = `${feltTempData.label}: ${formatValue(feltTempData.value, '°', 1)}`;
+                
+                if (heatIndexEl) {
+                    heatIndexEl.textContent = feltTempText;
+                    heatIndexEl.classList.remove('is-hidden'); // Biztosítjuk, hogy mindig látható legyen
+                }
+
             } else {
                 updateAnimatedValue(document.getElementById('top-temp-card-value'), NO_DATA_STRING);
-                 document.getElementById('heat-index-secondary').textContent = `Hőérzet: ${NO_DATA_STRING}°`;
+                 if(heatIndexEl) {
+                    heatIndexEl.textContent = `Hőérzet: ${NO_DATA_STRING}°`;
+                    heatIndexEl.classList.remove('is-hidden');
+                 }
             }
 
             const windCenterEl = document.getElementById('wind-data-center');
-            if (windCenterEl && obs.windSpeed !== undefined && obs.windSpeed !== null) {
+            if (windCenterEl && typeof obs.windSpeed !== 'undefined' && obs.windSpeed !== null) {
                 const windSpeed = obs.windSpeed || 0;
                 windCenterEl.style.borderColor = `var(--wind-${getWindColorName(windSpeed)})`;
                 const speedMainEl = document.getElementById('wind-speed-main-value');
@@ -593,8 +628,9 @@
                  updateAnimatedValue(document.getElementById('wind-speed-main-value'), NO_DATA_STRING);
                  updateAnimatedValue(document.getElementById('wind-direction-bottom'), '-');
                  updateAnimatedValue(document.getElementById('wind-gust-value'), NO_DATA_STRING);
-                 windCenterEl.style.borderColor = `var(--wind-calm)`;
-                 document.getElementById('wind-speed-main-value').style.color = `var(--wind-calm)`;
+                 if (windCenterEl) windCenterEl.style.borderColor = `var(--wind-calm)`;
+                 const speedMainEl = document.getElementById('wind-speed-main-value');
+                 if (speedMainEl) speedMainEl.style.color = `var(--wind-calm)`;
             }
 
             const precipCardEl = document.getElementById('precip-summary-card');
@@ -734,16 +770,13 @@
             } catch (e) { /* Hiba csendes kezelése */ } 
         }
 
-        // --- ÚJ, TÖBBSZINTŰ FALLBACK LOGIKÁVAL ELLÁTOTT FŐ FÜGGVÉNY ---
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
             const now = Date.now();
 
             if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
             
-            // 1. MINDEN állomás adatának lekérése egyszerre
             await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
             
-            // 2. Szükséges API hívások összegyűjtése (Előrejelzés, Általános, Nap/Hold)
             const promises = [];
             if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { 
                 promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
@@ -758,54 +791,52 @@
             
             await Promise.allSettled(promises);
 
-            // 3. DÖNTÉS: Melyik adatforrást használjuk? (Többszintű logika)
             const stationSelectorContainer = document.querySelector('.station-status-container');
             const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'];
             
-            // Itt a logika priorizálja a felhasználó által kiválasztott állomást, ha az online
             const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline;
             
             if (activeStationIsOnline) {
-                // A felhasználó által választott állomás online, használjuk azt
                 const activeStation = STATIONS[activeDisplayStationKey];
                 cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                stationSelectorContainer.classList.remove('is-hidden');
-                document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
+                if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden');
+                const locationTitle = document.getElementById('location-title-text');
+                if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke";
             } else {
-                // A választott állomás offline, keressünk másikat
                 const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline);
                 if (onlinePrimaryStations.length > 0) {
-                    // Van másik fő állomás, ami online. Váltsunk arra.
                     activeDisplayStationKey = onlinePrimaryStations[0];
                     const activeStation = STATIONS[activeDisplayStationKey];
                     cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                    stationSelectorContainer.classList.remove('is-hidden');
-                    document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
+                    if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden');
+                    const locationTitle = document.getElementById('location-title-text');
+                    if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke";
                 } else {
-                    // Nincs online fő állomás, keressünk tartalékot
                     const secondaryFallbackOrder = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'];
                     const availableFallbackKey = secondaryFallbackOrder.find(key => STATIONS[key].isOnline);
 
                     if (availableFallbackKey) {
                         const fallbackStation = STATIONS[availableFallbackKey];
                         cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data };
-                        stationSelectorContainer.classList.add('is-hidden');
-                        document.getElementById('location-title-text').textContent = "Nyíregyháza és környéke";
+                        if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden');
+                        const locationTitle = document.getElementById('location-title-text');
+                        if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke";
                     } else {
-                        // Végső eset: régiós adatok használata
-                        stationSelectorContainer.classList.add('is-hidden');
-                        document.getElementById('location-title-text').textContent = "Nyíregyháza (Régiós adat)";
+                        if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden');
+                        const locationTitle = document.getElementById('location-title-text');
+                        if (locationTitle) locationTitle.textContent = "Nyíregyháza (Régiós adat)";
                         const general = cachedData.generalConditions;
-                        cachedData.displayPws = {
-                            temp: general.temperature, heatIndex: null, windSpeed: general.windSpeed, winddir: general.windDirection,
-                            windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity,
-                            pressure: general.pressureAltimeter, solarRadiation: null, uv: null,
-                        };
+                        if (general) {
+                            cachedData.displayPws = {
+                                temp: general.temperature, heatIndex: null, windChill: null, windSpeed: general.windSpeed, winddir: general.windDirection,
+                                windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity,
+                                pressure: general.pressureAltimeter, solarRadiation: null, uv: null,
+                            };
+                        }
                     }
                 }
             }
             
-            // 4. Frissítés és megjelenítés a kiválasztott adatforrás alapján
             Object.keys(STATIONS).forEach(key => updateStationStatusUI(key));
             updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
             compileAndRenderDisplayData();
