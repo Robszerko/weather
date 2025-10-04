@@ -413,6 +413,7 @@
             lastApiCallTimes.generalConditions = Date.now(); 
             return { 
                 temperature: data.temperature,
+                temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, // MÓDOSÍTÁS: Hőérzet adat lekérése
                 relativeHumidity: data.relativeHumidity,
                 windSpeed: data.windSpeed,
                 windDirection: data.windDirection,
@@ -558,32 +559,6 @@
         
         function updateAnimatedValue(element, newValue) { if (!element) return; if (element.textContent.trim() !== newValue.toString().trim()) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newValue; element.classList.remove('is-flipping'); }, 300); } } }
 
-        // ================= JAVÍTOTT HŐÉRZET LOGIKA V2 =================
-        function getFeltTemperatureData(obs) {
-            const temp = obs.temp;
-            const heatIndex = obs.heatIndex;
-            const windChill = obs.windChill;
-
-            if (temp === null || typeof temp === 'undefined') {
-                return { label: 'Hőérzet', value: null };
-            }
-
-            // Elsődleges: Szélhűtés. Az állomás csak akkor küld `windChill` adatot, ha az releváns.
-            // Ellenőrizzük, hogy a kapott érték valóban alacsonyabb-e, mint a hőmérséklet.
-            if (windChill !== null && typeof windChill !== 'undefined' && windChill < temp) {
-                return { label: 'Szélhűtés', value: windChill };
-            }
-
-            // Másodlagos: Hőségindex. Az állomás csak akkor küld `heatIndex` adatot, ha az releváns.
-            // Ellenőrizzük, hogy a kapott érték valóban magasabb-e, mint a hőmérséklet.
-            if (heatIndex !== null && typeof heatIndex !== 'undefined' && heatIndex > temp) {
-                return { label: 'Hőérzet', value: heatIndex };
-            }
-
-            // Végső eset: Ha egyik sem releváns, a hőérzet megegyezik a mért hőmérséklettel.
-            return { label: 'Hőérzet', value: temp };
-        }
-
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
             if (!general || !sunCalc || !obs) return;
@@ -597,9 +572,11 @@
                 updateAnimatedValue(document.getElementById('top-temp-card-value'), formatValue(obs.temp, '', 1));
                 tempCardEl.style.setProperty('--current-temp-bg-color', `var(--${getTemperatureColorName(obs.temp)})`);
                 
-                // Az új, megbízhatóbb logika használata
-                const feltTempData = getFeltTemperatureData(obs);
-                const feltTempText = `${feltTempData.label}: ${formatValue(feltTempData.value, '°', 1)}`;
+                // MÓDOSÍTÁS: Hőérzet a központi API-ból
+                let feltTempText = `Hőérzet: ${NO_DATA_STRING}°`; // Alapértelmezett szöveg
+                if (general && typeof general.temperatureFeelsLike !== 'undefined' && general.temperatureFeelsLike !== null) {
+                    feltTempText = `Hőérzet: ${formatValue(general.temperatureFeelsLike, '°', 1)}`;
+                }
                 
                 if (heatIndexEl) {
                     heatIndexEl.textContent = feltTempText;
