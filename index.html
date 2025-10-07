@@ -15,90 +15,88 @@
             --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.4) 0%, rgba(225, 238, 252, 0.3) 100%);
             --border-widget-day: rgba(0, 122, 255, 0.15);
             
-            /* MÓDOSÍTÁS: Jobban látható szürke színek */
+            /* Jobban látható szürke színek (változatlan) */
             --accent-interactive-night: #00BFFF;
             --text-primary-night: #EAEAEA;
-            --text-secondary-night: #BCCCDC; /* Világosabb szürke */
+            --text-secondary-night: #BCCCDC;
             --accent-interactive-day: #007AFF;
             --text-primary-day: #111827;
-            --text-secondary-day: #374151;  /* Kontrasztosabb sötétszürke */
+            --text-secondary-day: #374151;
 
             --cloud-base-color: #f5f5f5;
             --cloud-shadow-color: #d8d8d8;
             
-            /* Hőmérsékletfüggő színek (változatlan) */
+            /* Színpaletta Alapok (változatlan) */
             --hot: #EF4444; --warm: #F97316; --mild: #22C55E; --cool: #3B82F6; --cold: #6366F1;
             --current-temp-bg-color: var(--mild);
-
-            /* Szél Színskála (változatlan) */
             --wind-calm: #6366F1; --wind-light: #3B82F6; --wind-moderate: #22C55E; --wind-strong: #F97316;
             --current-wind-color: var(--wind-calm);
-            
-            /* Aktuális Téma (JS által felülírva) */
             --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: var(--accent-interactive-night); --current-widget-bg: var(--bg-widget-night); --current-widget-border: var(--border-widget-night); --current-container-border-color: var(--border-widget-night);
         }
         
         /* Dinamikus égbolt és időjárás effektek stílusai */
         #sky-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: linear-gradient(to bottom, #0B1120, #020617); transition: background 1s ease-out; }
-        #celestial-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-        #sun, #moon { position: absolute; width: 100px; height: 100px; border-radius: 50%; will-change: transform, background, box-shadow; transition: opacity 1.5s ease; opacity: 0; z-index: 2; }
-        #sun { background: radial-gradient(circle, #FFFFFF 20%, #FFFACD 50%, #FFD700 100%); box-shadow: 0 0 60px #fff, 0 0 120px #FFFACD, 0 0 200px #FFD700; transition: all 0.5s ease-out; position: relative; }
+        
+        /* MÓDOSÍTÁS: A z-index hierarchia javítása */
+        #stars-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; opacity: 0; z-index: 1; transition: opacity 3s ease-in-out; }
+        .star { position: absolute; background-color: white; border-radius: 50%; }
+
+        #sun, #moon { position: absolute; width: 100px; height: 100px; border-radius: 50%; will-change: transform, background, box-shadow; transition: opacity 1.5s ease; opacity: 0; z-index: 2; background-size: cover; background-position: center; }
+        #sun { background-image: url(https://i.imgur.com/e5k06t3.png); background-blend-mode: overlay; box-shadow: 0 0 60px #fff, 0 0 120px #FFFACD, 0 0 200px #FFD700; transition: all 0.5s ease-out; position: relative; }
         #sun::after { content: ''; position: absolute; top: -25%; left: -25%; width: 150%; height: 150%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 224, 0.5) 30%, transparent 70%); filter: blur(25px); animation: sun-pulse 4s ease-in-out infinite; z-index: -1; transform-origin: center center; transition: all 0.5s ease-out;}
         
         @keyframes sun-pulse { 0% { transform: scale(0.95); opacity: 0.7; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.7; } }
         @keyframes move-cloud {
-            from { transform: translateX(-250px); }
-            to { transform: translateX(calc(100vw + 250px)); }
+            from { transform: translateX(-350px); }
+            to { transform: translateX(calc(100vw + 350px)); }
         }
 
         #sun.is-occluded {
             box-shadow: 0 0 50px rgba(255, 220, 150, 0.5);
-            background: radial-gradient(circle, rgba(255, 255, 224, 0.8) 20%, transparent 80%);
+            background-blend-mode: soft-light;
         }
-        #sun.is-occluded::after {
-            transform: scale(0.5);
-            opacity: 0;
+        #sun.is-occluded::after { transform: scale(0.5); opacity: 0; }
+
+        #moon { background-color: #F0EAD6; background-image: url(https://i.imgur.com/gFS36zJ.png); background-blend-mode: multiply; box-shadow: 0 0 20px rgba(226, 232, 240, 0.5), 0 0 40px rgba(148, 163, 184, 0.5), inset 5px -5px 20px rgba(0,0,0,0.15); overflow: hidden; transition: opacity 1.5s ease, box-shadow 1s ease; }
+        #moon-phase-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; will-change: background, transform; transition: background 0.1s linear; }
+        
+        #clouds-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 3; opacity: 0; transition: opacity 3s ease-in-out; }
+        
+        /* MÓDOSÍTÁS: Új, rétegzett felhőstruktúra */
+        .cloud-group {
+            position: absolute;
+            will-change: transform;
+            animation: move-cloud linear infinite;
+            filter: none;
+            transition: filter 0.5s ease-out;
+        }
+        .cloud-group.is-illuminated {
+            filter: drop-shadow(0 0 20px rgba(255, 255, 240, 0.9)) drop-shadow(0 0 35px rgba(255, 220, 150, 0.7));
         }
 
-        #moon { background-color: #F0EAD6; background-image: radial-gradient(circle at 20% 20%, rgba(226, 232, 240, 0.5) 1px, transparent 1px), radial-gradient(circle at 80% 60%, rgba(203, 213, 225, 0.5) 1px, transparent 1px), radial-gradient(circle at 50% 90%, rgba(226, 232, 240, 0.5) 1px, transparent 1px); box-shadow: 0 0 20px rgba(226, 232, 240, 0.5), 0 0 40px rgba(148, 163, 184, 0.5), inset 5px -5px 20px rgba(0,0,0,0.15); overflow: hidden; transition: opacity 1.5s ease, box-shadow 1s ease; }
-        #moon-phase-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; will-change: background, transform; transition: background 0.1s linear; }
-        #stars-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; opacity: 0; z-index: 0; transition: opacity 3s ease-in-out; }
-        .star { position: absolute; background-color: white; border-radius: 50%; }
-        
-        #clouds-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; opacity: 0; transition: opacity 3s ease-in-out; }
-        
-        .cloud {
+        .puff {
             position: absolute;
-            width: 1px;
-            height: 1px;
+            width: 1px; height: 1px;
             background-color: transparent;
             border-radius: 50%;
-            filter: none;
-            transition: box-shadow 1s linear, filter 0.5s ease-out;
-            animation: move-cloud linear infinite;
-        }
-        
-        .cloud.is-illuminated {
-            filter: drop-shadow(0 0 15px rgba(255, 255, 240, 0.9)) drop-shadow(0 0 30px rgba(255, 220, 150, 0.7));
-            z-index: 3;
+            transition: box-shadow 1s linear;
         }
 
-        .cloud.type1 {
-            width: 200px; height: 120px;
-            box-shadow: -10px 115px 45px 5px var(--cloud-shadow-color), 100px 125px 55px 0px var(--cloud-shadow-color), 195px 115px 45px 5px var(--cloud-shadow-color), -20px 110px 45px 0px var(--cloud-base-color), 90px 120px 55px 0px var(--cloud-base-color), 190px 110px 45px 0px var(--cloud-base-color), 30px 40px 45px 0px var(--cloud-base-color), 130px 20px 60px 0px var(--cloud-base-color);
-        }
-        .cloud.type2 {
-            width: 180px; height: 150px;
-            box-shadow: -5px 140px 45px -20px var(--cloud-shadow-color), 125px 135px 40px -20px var(--cloud-shadow-color), 80px 55px 40px -10px var(--cloud-shadow-color), 0px 135px 45px -20px var(--cloud-base-color), 120px 130px 40px -20px var(--cloud-base-color), 75px 50px 40px -10px var(--cloud-base-color), 30px 80px 40px -15px var(--cloud-base-color);
-        }
-        .cloud.type3 {
-            width: 280px; height: 90px;
-            box-shadow: 5px 80px 40px -15px var(--cloud-shadow-color), 125px 90px 45px -15px var(--cloud-shadow-color), 245px 80px 40px -15px var(--cloud-shadow-color), 0px 75px 40px -15px var(--cloud-base-color), 120px 85px 45px -15px var(--cloud-base-color), 240px 75px 40px -15px var(--cloud-base-color), 80px 30px 35px -10px var(--cloud-base-color), 180px 25px 35px -10px var(--cloud-base-color);
-        }
-        .cloud.type4 {
-             width: 120px; height: 100px;
-             box-shadow: 60px 55px 35px -5px var(--cloud-shadow-color), 55px 50px 35px -5px var(--cloud-base-color), 10px 60px 30px -10px var(--cloud-base-color);
-        }
+        /* Hiperrealisztikus felhőformák */
+        .type1 .puff-1 { width: 100px; height: 100px; top: 20px; left: 50px; box-shadow: 0 0 35px 30px var(--cloud-base-color), inset 0 0 20px var(--cloud-shadow-color); }
+        .type1 .puff-2 { width: 80px; height: 80px; top: 0px; left: 120px; box-shadow: 0 0 30px 25px var(--cloud-base-color), inset 0 0 15px var(--cloud-shadow-color); }
+        .type1 .puff-3 { width: 60px; height: 60px; top: 50px; left: 0px; box-shadow: 0 0 25px 20px var(--cloud-base-color), inset 0 0 10px var(--cloud-shadow-color); }
+        .type1 .puff-4 { width: 70px; height: 70px; top: 60px; left: 150px; box-shadow: 0 0 30px 20px var(--cloud-base-color), inset 0 0 15px var(--cloud-shadow-color); }
+
+        .type2 .puff-1 { width: 120px; height: 80px; top: 30px; left: 80px; box-shadow: 0 0 40px 30px var(--cloud-base-color), inset 0 0 25px var(--cloud-shadow-color); }
+        .type2 .puff-2 { width: 90px; height: 60px; top: 10px; left: 20px; box-shadow: 0 0 35px 25px var(--cloud-base-color), inset 0 0 20px var(--cloud-shadow-color); }
+        .type2 .puff-3 { width: 90px; height: 70px; top: 50px; left: 0px; box-shadow: 0 0 30px 20px var(--cloud-base-color), inset 0 0 15px var(--cloud-shadow-color); }
+        .type2 .puff-4 { width: 100px; height: 80px; top: 40px; left: 180px; box-shadow: 0 0 40px 30px var(--cloud-base-color), inset 0 0 25px var(--cloud-shadow-color); }
+
+        .type3 .puff-1 { width: 200px; height: 40px; top: 20px; left: 50px; box-shadow: 0 0 30px 20px var(--cloud-base-color), inset 0 0 15px var(--cloud-shadow-color); }
+        .type3 .puff-2 { width: 150px; height: 30px; top: 0px; left: 0px; box-shadow: 0 0 25px 15px var(--cloud-base-color), inset 0 0 10px var(--cloud-shadow-color); }
+        .type3 .puff-3 { width: 180px; height: 35px; top: 40px; left: 100px; box-shadow: 0 0 30px 20px var(--cloud-base-color), inset 0 0 15px var(--cloud-shadow-color); }
+        
 
         #rain-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 3; pointer-events: none; }
         .raindrop { position: absolute; width: 1.5px; height: 12px; background-color: rgba(255,255,255,0.5); border-radius: 1px; opacity: 0; transition: opacity 0.5s; transform: rotate(15deg); }
@@ -214,11 +212,10 @@
 
     <div id="sky-container">
         <div id="stars-container"></div>
-        <div id="celestial-container">
-            <div id="sun"></div>
-            <div id="moon">
-                <div id="moon-phase-overlay"></div>
-            </div>
+        <!-- MÓDOSÍTÁS: A celestial-container megszűnt, a Nap és Hold közvetlenül itt van -->
+        <div id="sun"></div>
+        <div id="moon">
+            <div id="moon-phase-overlay"></div>
         </div>
         <div id="clouds-container"></div>
         <div id="rain-container"></div>
@@ -298,7 +295,6 @@
             const moonIllumination = SunCalc.getMoonIllumination(now);
             const altitudeDeg = sunPos.altitude * 180 / Math.PI;
 
-            // MÓDOSÍTÁS: Világosabb éjszakai felhők
             const cloudDay = { base: {r:245, g:245, b:245}, shadow: {r:210, g:210, b:220} };
             const cloudGolden = { base: {r:255, g:230, b:200}, shadow: {r:240, g:180, b:130} };
             const cloudSunset = { base: {r:255, g:180, b:150}, shadow: {r:210, g:120, b:100} };
@@ -321,9 +317,13 @@
                 const x = 50 + Math.cos(sunPos.azimuth + Math.PI/2) * 50;
                 const y = verticalMultiplier - Math.sin(sunPos.altitude) * verticalMultiplier;
                 sunEl.style.transform = `translate(-50%, -50%) translate(${x}vw, ${y}vh)`;
-                let sunGradient, sunShadow;
-                if (altitudeDeg < 5) { sunGradient = 'radial-gradient(circle, #FFDAB9 20%, #FFA500 60%, #FF4500 100%)'; sunShadow = '0 0 60px #ffA500, 0 0 120px #ff4500'; } else if (altitudeDeg < 20) { sunGradient = 'radial-gradient(circle, #FFF5C9 30%, #FFD78C 70%, #FFC34D 100%)'; sunShadow = '0 0 50px #fff, 0 0 100px #fef08a'; } else { sunGradient = 'radial-gradient(circle, #FFFFFF 20%, #FFFACD 50%, #FFD700 100%)'; sunShadow = '0 0 60px #fff, 0 0 120px #FFFACD, 0 0 200px #FFD700'; }
-                sunEl.style.background = sunGradient; sunEl.style.boxShadow = sunShadow; sunEl.style.opacity = Math.min(1, sunPos.altitude * 20);
+                let sunGradient;
+                if (altitudeDeg < 5) { sunGradient = 'radial-gradient(circle, #FFDAB9 20%, #FFA500 60%, #FF4500 100%)';
+                } else if (altitudeDeg < 20) { sunGradient = 'radial-gradient(circle, #FFF5C9 30%, #FFD78C 70%, #FFC34D 100%)';
+                } else { sunGradient = 'radial-gradient(circle, #FFFFFF 20%, #FFFACD 50%, #FFD700 100%)'; }
+                sunEl.style.backgroundColor = 'transparent'; 
+                sunEl.style.setProperty('background', sunGradient, 'important');
+                sunEl.style.opacity = Math.min(1, sunPos.altitude * 20);
                 sunRect = sunEl.getBoundingClientRect();
             } else { sunEl.style.opacity = 0; sunRect = null; }
 
@@ -362,14 +362,23 @@
             if (cloudsContainerEl.children.length !== desiredCloudCount) {
                 cloudsContainerEl.innerHTML = '';
                 for (let i = 0; i < desiredCloudCount; i++) {
-                    const cloud = document.createElement('div');
-                    cloud.classList.add('cloud', `type${Math.floor(Math.random() * 4) + 1}`);
-                    cloud.style.top = `${Math.random() * 40}%`; 
+                    const cloudGroup = document.createElement('div');
+                    const type = `type${Math.floor(Math.random() * 4) + 1}`;
+                    cloudGroup.className = `cloud-group ${type}`;
+                    cloudGroup.style.top = `${Math.random() * 40}%`; 
+                    
+                    const puffCount = { type1: 4, type2: 4, type3: 3, type4: 2 }[type] || 2;
+                    for (let j = 1; j <= puffCount; j++) {
+                        const puff = document.createElement('div');
+                        puff.className = `puff puff-${j}`;
+                        cloudGroup.appendChild(puff);
+                    }
+                    
                     const duration = Math.random() * 80 + 90;
                     const delay = -Math.random() * duration;
-                    cloud.style.animationDuration = `${duration}s`;
-                    cloud.style.animationDelay = `${delay}s`;
-                    cloudsContainerEl.appendChild(cloud);
+                    cloudGroup.style.animationDuration = `${duration}s`;
+                    cloudGroup.style.animationDelay = `${delay}s`;
+                    cloudsContainerEl.appendChild(cloudGroup);
                 }
             }
             cloudsContainerEl.style.opacity = desiredCloudCount > 0 ? '1' : '0';
