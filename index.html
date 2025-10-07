@@ -9,85 +9,127 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"></script>
     <style>
         :root {
-            /* Színpaletta Alapok */
+            /* Panelek áttetszősége (változatlan) */
+            --bg-widget-night: rgba(15, 23, 42, 0.35);
+            --border-widget-night: rgba(56, 189, 248, 0.15);
+            --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.4) 0%, rgba(225, 238, 252, 0.3) 100%);
+            --border-widget-day: rgba(0, 122, 255, 0.15);
+            
+            /* MÓDOSÍTÁS: Jobban látható szürke színek */
             --accent-interactive-night: #00BFFF;
             --text-primary-night: #EAEAEA;
-            --text-secondary-night: #A0B0C0;
-            --bg-widget-night: rgba(15, 23, 42, 0.88);
-            --border-widget-night: rgba(56, 189, 248, 0.2);
-
+            --text-secondary-night: #BCCCDC; /* Világosabb szürke */
             --accent-interactive-day: #007AFF;
             --text-primary-day: #111827;
-            --text-secondary-day: #4B5563;
-            --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.92) 0%, rgba(225, 238, 252, 0.90) 100%);
-            --border-widget-day: rgba(0, 122, 255, 0.18);
+            --text-secondary-day: #374151;  /* Kontrasztosabb sötétszürke */
 
-            /* Hőmérsékletfüggő színek */
-            --hot: #EF4444;
-            --warm: #F97316;
-            --mild: #22C55E;
-            --cool: #3B82F6;
-            --cold: #6366F1;
+            --cloud-base-color: #f5f5f5;
+            --cloud-shadow-color: #d8d8d8;
+            
+            /* Hőmérsékletfüggő színek (változatlan) */
+            --hot: #EF4444; --warm: #F97316; --mild: #22C55E; --cool: #3B82F6; --cold: #6366F1;
             --current-temp-bg-color: var(--mild);
 
-            /* Szél Színskála */
-            --wind-calm: #6366F1;
-            --wind-light: #3B82F6;
-            --wind-moderate: #22C55E;
-            --wind-strong: #F97316;
+            /* Szél Színskála (változatlan) */
+            --wind-calm: #6366F1; --wind-light: #3B82F6; --wind-moderate: #22C55E; --wind-strong: #F97316;
             --current-wind-color: var(--wind-calm);
             
-            /* 12 FÁZISÚ CIKLUS DEFINÍCIÓJA */
-            --sky-color-top-night: #0B1120; --sky-color-bottom-night: #020617; --sky-color-top-early-dawn: #020617; --sky-color-bottom-early-dawn: #0f172a; --sky-color-top-blue-hour-dawn: #0f172a; --sky-color-bottom-blue-hour-dawn: #1e3a8a; --sky-color-top-dawn: #1e293b; --sky-color-bottom-dawn: #f97316; --sky-color-top-sunrise: #fef3c7; --sky-color-bottom-sunrise: #fb923c; --sky-color-top-golden-hour-rise: #fde68a; --sky-color-bottom-golden-hour-rise: #fca5a5; --sky-color-top-day: #7DD3FC; --sky-color-bottom-day: #C4EFFF; --sky-color-top-golden-hour-set: #fbbf24; --sky-color-bottom-golden-hour-set: #f87171; --sky-color-top-sunset: #f97316; --sky-color-bottom-sunset: #dc2626; --sky-color-top-dusk: #0369a1; --sky-color-bottom-dusk: #4c1d95; --sky-color-top-blue-hour-dusk: #1e3a8a; --sky-color-bottom-blue-hour-dusk: #312e81; --sky-color-top-late-dusk: #111827; --sky-color-bottom-late-dusk: #0c0a09;
-
-            /* Aktuális Téma (kezdetben éjszakai) */
-            --current-sky-color-top: var(--sky-color-top-night); --current-sky-color-bottom: var(--sky-color-bottom-night); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: var(--accent-interactive-night); --current-widget-bg: var(--bg-widget-night); --current-widget-border: var(--border-widget-night); --current-container-border-color: var(--border-widget-night);
+            /* Aktuális Téma (JS által felülírva) */
+            --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: var(--accent-interactive-night); --current-widget-bg: var(--bg-widget-night); --current-widget-border: var(--border-widget-night); --current-container-border-color: var(--border-widget-night);
+        }
+        
+        /* Dinamikus égbolt és időjárás effektek stílusai */
+        #sky-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; background: linear-gradient(to bottom, #0B1120, #020617); transition: background 1s ease-out; }
+        #celestial-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        #sun, #moon { position: absolute; width: 100px; height: 100px; border-radius: 50%; will-change: transform, background, box-shadow; transition: opacity 1.5s ease; opacity: 0; z-index: 2; }
+        #sun { background: radial-gradient(circle, #FFFFFF 20%, #FFFACD 50%, #FFD700 100%); box-shadow: 0 0 60px #fff, 0 0 120px #FFFACD, 0 0 200px #FFD700; transition: all 0.5s ease-out; position: relative; }
+        #sun::after { content: ''; position: absolute; top: -25%; left: -25%; width: 150%; height: 150%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 255, 224, 0.5) 30%, transparent 70%); filter: blur(25px); animation: sun-pulse 4s ease-in-out infinite; z-index: -1; transform-origin: center center; transition: all 0.5s ease-out;}
+        
+        @keyframes sun-pulse { 0% { transform: scale(0.95); opacity: 0.7; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.7; } }
+        @keyframes move-cloud {
+            from { transform: translateX(-250px); }
+            to { transform: translateX(calc(100vw + 250px)); }
         }
 
-        body[data-theme="day"] { --current-sky-color-top: var(--sky-color-top-day); --current-sky-color-bottom: var(--sky-color-bottom-day); --current-text-color: var(--text-primary-day); --current-text-muted-color: var(--text-secondary-day); --current-icon-color: var(--accent-interactive-day); --current-widget-bg: var(--bg-widget-day); --current-widget-border: var(--border-widget-day); --current-container-border-color: rgba(203, 213, 225, 0.55); }
-        body[data-theme="dawn"] { --current-sky-color-top: var(--sky-color-top-dawn); --current-sky-color-bottom: var(--sky-color-bottom-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f59e0b; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(245, 158, 11, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="dusk"] { --current-sky-color-top: var(--sky-color-top-dusk); --current-sky-color-bottom: var(--sky-color-bottom-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #f472b6; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(236, 72, 153, 0.3); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="early_dawn"] { --current-sky-color-top: var(--sky-color-top-early-dawn); --current-sky-color-bottom: var(--sky-color-bottom-early-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: #94a3b8; --current-icon-color: #60a5fa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(96, 165, 250, 0.2); --current-container-border-color: rgba(51, 65, 85, 0.5); }
-        body[data-theme="blue_hour_dawn"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dawn); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dawn); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #93c5fd; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(147, 197, 253, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="sunrise"] { --current-sky-color-top: var(--sky-color-top-sunrise); --current-sky-color-bottom: var(--sky-color-bottom-sunrise); --current-text-color: #422006; --current-text-muted-color: #7c2d12; --current-icon-color: #f97316; --current-widget-bg: linear-gradient(160deg, rgba(254, 243, 199, 0.92) 0%, rgba(253, 186, 116, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.25); --current-container-border-color: rgba(124, 45, 18, 0.4); }
-        body[data-theme="golden_hour_rise"] { --current-sky-color-top: var(--sky-color-top-golden-hour-rise); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-rise); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #f59e0b; --current-widget-bg: linear-gradient(160deg, rgba(254, 249, 231, 0.92) 0%, rgba(253, 224, 224, 0.90) 100%); --current-widget-border: rgba(245, 158, 11, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); }
-        body[data-theme="golden_hour_set"] { --current-sky-color-top: var(--sky-color-top-golden-hour-set); --current-sky-color-bottom: var(--sky-color-bottom-golden-hour-set); --current-text-color: #44403c; --current-text-muted-color: #78716c; --current-icon-color: #ea580c; --current-widget-bg: linear-gradient(160deg, rgba(254, 235, 202, 0.92) 0%, rgba(254, 202, 202, 0.90) 100%); --current-widget-border: rgba(249, 115, 22, 0.2); --current-container-border-color: rgba(168, 162, 158, 0.5); }
-        body[data-theme="sunset"] { --current-sky-color-top: var(--sky-color-top-sunset); --current-sky-color-bottom: var(--sky-color-bottom-sunset); --current-text-color: #fef2f2; --current-text-muted-color: #fecaca; --current-icon-color: #ef4444; --current-widget-bg: linear-gradient(160deg, rgba(127, 29, 29, 0.9) 0%, rgba(76, 29, 29, 0.92) 100%); --current-widget-border: rgba(239, 68, 68, 0.25); --current-container-border-color: rgba(159, 18, 57, 0.4); }
-        body[data-theme="blue_hour_dusk"] { --current-sky-color-top: var(--sky-color-top-blue-hour-dusk); --current-sky-color-bottom: var(--sky-color-bottom-blue-hour-dusk); --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: #a78bfa; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(167, 139, 250, 0.2); --current-container-border-color: rgba(71, 85, 105, 0.5); }
-        body[data-theme="late_dusk"] { --current-sky-color-top: var(--sky-color-top-late-dusk); --current-sky-color-bottom: var(--sky-color-bottom-late-dusk); --current-text-color: #d1d5db; --current-text-muted-color: #9ca3af; --current-icon-color: #818cf8; --current-widget-bg: var(--bg-widget-night); --current-widget-border: rgba(99, 102, 241, 0.2); --current-container-border-color: rgba(55, 65, 81, 0.5); }
+        #sun.is-occluded {
+            box-shadow: 0 0 50px rgba(255, 220, 150, 0.5);
+            background: radial-gradient(circle, rgba(255, 255, 224, 0.8) 20%, transparent 80%);
+        }
+        #sun.is-occluded::after {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+
+        #moon { background-color: #F0EAD6; background-image: radial-gradient(circle at 20% 20%, rgba(226, 232, 240, 0.5) 1px, transparent 1px), radial-gradient(circle at 80% 60%, rgba(203, 213, 225, 0.5) 1px, transparent 1px), radial-gradient(circle at 50% 90%, rgba(226, 232, 240, 0.5) 1px, transparent 1px); box-shadow: 0 0 20px rgba(226, 232, 240, 0.5), 0 0 40px rgba(148, 163, 184, 0.5), inset 5px -5px 20px rgba(0,0,0,0.15); overflow: hidden; transition: opacity 1.5s ease, box-shadow 1s ease; }
+        #moon-phase-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; will-change: background, transform; transition: background 0.1s linear; }
+        #stars-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: transparent; opacity: 0; z-index: 0; transition: opacity 3s ease-in-out; }
+        .star { position: absolute; background-color: white; border-radius: 50%; }
         
+        #clouds-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; opacity: 0; transition: opacity 3s ease-in-out; }
+        
+        .cloud {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background-color: transparent;
+            border-radius: 50%;
+            filter: none;
+            transition: box-shadow 1s linear, filter 0.5s ease-out;
+            animation: move-cloud linear infinite;
+        }
+        
+        .cloud.is-illuminated {
+            filter: drop-shadow(0 0 15px rgba(255, 255, 240, 0.9)) drop-shadow(0 0 30px rgba(255, 220, 150, 0.7));
+            z-index: 3;
+        }
+
+        .cloud.type1 {
+            width: 200px; height: 120px;
+            box-shadow: -10px 115px 45px 5px var(--cloud-shadow-color), 100px 125px 55px 0px var(--cloud-shadow-color), 195px 115px 45px 5px var(--cloud-shadow-color), -20px 110px 45px 0px var(--cloud-base-color), 90px 120px 55px 0px var(--cloud-base-color), 190px 110px 45px 0px var(--cloud-base-color), 30px 40px 45px 0px var(--cloud-base-color), 130px 20px 60px 0px var(--cloud-base-color);
+        }
+        .cloud.type2 {
+            width: 180px; height: 150px;
+            box-shadow: -5px 140px 45px -20px var(--cloud-shadow-color), 125px 135px 40px -20px var(--cloud-shadow-color), 80px 55px 40px -10px var(--cloud-shadow-color), 0px 135px 45px -20px var(--cloud-base-color), 120px 130px 40px -20px var(--cloud-base-color), 75px 50px 40px -10px var(--cloud-base-color), 30px 80px 40px -15px var(--cloud-base-color);
+        }
+        .cloud.type3 {
+            width: 280px; height: 90px;
+            box-shadow: 5px 80px 40px -15px var(--cloud-shadow-color), 125px 90px 45px -15px var(--cloud-shadow-color), 245px 80px 40px -15px var(--cloud-shadow-color), 0px 75px 40px -15px var(--cloud-base-color), 120px 85px 45px -15px var(--cloud-base-color), 240px 75px 40px -15px var(--cloud-base-color), 80px 30px 35px -10px var(--cloud-base-color), 180px 25px 35px -10px var(--cloud-base-color);
+        }
+        .cloud.type4 {
+             width: 120px; height: 100px;
+             box-shadow: 60px 55px 35px -5px var(--cloud-shadow-color), 55px 50px 35px -5px var(--cloud-base-color), 10px 60px 30px -10px var(--cloud-base-color);
+        }
+
+        #rain-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: 3; pointer-events: none; }
+        .raindrop { position: absolute; width: 1.5px; height: 12px; background-color: rgba(255,255,255,0.5); border-radius: 1px; opacity: 0; transition: opacity 0.5s; transform: rotate(15deg); }
+
+        /* Eredeti stílusok innen folytatódnak... */
         .is-hidden { display: none !important; }
-        body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; position: relative; overflow-x: hidden; transition: background-color 1.5s ease-in-out; }
-        .sky-gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, var(--current-sky-color-top), var(--current-sky-color-bottom)); transition: background 2s ease-in-out; z-index: -1; }
-        .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 800px; box-sizing: border-box; margin: 0 auto; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); transition: all 0.6s ease-in-out; }
+        body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; position: relative; overflow-x: hidden; }
+        .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 800px; box-sizing: border-box; margin: 0 auto; position: relative; z-index: 10; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%); transition: all 0.6s ease-in-out; }
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
         .header-container { display: flex; flex-direction: column; align-items: center; gap: 4px; }
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
         .timestamp-container { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px;}
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
-        .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.7; line-height: 1.4; }
-        
+        .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.8; line-height: 1.4; }
         .station-status-container { display: flex; justify-content: center; align-items: center; gap: 6px; background-color: rgba(0,0,0,0.2); border-radius: 10px; padding: 5px; margin: 10px auto 0 auto; max-width: max-content; flex-wrap: wrap;}
         .station-selector { display: flex; align-items: center; }
         .station-selector input[type="radio"] { display: none; }
         .station-selector label { cursor: pointer; padding: 6px 14px; border-radius: 8px; transition: all 0.3s; font-size: 12px; font-weight: 600; color: var(--current-text-muted-color); display: flex; align-items: center; gap: 6px; }
         .station-selector input[type="radio"]:checked + label { background-color: var(--current-icon-color); color: #fff; box-shadow: 0 2px 8px -2px var(--current-icon-color); }
         .station-selector.disabled label { opacity: 0.4; cursor: not-allowed; }
-        .station-status-indicator { width: 8px; height: 8px; border-radius: 50%; transition: background-color 0.5s; }
+        .station-status-indicator { width: 8px; height: 8px; border-radius: 50%; transition: background-color: 0.5s; }
         .station-status-indicator.online { background-color: #22c55e; box-shadow: 0 0 5px #22c55e; }
         .station-status-indicator.offline { background-color: #ef4444; }
-
         .top-info-cards-container { display: flex; flex-direction: row; justify-content: center; align-items: stretch; flex-wrap: nowrap; gap: 12px; margin: 20px 0; width: 100%; }
         .info-card { display: flex; flex-direction: column; flex: 1 1 0; padding: 12px; color: var(--current-text-color); background: rgba(0,0,0,0.1); border: 1px solid var(--current-widget-border); transition: all 0.6s ease; border-radius: 12px; justify-content: center; align-items: center; min-width: 0; }
         .temp-card { background: linear-gradient(145deg, var(--current-temp-bg-color), color-mix(in srgb, var(--current-temp-bg-color) 70%, black)) !important; color: white; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
-        
         .card-label { font-size: 12px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
         .temp-card .card-label { color: white; opacity: 0.85; }
-        
         .temp-card .card-main-value { font-size: 48px; font-weight: 800; line-height: 1; }
         .heat-index-secondary { font-size: 13px; font-weight: 600; color: white; opacity: 0.8; margin-top: 6px; }
-        
         .wind-card { --current-wind-color: var(--wind-calm); }
         .wind-card-title { font-size: 13px; font-weight: 600; color: var(--current-text-muted-color); margin-bottom: 8px; }
         .wind-gauge { position: relative; width: 130px; height: 130px; display: flex; justify-content: center; align-items: center; }
@@ -97,146 +139,33 @@
         .wind-data-bottom { text-align: center; margin-top: 8px; }
         .wind-direction-bottom { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
         .wind-gust-bottom { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
-        
-        .precip-summary-card {
-            display: flex;
-            flex-direction: column;
-            gap: 0;
-            background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18));
-            border: 1px solid var(--current-container-border-color);
-            border-radius: 12px;
-            padding: 0;
-            margin-bottom: 20px;
-            transition: all 0.5s ease;
-            overflow: hidden;
-        }
-
-        .precip-summary-card.is-raining-somewhere {
-            border-color: rgba(from var(--current-icon-color) r g b / 0.6);
-            box-shadow: 0 0 12px -3px rgba(from var(--current-icon-color) r g b / 0.4);
-        }
-
-        .precip-card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 16px;
-            border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4);
-            background-color: rgba(0,0,0,0.1);
-        }
-
-        .precip-header-icon i {
-            font-size: 22px;
-            color: var(--current-icon-color);
-            transition: color 0.5s ease;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-
-        .precip-header-title {
-            font-size: 16px;
-            font-weight: 800;
-            color: var(--current-text-color);
-            margin: 0;
-            letter-spacing: 0.5px;
-        }
-
-        .precip-card-content {
-            padding: 10px 16px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        
-        .precip-card-footer {
-            padding: 8px 16px 12px 16px;
-            border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3);
-            text-align: center;
-        }
-        .precip-footer-note {
-            font-size: 11px;
-            font-style: italic;
-            color: var(--current-text-muted-color);
-            margin-bottom: 8px;
-            text-align: center;
-        }
-
-        .precip-station-list {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .precip-station-list-item {
-            padding: 6px 12px;
-            border-radius: 6px;
-            border-left: 3px solid transparent;
-            transition: background-color 0.3s ease, border-left-color 0.3s ease;
-        }
-        .precip-station-list-item:hover {
-            background-color: rgba(from var(--current-text-color) r g b / 0.08);
-        }
-
-        .precip-station-list-item.is-raining-now {
-            border-left: 3px solid var(--current-icon-color);
-            background: linear-gradient(90deg, rgba(from var(--current-icon-color) r g b / 0.2) 0%, rgba(from var(--current-icon-color) r g b / 0.05) 100%);
-        }
-
-        .precip-station-list-item:not(:last-child) {
-             border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.2);
-        }
-
+        .precip-summary-card { display: flex; flex-direction: column; gap: 0; background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 0; margin-bottom: 20px; transition: all 0.5s ease; overflow: hidden; }
+        .precip-summary-card.is-raining-somewhere { border-color: rgba(from var(--current-icon-color) r g b / 0.6); box-shadow: 0 0 12px -3px rgba(from var(--current-icon-color) r g b / 0.4); }
+        .precip-card-header { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4); background-color: rgba(0,0,0,0.1); }
+        .precip-header-icon i { font-size: 22px; color: var(--current-icon-color); transition: color 0.5s ease; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        .precip-header-title { font-size: 16px; font-weight: 800; color: var(--current-text-color); margin: 0; letter-spacing: 0.5px; }
+        .precip-card-content { padding: 10px 16px; width: 100%; box-sizing: border-box; }
+        .precip-card-footer { padding: 8px 16px 12px 16px; border-top: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); text-align: center; }
+        .precip-footer-note { font-size: 11px; font-style: italic; color: var(--current-text-muted-color); margin-bottom: 8px; text-align: center; }
+        .precip-station-list { display: flex; flex-direction: column; gap: 4px; }
+        .precip-station-list-item { padding: 6px 12px; border-radius: 6px; border-left: 3px solid transparent; transition: background-color 0.3s ease, border-left-color 0.3s ease; }
+        .precip-station-list-item:hover { background-color: rgba(from var(--current-text-color) r g b / 0.08); }
+        .precip-station-list-item.is-raining-now { border-left: 3px solid var(--current-icon-color); background: linear-gradient(90deg, rgba(from var(--current-icon-color) r g b / 0.2) 0%, rgba(from var(--current-icon-color) r g b / 0.05) 100%); }
+        .precip-station-list-item:not(:last-child) { border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.2); }
         .station-main-row { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         .precip-station-name { font-weight: 600; font-size: 14px; color: var(--current-text-color); }
         .precip-station-value { font-weight: 500; font-size: 13px; color: var(--current-text-muted-color); }
         .precip-station-value strong { font-weight: 700; font-size: 14px; color: var(--current-text-color); margin-left: 4px; }
         .rain-intensity-text { font-size: 12px; font-weight: 600; font-style: italic; color: var(--current-text-color); margin-top: 3px; }
-
-        .precip-explanation-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            text-align: left;
-            gap: 10px;
-            padding: 12px 4px;
-        }
-        .explanation-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--current-text-color);
-            margin: 0;
-            width: 100%;
-            text-align: center;
-            padding-bottom: 8px;
-            border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3);
-        }
-        .explanation-subtitle {
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--current-text-color);
-            margin: 5px 0 -5px 0;
-        }
-        .explanation-text {
-            font-size: 12.5px;
-            line-height: 1.6;
-            color: var(--current-text-muted-color);
-            margin: 0;
-        }
-        .explanation-text strong {
-            color: var(--current-text-color);
-            font-weight: 600;
-        }
-
+        .precip-explanation-container { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 10px; padding: 12px 4px; }
+        .explanation-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); margin: 0; width: 100%; text-align: center; padding-bottom: 8px; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); }
+        .explanation-subtitle { font-size: 13px; font-weight: 600; color: var(--current-text-color); margin: 5px 0 -5px 0; }
+        .explanation-text { font-size: 12.5px; line-height: 1.6; color: var(--current-text-muted-color); margin: 0; }
+        .explanation-text strong { color: var(--current-text-color); font-weight: 600; }
         .station-tooltip-container { position: relative; display: inline-block; }
-        .station-list-trigger {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--current-icon-color);
-            border-bottom: 1px dashed var(--current-icon-color);
-            cursor: help;
-            padding: 4px;
-        }
+        .station-list-trigger { font-size: 12px; font-weight: 600; color: var(--current-icon-color); border-bottom: 1px dashed var(--current-icon-color); cursor: help; padding: 4px; }
         .station-tooltip-content { visibility: hidden; opacity: 0; width: 280px; background-color: var(--bg-widget-night); color: var(--text-primary-night); padding: 10px; border-radius: 8px; border: 1px solid var(--border-widget-night); position: absolute; z-index: 100; bottom: 125%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s, visibility 0.3s; pointer-events: none; font-size: 12px; line-height: 1.5; }
         .station-tooltip-container:hover .station-tooltip-content { visibility: visible; opacity: 1; }
-        
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; }
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .section-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); text-align: left; }
@@ -249,25 +178,15 @@
         .bar-fill { width: 100%; background-color: var(--current-icon-color); border-radius: 5px; transition: height 0.6s ease-out, opacity 0.6s ease-out; }
         .precip-amount-text { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); }
         .precip-hour-label { font-size: 13px; font-weight: 500; color: var(--current-text-color); }
-
-        .section-footer {
-            text-align: right;
-            font-size: 11px;
-            color: var(--current-text-muted-color);
-            opacity: 0.8;
-            margin-top: 8px;
-        }
-
+        .section-footer { text-align: right; font-size: 11px; color: var(--current-text-muted-color); opacity: 0.8; margin-top: 8px; }
         .weather-details-grid { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; column-gap: 14px; row-gap: 8px; transition: all 0.6s; margin-bottom: 20px; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; padding: 4px 0; }
         .detail-item .label { font-weight: 600; color: var(--current-text-color); margin-right: 4px; display: flex; align-items: center; transition: color 0.6s; white-space: nowrap; }
         .detail-item .label i { margin-right: 6px; width: 14px; font-size: 0.9em; text-align: center; opacity: 0.8; color: var(--current-icon-color); transition: color 0.6s; }
         .detail-item .value { color: var(--current-text-muted-color); font-weight: 500; transition: color 0.6s; display: flex; align-items: center; text-align: right; flex-shrink: 0; margin-left: 3px; }
         .pressure-trend-icon { margin-left: 4px; font-weight: 700; }
-        
         .flippable-value { display: inline-block; transition: transform 0.6s cubic-bezier(0.45, 0, 0.55, 1); transform-style: preserve-3d; will-change: transform; }
         .flippable-value.is-flipping { transform: rotateX(90deg); }
-        
         .forecast-title { width: 100%; max-width: 800px; font-size: 16px; font-weight: 700; color: var(--current-text-color); margin-top: 24px; margin-bottom: 12px; text-align: center; transition: color 0.6s; }
         .hourly-forecast-container { width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr; gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
         .hourly-forecast-card { display: flex; flex-direction: column; align-items: stretch; gap: 10px; padding: 10px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; }
@@ -287,24 +206,24 @@
         @media (min-width: 1000px) { .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 768px) { .weather-details-grid { grid-template-columns: 1fr; } }
         @media (max-width: 480px) {
-            .top-info-cards-container { gap: 8px; }
-            .info-card { padding: 8px; }
-            .temp-card .card-main-value { font-size: 44px; }
-            .heat-index-secondary { font-size: 11px; margin-top: 4px; }
-            .wind-card-title { font-size: 11px; margin-bottom: 4px; }
-            .wind-gauge { width: 100px; height: 100px; }
-            .wind-data-center { width: 75px; height: 75px; }
-            .wind-speed-main { font-size: 24px; }
-            .wind-speed-unit { font-size: 11px; }
-            .wind-data-bottom { margin-top: 4px; }
-            .wind-direction-bottom { font-size: 12px; }
-            .wind-gust-bottom { font-size: 10px; }
+            .top-info-cards-container { gap: 8px; } .info-card { padding: 8px; } .temp-card .card-main-value { font-size: 44px; } .heat-index-secondary { font-size: 11px; margin-top: 4px; } .wind-card-title { font-size: 11px; margin-bottom: 4px; } .wind-gauge { width: 100px; height: 100px; } .wind-data-center { width: 75px; height: 75px; } .wind-speed-main { font-size: 24px; } .wind-speed-unit { font-size: 11px; } .wind-data-bottom { margin-top: 4px; } .wind-direction-bottom { font-size: 12px; } .wind-gust-bottom { font-size: 10px; } #sun, #moon { width: 60px; height: 60px; }
         }
     </style>
 </head>
-<body data-theme="night">
+<body>
 
-    <div class="sky-gradient-overlay"></div>
+    <div id="sky-container">
+        <div id="stars-container"></div>
+        <div id="celestial-container">
+            <div id="sun"></div>
+            <div id="moon">
+                <div id="moon-phase-overlay"></div>
+            </div>
+        </div>
+        <div id="clouds-container"></div>
+        <div id="rain-container"></div>
+    </div>
+
     <div class="weather-widget">
         <div id="weather-display"></div>
     </div>
@@ -313,506 +232,257 @@
     <div class="hourly-forecast-container" id="hourly-forecast-container"></div>
 
     <script>
+        // --- Globális változók és konstansok (változatlan) ---
         const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525';
         const REFRESH_INTERVAL_PWS = 30 * 1000;
         const REFRESH_INTERVAL_GENERAL_CONDITIONS = 20 * 60 * 1000;
         const REFRESH_INTERVAL_FORECAST = 5 * 60 * 1000;
         const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
-
-        const STATIONS = {
-            // Fő, választható állomások
-            NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
-            KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50', displayName: 'Kossuth út 50', displayNameShort: 'Kossuth út', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null },
-            KERT_UTCA: { id: 'INYREG37', name: 'Nyíregyháza Kert utca', displayName: 'Kert u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null },
-            
-            // Tartalék és csapadékfigyelő állomások
-            SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy (Állatpark)', displayName: 'Sóstóhegy', displayNameShort: 'Sóstóhegy', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
-            BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', displayNameShort: 'Borbánya', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
-            OROS_DERUS: { id: 'INYREG35', name: 'Oros Derűs utca', displayName: 'Oros', displayNameShort: 'Oros', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null },
-            KEMECSE: { id: 'IKEMEC1', name: 'Kemecse', displayName: 'Kemecse', provides: ['precip'], isOnline: false, data: null },
-            NAGYHALASZ: { id: 'INAGYH4', name: 'Nagyhalász', displayName: 'Nagyhalász', provides: ['precip'], isOnline: false, data: null },
-            RAMOCSAHAZA: { id: 'IRAMOC1', name: 'Ramocsaháza', displayName: 'Ramocsaháza', provides: ['precip'], isOnline: false, data: null },
-            SENYO: { id: 'ISNY1', name: 'Sényő', displayName: 'Sényő', provides: ['precip'], isOnline: false, data: null },
-            SZAKOLY: { id: 'ISZAKO1', name: 'Szakoly', displayName: 'Szakoly', provides: ['precip'], isOnline: false, data: null },
-            NYIRADONY: { id: 'INYRAD1', name: 'Nyíradony', displayName: 'Nyíradony', provides: ['precip'], isOnline: false, data: null },
-            NYIRBOGAT: { id: 'INYRBO3', name: 'Nyírbogát', displayName: 'Nyírbogát', provides: ['precip'], isOnline: false, data: null },
-            NAPKOR: { id: 'INAPKO1', name: 'Napkor', displayName: 'Napkor', provides: ['precip'], isOnline: false, data: null },
-            GAVAVENCSELLO: { id: 'IGVAVE1', name: 'Gávavencsellő', displayName: 'Gávavencsellő', provides: ['precip'], isOnline: false, data: null },
-            PATROHA: { id: 'IPTROH1', name: 'Pátroha', displayName: 'Pátroha', provides: ['precip'], isOnline: false, data: null },
-            AJAK: { id: 'IAJAK4', name: 'Ajak', displayName: 'Ajak', provides: ['precip'], isOnline: false, data: null },
-            KISVARDA: { id: 'IKISVR2', name: 'Kisvárda', displayName: 'Kisvárda', provides: ['precip'], isOnline: false, data: null },
-            VASAROSNAMENY: { id: 'IVSROS2', name: 'Vásárosnamény', displayName: 'Vásárosnamény', provides: ['precip'], isOnline: false, data: null },
-            FEHERGYARMAT: { id: 'IFEHRG1', name: 'Fehérgyarmat', displayName: 'Fehérgyarmat', provides: ['precip'], isOnline: false, data: null },
-            PORCSALMA: { id: 'IPORCS2', name: 'Porcsalma', displayName: 'Porcsalma', provides: ['precip'], isOnline: false, data: null },
-            CSENGER: { id: 'ICSENG10', name: 'Csenger', displayName: 'Csenger', provides: ['precip'], isOnline: false, data: null },
-            MATESZALKA: { id: 'IMTSZALK4', name: 'Mátészalka', displayName: 'Mátészalka', provides: ['precip'], isOnline: false, data: null },
-        };
+        const STATIONS = { NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null }, KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50', displayName: 'Kossuth út 50', displayNameShort: 'Kossuth út', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null }, KERT_UTCA: { id: 'INYREG37', name: 'Nyíregyháza Kert utca', displayName: 'Kert u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null }, SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy (Állatpark)', displayName: 'Sóstóhegy', displayNameShort: 'Sóstóhegy', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null }, BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', displayNameShort: 'Borbánya', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null }, OROS_DERUS: { id: 'INYREG35', name: 'Oros Derűs utca', displayName: 'Oros', displayNameShort: 'Oros', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null }, KEMECSE: { id: 'IKEMEC1', name: 'Kemecse', displayName: 'Kemecse', provides: ['precip'], isOnline: false, data: null }, NAGYHALASZ: { id: 'INAGYH4', name: 'Nagyhalász', displayName: 'Nagyhalász', provides: ['precip'], isOnline: false, data: null }, RAMOCSAHAZA: { id: 'IRAMOC1', name: 'Ramocsaháza', displayName: 'Ramocsaháza', provides: ['precip'], isOnline: false, data: null }, SENYO: { id: 'ISNY1', name: 'Sényő', displayName: 'Sényő', provides: ['precip'], isOnline: false, data: null }, SZAKOLY: { id: 'ISZAKO1', name: 'Szakoly', displayName: 'Szakoly', provides: ['precip'], isOnline: false, data: null }, NYIRADONY: { id: 'INYRAD1', name: 'Nyíradony', displayName: 'Nyíradony', provides: ['precip'], isOnline: false, data: null }, NYIRBOGAT: { id: 'INYRBO3', name: 'Nyírbogát', displayName: 'Nyírbogát', provides: ['precip'], isOnline: false, data: null }, NAPKOR: { id: 'INAPKO1', name: 'Napkor', displayName: 'Napkor', provides: ['precip'], isOnline: false, data: null }, GAVAVENCSELLO: { id: 'IGVAVE1', name: 'Gávavencsellő', displayName: 'Gávavencsellő', provides: ['precip'], isOnline: false, data: null }, PATROHA: { id: 'IPTROH1', name: 'Pátroha', displayName: 'Pátroha', provides: ['precip'], isOnline: false, data: null }, AJAK: { id: 'IAJAK4', name: 'Ajak', displayName: 'Ajak', provides: ['precip'], isOnline: false, data: null }, KISVARDA: { id: 'IKISVR2', name: 'Kisvárda', displayName: 'Kisvárda', provides: ['precip'], isOnline: false, data: null }, VASAROSNAMENY: { id: 'IVSROS2', name: 'Vásárosnamény', displayName: 'Vásárosnamény', provides: ['precip'], isOnline: false, data: null }, FEHERGYARMAT: { id: 'IFEHRG1', name: 'Fehérgyarmat', displayName: 'Fehérgyarmat', provides: ['precip'], isOnline: false, data: null }, PORCSALMA: { id: 'IPORCS2', name: 'Porcsalma', displayName: 'Porcsalma', provides: ['precip'], isOnline: false, data: null }, CSENGER: { id: 'ICSENG10', name: 'Csenger', displayName: 'Csenger', provides: ['precip'], isOnline: false, data: null }, MATESZALKA: { id: 'IMTSZALK4', name: 'Mátészalka', displayName: 'Mátészalka', provides: ['precip'], isOnline: false, data: null }, };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT';
-
         let lastApiCallTimes = { generalConditions: 0, forecast: 0, forecastSuccess: 0 };
-        let cachedData = { displayPws: null, generalConditions: {}, hourlyForecast: [], sunCalc: null };
+        let cachedData = { displayPws: null, generalConditions: {}, hourlyForecast: [], sunCalc: null, sunTimes: null };
         let isWeatherDisplayInitialized = false;
-
         let weatherDisplayEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
+        let skyContainerEl, sunEl, moonEl, moonPhaseOverlayEl, starsContainerEl, cloudsContainerEl, rainContainerEl;
+        let currentSkyState = { cloudAmount: 0, isRaining: false, precipRate: 0 };
         const NO_DATA_STRING = 'N/A';
         
+        // --- Segédfüggvények (változatlan) ---
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if (includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
         function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + 'h'; } catch (e) { return '--'; } }
-        
         function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nem esik'; if (rate > 0 && rate <= 0.2) return 'Szitálás'; if (rate > 0.2 && rate <= 0.5) return 'Csepergő eső'; if (rate > 0.5 && rate <= 2.5) return 'Gyenge eső'; if (rate > 2.5 && rate <= 7.5) return 'Mérsékelt eső'; if (rate > 7.5 && rate <= 15) return 'Intenzív eső'; if (rate > 15 && rate <= 30) return 'Zápor'; if (rate > 30 && rate <= 50) return 'Heves zápor'; return 'Felhőszakadás'; }
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function mapIconCodeToHungarianText(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const textMap = { 32: 'Napos', 36: 'Napos', 31: 'Tiszta ég', 33: 'Tiszta ég', 34: isDay ? 'Részben napos' : 'Részben felhős', 29: isDay ? 'Részben napos' : 'Részben felhős', 30: isDay ? 'Részben napos' : 'Részben felhős', 27: 'Felhős', 28: 'Felhős', 26: 'Borult', 11: 'Zápor', 12: 'Zápor', 40: 'Zápor', 39: isDay ? 'Zápor' : 'Éjjeli zápor', 45: isDay ? 'Zápor' : 'Éjjeli zápor', 3: 'Zivatar', 4: 'Zivatar', 37: 'Zivatar', 38: 'Zivatar', 47: 'Zivatar', 5: 'Havas eső', 6: 'Ónos eső', 7: 'Havas eső', 8: 'Ónos eső', 10: 'Ónos eső', 18: 'Havas eső', 13: 'Hózápor', 14: 'Hózápor', 15: 'Hófúvás', 16: 'Havazás', 41: 'Havazás', 42: 'Havazás', 43: 'Hófúvás', 46: 'Hózápor', 9: 'Eső', 19: 'Párás', 20: 'Ködös', 21: 'Párás', 22: 'Füstös', 23: 'Szeles', 24: 'Szeles' }; return textMap[iconCode] || 'Ismeretlen'; }
         function mapTwcIconToFontAwesome(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const iconMap = { 32:'fas fa-sun',36:'fas fa-sun',31:'fas fa-moon',33:'fas fa-moon',34:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',29:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',30:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',27:'fas fa-cloud',28:'fas fa-cloud',26:'fas fa-cloud',11:'fas fa-cloud-showers-heavy',12:'fas fa-cloud-showers-heavy',40:'fas fa-cloud-showers-heavy',39:isDay ?'fas fa-cloud-sun-rain':'fas fa-cloud-moon-rain',45:isDay ?'fas fa-cloud-sun-rain':'fas fa-cloud-moon-rain',3:'fas fa-cloud-bolt',4:'fas fa-cloud-bolt',37:'fas fa-cloud-bolt',38:'fas fa-cloud-bolt',47:'fas fa-cloud-bolt',5:'fas fa-snowflake',6:'fas fa-snowflake',7:'fas fa-snowflake',8:'fas fa-snowflake',10:'fas fa-cloud-sleet',18:'fas fa-smog',13:'fas fa-snowflake',14:'fas fa-snowflake',15:'fas fa-snowflake',16:'fas fa-snowflake',41:'fas fa-snowflake',42:'fas fa-snowflake',43:'fas fa-snowflake',46:'fas fa-snowflake',9:'fas fa-cloud-rain',19:'fas fa-smog',20:'fas fa-smog',21:'fas fa-smog',22:'fas fa-smog',23:'fas fa-wind',24:'fas fa-wind' }; return iconMap[iconCode] || 'fas fa-question-circle'; }
-        
         function getUVDescription(uvIndex) { if (uvIndex == null) return ''; if (uvIndex <= 2) return '(Alacsony)'; if (uvIndex <= 5) return '(Mérsékelt)'; if (uvIndex <= 7) return '(Magas)'; if (uvIndex <= 10) return '(Nagyon magas)'; return '(Extrém)'; }
         function getWindColorName(speed) { if (speed == null) return 'calm'; if (speed < 5) return 'calm'; if (speed < 20) return 'light'; if (speed < 40) return 'moderate'; return 'strong'; }
         function getTemperatureColorName(temp) { if (temp === null || isNaN(temp)) return 'mild'; if (temp >= 35) return 'hot'; if (temp >= 25) return 'warm'; if (temp >= 10) return 'mild'; if (temp >= 0) return 'cool'; return 'cold'; }
 
-        async function updateThemeAndSky(currentTime, sunriseTimeIso, sunsetTimeIso) {
-            const fallbackTheme = (new Date().getHours() >= 7 && new Date().getHours() < 18) ? 'day' : 'night';
-            let theme = fallbackTheme;
-            if (sunriseTimeIso && sunsetTimeIso) {
-                try {
-                    const nowMs = currentTime.getTime();
-                    const sunriseDate = new Date(sunriseTimeIso); const sunsetDate = new Date(sunsetTimeIso);
-                    if (isNaN(sunriseDate.getTime()) || isNaN(sunsetDate.getTime())) throw new Error("Invalid sunrise/sunset date");
-                    const EARLY_DAWN_DURATION = 30 * 60 * 1000, BLUE_HOUR_DAWN_DURATION = 30 * 60 * 1000, DAWN_DURATION = 25 * 60 * 1000, SUNRISE_EVENT_DURATION = 15 * 60 * 1000, GOLDEN_HOUR_RISE_DURATION = 45 * 60 * 1000;
-                    const GOLDEN_HOUR_SET_DURATION = 45 * 60 * 1000, SUNSET_EVENT_DURATION = 15 * 60 * 1000, DUSK_DURATION = 25 * 60 * 1000, BLUE_HOUR_DUSK_DURATION = 30 * 60 * 1000, LATE_DUSK_DURATION = 30 * 60 * 1000;
-                    const sunriseMs = sunriseDate.getTime(), sunsetMs = sunsetDate.getTime();
-                    const earlyDawnStart = sunriseMs - DAWN_DURATION - BLUE_HOUR_DAWN_DURATION - EARLY_DAWN_DURATION, blueHourDawnStart = sunriseMs - DAWN_DURATION - BLUE_HOUR_DAWN_DURATION, dawnStart = sunriseMs - DAWN_DURATION;
-                    const sunriseEnd = sunriseMs + SUNRISE_EVENT_DURATION, goldenHourRiseEnd = sunriseEnd + GOLDEN_HOUR_RISE_DURATION;
-                    const goldenHourSetStart = sunsetMs - GOLDEN_HOUR_SET_DURATION, sunsetEnd = sunsetMs + SUNSET_EVENT_DURATION, duskEnd = sunsetEnd + DUSK_DURATION;
-                    const blueHourDuskEnd = duskEnd + BLUE_HOUR_DUSK_DURATION, lateDuskEnd = blueHourDuskEnd + LATE_DUSK_DURATION;
-                    if (nowMs >= earlyDawnStart && nowMs < blueHourDawnStart) { theme = 'early_dawn'; }
-                    else if (nowMs >= blueHourDawnStart && nowMs < dawnStart) { theme = 'blue_hour_dawn'; }
-                    else if (nowMs >= dawnStart && nowMs < sunriseMs) { theme = 'dawn'; }
-                    else if (nowMs >= sunriseMs && nowMs < sunriseEnd) { theme = 'sunrise'; }
-                    else if (nowMs >= sunriseEnd && nowMs < goldenHourRiseEnd) { theme = 'golden_hour_rise'; }
-                    else if (nowMs >= goldenHourRiseEnd && nowMs < goldenHourSetStart) { theme = 'day'; }
-                    else if (nowMs >= goldenHourSetStart && nowMs < sunsetMs) { theme = 'golden_hour_set'; }
-                    else if (nowMs >= sunsetMs && nowMs < sunsetEnd) { theme = 'sunset'; }
-                    else if (nowMs >= sunsetEnd && nowMs < duskEnd) { theme = 'dusk'; }
-                    else if (nowMs >= duskEnd && nowMs < blueHourDuskEnd) { theme = 'blue_hour_dusk'; }
-                    else if (nowMs >= blueHourDuskEnd && nowMs < lateDuskEnd) { theme = 'late_dusk'; }
-                    else { theme = 'night'; }
-                } catch (e) { theme = fallbackTheme; }
+        // --- Dinamikus égbolt és időjárás-effektek logikája ---
+        const SKY_PHASES = [ { name: 'deep_night', time: -0.4, top: '#02040f', bottom: '#000000', stars: 1.0 }, { name: 'mid_night', time: -0.3, top: '#0B1120', bottom: '#020617', stars: 1.0 }, { name: 'late_night', time: -0.2, top: '#0f172a', bottom: '#0c0a09', stars: 0.9 }, { name: 'astronomical_dawn', time: -108, top: '#111827', bottom: '#0f172a', stars: 0.7 }, { name: 'nautical_dawn', time: -72, top: '#1e293b', bottom: '#1e3a8a', stars: 0.4 }, { name: 'blue_hour_dawn', time: -50, top: '#0f172a', bottom: '#1e3a8a', stars: 0.1 }, { name: 'civil_dawn', time: -36, top: '#1e293b', bottom: '#f97316', stars: 0 }, { name: 'sunrise_glow', time: -15, top: '#fef3c7', bottom: '#fb923c', stars: 0 }, { name: 'sunrise', time: 0, top: '#fde68a', bottom: '#fca5a5', stars: 0 }, { name: 'golden_hour_rise', time: 45, top: '#fde047', bottom: '#f87171', stars: 0 }, { name: 'morning', time: 120, top: '#a5f3fc', bottom: '#7dd3fc', stars: 0 }, { name: 'mid_day', time: 0.4, top: '#38bdf8', bottom: '#C4EFFF', stars: 0 }, { name: 'afternoon', time: -240, top: '#7DD3FC', bottom: '#a5f3fc', stars: 0 }, { name: 'golden_hour_set', time: -60, top: '#fbbf24', bottom: '#f87171', stars: 0 }, { name: 'sunset', time: 0, top: '#f97316', bottom: '#dc2626', stars: 0 }, { name: 'sunset_glow', time: 15, top: '#f472b6', bottom: '#4c1d95', stars: 0 }, { name: 'civil_dusk', time: 36, top: '#0369a1', bottom: '#4c1d95', stars: 0.1 }, { name: 'blue_hour_dusk', time: 50, top: '#1e3a8a', bottom: '#312e81', stars: 0.4 }, { name: 'nautical_dusk', time: 72, top: '#111827', bottom: '#0c0a09', stars: 0.8 }, { name: 'early_night', time: 108, top: '#0B1120', bottom: '#020617', stars: 1.0 } ];
+        function hexToRgb(hex) { let result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex); return result ? { r: parseInt(result[1], 16), g: parseInt(result[2], 16), b: parseInt(result[3], 16) } : null; }
+        function interpolateColor(color1, color2, factor) { let result = {r:0, g:0, b:0}; result.r = Math.round(color1.r + factor * (color2.r - color1.r)); result.g = Math.round(color1.g + factor * (color2.g - color1.g)); result.b = Math.round(color1.b + factor * (color2.b - color1.b)); return result; }
+        function updateDynamicSky() {
+            if (!cachedData.sunTimes) return;
+            const now = new Date(); const nowMs = now.getTime();
+            const { sunrise, sunset } = cachedData.sunTimes;
+            const dayDuration = sunset.getTime() - sunrise.getTime();
+            const minutesFromSunrise = (nowMs - sunrise.getTime()) / 60000;
+            let timePoint = minutesFromSunrise;
+            if (nowMs < sunrise.getTime()) { timePoint = minutesFromSunrise - (1440); }
+            let p1, p2, progress = 0;
+            for (let i = 0; i < SKY_PHASES.length; i++) {
+                const next_i = (i + 1) % SKY_PHASES.length;
+                let t1 = SKY_PHASES[i].time < 1 ? (SKY_PHASES[i].time * dayDuration / 60000) : SKY_PHASES[i].time;
+                let t2 = SKY_PHASES[next_i].time < 1 ? (SKY_PHASES[next_i].time * dayDuration / 60000) : SKY_PHASES[next_i].time;
+                if (i === SKY_PHASES.length - 1) { t2 += 1440; }
+                if (timePoint >= t1 && timePoint < t2) { p1 = SKY_PHASES[i]; p2 = SKY_PHASES[next_i]; progress = (timePoint - t1) / (t2 - t1); break; }
             }
-            if (document.body.dataset.theme !== theme) document.body.dataset.theme = theme;
-        }
-        async function fetchAdvancedSunCalcData(lat, lon) { const now = new Date(); const sunTimes = SunCalc.getTimes(now, lat, lon); const moonTimes = SunCalc.getMoonTimes(now, lat, lon, true); let nextMoonrise = moonTimes.rise; let nextMoonset = moonTimes.set; if (!nextMoonrise || nextMoonrise < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonrise = SunCalc.getMoonTimes(tomorrow, lat, lon, true).rise; } if (!nextMoonset || nextMoonset < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonset = SunCalc.getMoonTimes(tomorrow, lat, lon, true).set; } return { sunrise: formatTime(sunTimes.sunrise), sunset: formatTime(sunTimes.sunset), moonrise: formatTime(nextMoonrise), moonset: formatTime(nextMoonset) }; }
-        async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); stationConfig.isOnline = true; stationConfig.data = data.observations[0]; } catch (error) { stationConfig.isOnline = false; stationConfig.data = null; } finally { if(isWeatherDisplayInitialized) updateStationStatusUI(stationKey); } }
-        
-        async function fetchGeneralConditionsData(lat, lon) { 
-            const lang = 'hu-HU'; 
-            const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; 
-            const response = await fetch(url); 
-            if (!response.ok) { throw new Error(`API hiba`); } 
-            const data = await response.json(); 
-            lastApiCallTimes.generalConditions = Date.now(); 
-            return { 
-                temperature: data.temperature,
-                temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, // MÓDOSÍTÁS: Hőérzet adat lekérése
-                relativeHumidity: data.relativeHumidity,
-                windSpeed: data.windSpeed,
-                windDirection: data.windDirection,
-                dewpoint: data.temperatureDewPoint,
-                skyCoverPhrase: data.cloudCoverPhrase || data.wxPhraseLong || null, 
-                wxPhraseLong: data.wxPhraseLong || null, 
-                pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, 
-                visibility: data.visibility, 
-                dayOrNight: data.dayOrNight, 
-                pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), 
-                uvDescription: data.uvDescription || null, 
-                sunriseTimeLocal: data.sunriseTimeLocal, 
-                sunsetTimeLocal: data.sunsetTimeLocal, 
-                iconCode: data.iconCode 
-            }; 
-        }
-
-        async function fetchHourlyForecastData(lat, lon) {
-            const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`;
-            try {
-                const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`);
-                const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); }
-                const hourlyForecasts = []; const nowMs = new Date().getTime();
-                let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs);
-                if (startIndex === -1) { startIndex = 0; }
-                const forecastLimit = Math.min(startIndex + 12, data.validTimeLocal.length);
-                for (let i = startIndex; i < forecastLimit; i++) {
-                    hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] });
-                }
-                return hourlyForecasts;
-            } catch (error) { throw error; }
-        }
-
-        function initializeWeatherDisplayDOM() {
-            weatherDisplayEl.innerHTML = `<div class="widget-header">
-                <div class="header-container">
-                    <div class="location-title" id="location-title-text">Nyíregyháza és környéke</div>
-                </div>
-                <div class="timestamp-container">
-                    <span class="timestamp" id="timestamp-text">--:--:--</span>
-                    <div class="attribution-line">© Copyright by: Robi</div>
-                </div>
-            </div>
-            <div class="station-status-container">
-                ${Object.keys(STATIONS).filter(key => ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'].includes(key)).map(key => `
-                <div class="station-selector" id="${key.toLowerCase()}-selector-container">
-                    <input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}">
-                    <label for="station-select-${key.toLowerCase()}">
-                        <span class="station-status-indicator" id="status-indicator-${key}"></span>
-                        ${STATIONS[key].displayName}
-                    </label>
-                </div>`).join('')}
-            </div>
-            <div class="top-info-cards-container">
-                <div class="info-card temp-card">
-                    <div class="card-label">Hőmérséklet</div>
-                    <div class="card-main-value"><span id="top-temp-card-value" class="flippable-value">--</span>°</div>
-                    <div id="heat-index-secondary" class="heat-index-secondary">Hőérzet: --°</div>
-                </div>
-                <div class="info-card wind-card" id="wind-card">
-                    <div class="wind-card-title">Szél adatok</div>
-                    <div class="wind-gauge">
-                        <div class="wind-data-center" id="wind-data-center">
-                            <div class="wind-speed-main"><span id="wind-speed-main-value" class="flippable-value">--</span></div>
-                            <div class="wind-speed-unit">km/h</div>
-                        </div>
-                    </div>
-                    <div class="wind-data-bottom">
-                        <div id="wind-direction-bottom" class="flippable-value">--</div>
-                        <div class="wind-gust-bottom">Lökés: <span id="wind-gust-value" class="flippable-value">--</span> km/h</div>
-                    </div>
-                </div>
-            </div>
-            <div class="precip-summary-card" id="precip-summary-card">
-                <!-- Ezt a részt a JavaScript tölti fel az új dizájnnal -->
-            </div>
-            <div class="precipitation-forecast-section">
-                <div class="section-header">
-                    <div class="section-title">Órás csapadék előrejelzés</div>
-                    <div class="section-timestamp" id="forecast-timestamp"></div>
-                </div>
-                <div class="precipitation-chart-container">
-                    <div class="precipitation-chart">
-                    ${Array.from({ length: 7 }).map((_, i) => `
-                        <div class="precip-column">
-                            <div class="precip-chance-text" id="precip-chance-text-${i}">--%</div>
-                            <div class="bar-container"><div class="bar-fill" id="precip-bar-${i}"></div></div>
-                            <div class="precip-amount-text" id="precip-amount-text-${i}">-- mm</div>
-                            <div class="precip-hour-label" id="precip-hour-label-${i}">--</div>
-                        </div>`).join('')}
-                    </div>
-                </div>
-                <div class="section-footer">
-                    <span id="forecast-live-timestamp"></span>
-                </div>
-            </div>
-            <div class="weather-details-grid" id="weather-details-grid"></div>`;
-            
-            addStationChangeListeners(); isWeatherDisplayInitialized = true;
-        }
-
-        function updateStationStatusUI(stationKey) {
-            const stationConfig = STATIONS[stationKey]; if (!stationConfig) return;
-            const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`);
-            if(statusIndicatorEl) {
-                 statusIndicatorEl.classList.remove('online', 'offline');
-                 statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline');
-            }
-            const selectorContainer = document.getElementById(`${stationKey.toLowerCase()}-selector-container`);
-            if(selectorContainer) { selectorContainer.classList.toggle('disabled', !stationConfig.isOnline); }
-            const radioEl = document.getElementById(`station-select-${stationKey.toLowerCase()}`);
-            if(radioEl) { radioEl.checked = (stationKey === activeDisplayStationKey); }
-        }
-
-        function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
-        
-        function handleStationChange(event) {
-            const selectedStationKey = event.target.value;
-            if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) {
-                activeDisplayStationKey = selectedStationKey;
-                
-                const activeStation = STATIONS[activeDisplayStationKey];
-                if (activeStation && activeStation.data) {
-                    cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                }
-                
-                compileAndRenderDisplayData();
-            } else if (!STATIONS[selectedStationKey].isOnline) {
-                event.target.checked = false;
-                const previouslyActiveRadio = document.querySelector(`input[value="${activeDisplayStationKey}"]`);
-                if (previouslyActiveRadio) {
-                    previouslyActiveRadio.checked = true;
-                }
-            }
-        }
-
-        function compileAndRenderDisplayData() {
-            if (!cachedData.displayPws) return;
-            renderWeatherData();
-            renderPrecipitationForecast();
-            renderHourlyForecastData();
-        }
-        
-        function updateAnimatedValue(element, newValue) { if (!element) return; if (element.textContent.trim() !== newValue.toString().trim()) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newValue; element.classList.remove('is-flipping'); }, 300); } } }
-
-        function renderWeatherData() {
-            const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalc = cachedData.sunCalc;
-            if (!general || !sunCalc || !obs) return;
-
-            document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`;
-            
-            const tempCardEl = document.querySelector('.temp-card');
-            const heatIndexEl = document.getElementById('heat-index-secondary');
-
-            if (tempCardEl && typeof obs.temp !== 'undefined' && obs.temp !== null) {
-                updateAnimatedValue(document.getElementById('top-temp-card-value'), formatValue(obs.temp, '', 1));
-                tempCardEl.style.setProperty('--current-temp-bg-color', `var(--${getTemperatureColorName(obs.temp)})`);
-                
-                // MÓDOSÍTÁS: Hőérzet a központi API-ból
-                let feltTempText = `Hőérzet: ${NO_DATA_STRING}°`; // Alapértelmezett szöveg
-                if (general && typeof general.temperatureFeelsLike !== 'undefined' && general.temperatureFeelsLike !== null) {
-                    feltTempText = `Hőérzet: ${formatValue(general.temperatureFeelsLike, '°', 1)}`;
-                }
-                
-                if (heatIndexEl) {
-                    heatIndexEl.textContent = feltTempText;
-                }
-
-            } else {
-                updateAnimatedValue(document.getElementById('top-temp-card-value'), NO_DATA_STRING);
-                 if(heatIndexEl) {
-                    heatIndexEl.textContent = `Hőérzet: ${NO_DATA_STRING}°`;
-                 }
-            }
-
-            const windCenterEl = document.getElementById('wind-data-center');
-            if (windCenterEl && typeof obs.windSpeed !== 'undefined' && obs.windSpeed !== null) {
-                const windSpeed = obs.windSpeed || 0;
-                windCenterEl.style.borderColor = `var(--wind-${getWindColorName(windSpeed)})`;
-                const speedMainEl = document.getElementById('wind-speed-main-value');
-                speedMainEl.style.color = `var(--wind-${getWindColorName(windSpeed)})`;
-                updateAnimatedValue(speedMainEl, formatValue(windSpeed, '', 1));
-                updateAnimatedValue(document.getElementById('wind-direction-bottom'), degreesToCompass(obs.winddir));
-                updateAnimatedValue(document.getElementById('wind-gust-value'), formatValue(obs.windGust, '', 1));
-            } else {
-                 updateAnimatedValue(document.getElementById('wind-speed-main-value'), NO_DATA_STRING);
-                 updateAnimatedValue(document.getElementById('wind-direction-bottom'), '-');
-                 updateAnimatedValue(document.getElementById('wind-gust-value'), NO_DATA_STRING);
-                 if (windCenterEl) windCenterEl.style.borderColor = `var(--wind-calm)`;
-                 const speedMainEl = document.getElementById('wind-speed-main-value');
-                 if (speedMainEl) speedMainEl.style.color = `var(--wind-calm)`;
-            }
-
-            const precipCardEl = document.getElementById('precip-summary-card');
-            if (precipCardEl) {
-                const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
-                const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0);
-                let mainContentHTML = '';
-                let footerHTML = '';
-
-                const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
-                const tooltipHTML = `<div class="station-tooltip-container">
-                                        <span class="station-list-trigger">Figyelt állomások listája</span>
-                                        <div class="station-tooltip-content">${allMonitoredNames}</div>
-                                    </div>`;
-
-                if (stationsWithRainToday.length === 0) {
-                    mainContentHTML = `<div class="precip-explanation-container">
-                        <h5 class="explanation-title">Hogyan működik a Csapadékfigyelő?</h5>
-                        <p class="explanation-text">
-                            Ez a modul nem egy hagyományos, nagy hatótávolságú radar. Ehelyett egy <strong>mikro-hálózatot</strong> használ, amely Nyíregyháza környéki privát időjárás-állomások (PWS) valós idejű adatait gyűjti össze. Amikor valamelyik figyelt állomáson csapadékot észlel a rendszer, az azonnal megjelenik itt.
-                        </p>
-                        <h6 class="explanation-subtitle">A mérés elve és a frissítés</h6>
-                        <p class="explanation-text">
-                            Az állomások egy úgynevezett <strong>billenővödrös csapadékmérővel</strong> vannak felszerelve. Ez egy kis edény, amely meghatározott mennyiségű (pl. 0.2 mm) esővíz összegyűlése után megbillen, és egy elektromos jelet küld. A billenések gyakorisága adja a csapadék intenzitását (mm/óra), az összes billenés pedig a napi összeget. A rendszer <strong>30 másodpercenként</strong> kéri le az adatokat az összes állomásról a maximális pontosság érdekében.
-                        </p>
-                        <h6 class="explanation-subtitle">Mit fog látni, ha esni kezd?</h6>
-                        <p class="explanation-text">
-                            Amint egy állomás esőt jelez, ez a tájékoztató eltűnik, és helyette egy lista jelenik meg. A listában azok az állomások szerepelnek majd, ahol aznap éjfél óta esett az eső. Külön kiemelve láthatja, ha egy helyen <strong>éppen most is esik</strong>, az aktuális intenzitással és a mai napon lehullott teljes csapadékmennyiséggel együtt.
-                        </p>
-                    </div>`;
-                    footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`;
-                    precipCardEl.classList.remove('is-raining-somewhere');
-                } else {
-                    mainContentHTML = `<div class="precip-station-list">${stationsWithRainToday
-                        .sort((a, b) => (b.data.metric.precipTotal - a.data.metric.precipTotal))
-                        .map(station => {
-                            const isRainingNow = station.data.metric.precipRate > 0;
-                            const itemClass = isRainingNow ? 'precip-station-list-item is-raining-now' : 'precip-station-list-item';
-                            const intensityText = getPrecipIntensityDescription(station.data.metric.precipRate);
-                            const displayName = station.displayNameShort || station.displayName;
-                            return `<div class="${itemClass}">
-                                        <div class="station-main-row">
-                                            <span class="precip-station-name">${displayName}</span>
-                                            <span class="precip-station-value" title="Ennyi esett ma eddig">Ma eddig: <strong>${formatValue(station.data.metric.precipTotal, ' mm', 1)}</strong></span>
-                                        </div>
-                                        ${isRainingNow ? `<div class="rain-intensity-text">Most: ${intensityText}</div>` : ''}
-                                    </div>`;
-                        }).join('')}</div>`;
-                    
-                    footerHTML = `<div class="precip-card-footer">
-                                    <div class="precip-footer-note">Azok az állomások is láthatóak, ahol ma már esett az eső.</div>
-                                    ${tooltipHTML}
-                                  </div>`;
-                    precipCardEl.classList.add('is-raining-somewhere');
-                }
-                
-                precipCardEl.innerHTML = `<div class="precip-card-header">
-                        <div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div>
-                        <h4 class="precip-header-title">CsapadékRadar</h4>
-                    </div>
-                    <div class="precip-card-content">${mainContentHTML}</div>
-                    ${footerHTML}`;
-            }
-            
-            const detailsGrid = document.getElementById('weather-details-grid');
-            if (detailsGrid) {
-                 const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→'; 
-                 detailsGrid.innerHTML = `<div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value">${formatValue(obs.dewpt, '°C', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value">${formatValue(obs.humidity, '%', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value">${formatValue(general.pressureAltimeter || obs.pressure, ' hPa', 0)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div> <div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value">${formatValue(obs.solarRadiation, ' W/m²', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value">${formatValue(obs.uv, '', 1)} ${getUVDescription(obs.uv)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value">${sunCalc.sunrise}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value">${sunCalc.sunset}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte:</span><span class="value">${sunCalc.moonrise}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta:</span><span class="value">${sunCalc.moonset}</span></div>`;
+             if (!p1) { p1 = SKY_PHASES[now.getHours() > 18 || now.getHours() < 6 ? 1 : 11]; p2 = p1; }
+            if(p1 && p2) {
+                const topRgb = interpolateColor(hexToRgb(p1.top), hexToRgb(p2.top), progress);
+                const bottomRgb = interpolateColor(hexToRgb(p1.bottom), hexToRgb(p2.bottom), progress);
+                skyContainerEl.style.background = `linear-gradient(to bottom, rgb(${topRgb.r},${topRgb.g},${topRgb.b}), rgb(${bottomRgb.r},${bottomRgb.g},${bottomRgb.b}))`;
+                const starsOpacity = p1.stars + progress * (p2.stars - p1.stars);
+                starsContainerEl.style.opacity = (starsOpacity * (1 - currentSkyState.cloudAmount / 20)).toFixed(2);
             }
         }
         
-        function renderPrecipitationForecast() {
-            const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull) return;
-            const forecastLiveTimestampEl = document.getElementById('forecast-live-timestamp');
-            if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) {
-                forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess), true)}`;
-            }
-            for (let i = 0; i < 7; i++) {
-                const chanceEl = document.getElementById(`precip-chance-text-${i}`); const barEl = document.getElementById(`precip-bar-${i}`); const amountEl = document.getElementById(`precip-amount-text-${i}`); const labelEl = document.getElementById(`precip-hour-label-${i}`);
-                if (chanceEl && barEl && amountEl && labelEl) {
-                    const hourData = hourlyDataFull[i];
-                    if (hourData) { const chance = hourData.precipChance || 0; const amount = hourData.qpf || 0; const barHeight = Math.min(100, (amount / 5.0) * 100); const barOpacity = 0.15 + (chance / 100) * 0.85; chanceEl.textContent = `${chance}%`; barEl.style.height = `${barHeight}%`; barEl.style.opacity = barOpacity; amountEl.textContent = `${formatValue(amount, ' mm', 1)}`; labelEl.textContent = formatHourOnly(hourData.time); } else { chanceEl.textContent = '--%'; barEl.style.height = '0%'; barEl.style.opacity = 0.15; amountEl.textContent = '-- mm'; labelEl.textContent = '--'; }
-                }
-            }
-        }
-        
-        function renderHourlyForecastData() {
-            const hourlyDataFull = cachedData.hourlyForecast; 
-            if (!hourlyDataFull || hourlyDataFull.length === 0 || !hourlyForecastContainerEl) { 
-                if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden'); 
-                if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); 
-                return; 
-            }
-            let forecastHTML = '';
-            hourlyDataFull.forEach(hour => {
-                let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight);
-                forecastHTML += `<div class="hourly-forecast-card">
-                    <div class="hourly-primary-info">
-                        <div class="hourly-time">${formatTime(hour.time)}</div>
-                        <div class="hourly-icon-and-condition">
-                            <i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i>
-                            <div class="hourly-condition-text">${conditionText}</div>
-                        </div>
-                        <div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div>
-                    </div>
-                    <div class="hourly-secondary-details">
-                        <div class="hourly-detail-row">
-                            <span><i class="fas fa-tint"></i> Csapadék</span>
-                            <strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong>
-                        </div>
-                        <div class="hourly-detail-row">
-                            <span><i class="fas fa-wind"></i> Szél</span>
-                            <strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong>
-                        </div>
-                        <div class="hourly-detail-row">
-                            <span><i class="fas fa-hand-holding-water"></i> Pára</span>
-                            <strong>${formatValue(hour.humidity, '%', 0)}</strong>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; 
-            if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); 
-            if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden');
-        }
+        function updateDynamicVisuals() {
+            const now = new Date();
+            const sunPos = SunCalc.getPosition(now, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
+            const moonPos = SunCalc.getMoonPosition(now, NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon);
+            const moonIllumination = SunCalc.getMoonIllumination(now);
+            const altitudeDeg = sunPos.altitude * 180 / Math.PI;
 
-        async function fetchAndRefreshForecasts() { 
-            try { 
-                const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon); 
-                if (data) { 
-                    cachedData.hourlyForecast = data; 
-                    lastApiCallTimes.forecastSuccess = Date.now(); 
-                } 
-                lastApiCallTimes.forecast = Date.now(); 
-                renderPrecipitationForecast(); 
-                renderHourlyForecastData();
-            } catch (e) { /* Hiba csendes kezelése */ } 
-        }
+            // MÓDOSÍTÁS: Világosabb éjszakai felhők
+            const cloudDay = { base: {r:245, g:245, b:245}, shadow: {r:210, g:210, b:220} };
+            const cloudGolden = { base: {r:255, g:230, b:200}, shadow: {r:240, g:180, b:130} };
+            const cloudSunset = { base: {r:255, g:180, b:150}, shadow: {r:210, g:120, b:100} };
+            const cloudBlueHour = { base: {r:120, g:130, b:160}, shadow: {r:80, g:90, b:120} };
+            const cloudNight = { base: {r:45, g:55, b:70}, shadow: {r:30, g:40, b:55} };
+            let currentBase = cloudDay.base; let currentShadow = cloudDay.shadow;
+            if (altitudeDeg > 15) { currentBase = cloudDay.base; currentShadow = cloudDay.shadow;
+            } else if (altitudeDeg > 0) { const factor = altitudeDeg / 15; currentBase = interpolateColor(cloudGolden.base, cloudDay.base, factor); currentShadow = interpolateColor(cloudGolden.shadow, cloudDay.shadow, factor);
+            } else if (altitudeDeg > -6) { const factor = (altitudeDeg + 6) / 6; currentBase = interpolateColor(cloudSunset.base, cloudGolden.base, factor); currentShadow = interpolateColor(cloudSunset.shadow, cloudGolden.shadow, factor);
+            } else if (altitudeDeg > -12) { const factor = (altitudeDeg + 12) / 6; currentBase = interpolateColor(cloudBlueHour.base, cloudSunset.base, factor); currentShadow = interpolateColor(cloudBlueHour.shadow, cloudSunset.shadow, factor);
+            } else if (altitudeDeg > -18) { const factor = (altitudeDeg + 18) / 6; currentBase = interpolateColor(cloudNight.base, cloudBlueHour.base, factor); currentShadow = interpolateColor(cloudNight.shadow, cloudBlueHour.shadow, factor);
+            } else { currentBase = cloudNight.base; currentShadow = cloudNight.shadow; }
+            document.documentElement.style.setProperty('--cloud-base-color', `rgb(${currentBase.r},${currentBase.g},${currentBase.b})`);
+            document.documentElement.style.setProperty('--cloud-shadow-color', `rgb(${currentShadow.r},${currentShadow.g},${currentShadow.b})`);
 
-        async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
-            const now = Date.now();
+            const verticalMultiplier = window.innerHeight < 550 ? 70 : 85;
+            let sunRect;
 
-            if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
-            
-            await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
-            
-            const promises = [];
-            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { 
-                promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
-                    .then(data => { if (data) Object.assign(cachedData.generalConditions, data); })
-                    .catch(e => { console.error("General conditions fetch failed:", e); }));
-            }
-            if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { 
-                promises.push(fetchAndRefreshForecasts()); 
-            }
-            promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon)
-                .then(data => { cachedData.sunCalc = data; }));
-            
-            await Promise.allSettled(promises);
+            if (sunPos.altitude > -0.1) {
+                const x = 50 + Math.cos(sunPos.azimuth + Math.PI/2) * 50;
+                const y = verticalMultiplier - Math.sin(sunPos.altitude) * verticalMultiplier;
+                sunEl.style.transform = `translate(-50%, -50%) translate(${x}vw, ${y}vh)`;
+                let sunGradient, sunShadow;
+                if (altitudeDeg < 5) { sunGradient = 'radial-gradient(circle, #FFDAB9 20%, #FFA500 60%, #FF4500 100%)'; sunShadow = '0 0 60px #ffA500, 0 0 120px #ff4500'; } else if (altitudeDeg < 20) { sunGradient = 'radial-gradient(circle, #FFF5C9 30%, #FFD78C 70%, #FFC34D 100%)'; sunShadow = '0 0 50px #fff, 0 0 100px #fef08a'; } else { sunGradient = 'radial-gradient(circle, #FFFFFF 20%, #FFFACD 50%, #FFD700 100%)'; sunShadow = '0 0 60px #fff, 0 0 120px #FFFACD, 0 0 200px #FFD700'; }
+                sunEl.style.background = sunGradient; sunEl.style.boxShadow = sunShadow; sunEl.style.opacity = Math.min(1, sunPos.altitude * 20);
+                sunRect = sunEl.getBoundingClientRect();
+            } else { sunEl.style.opacity = 0; sunRect = null; }
 
-            const stationSelectorContainer = document.querySelector('.station-status-container');
-            const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'];
+            if (moonPos.altitude > -0.1) {
+                const x = 50 + Math.cos(moonPos.azimuth + Math.PI/2) * 50;
+                const y = verticalMultiplier - Math.sin(moonPos.altitude) * verticalMultiplier;
+                moonEl.style.transform = `translate(-50%, -50%) translate(${x}vw, ${y}vh)`;
+                moonEl.style.opacity = Math.min(1, moonIllumination.fraction * 1.5);
+                const phase = moonIllumination.phase; const visualAngle = (moonIllumination.angle - moonPos.parallacticAngle) * 180 / Math.PI;
+                let overlayStyle;
+                const quarterThreshold = 0.02;
+                if (Math.abs(phase - 0.25) < quarterThreshold) { overlayStyle = `linear-gradient(to left, transparent 50%, rgba(0,0,0,0.6) 50.5%)`;
+                } else if (Math.abs(phase - 0.75) < quarterThreshold) { overlayStyle = `linear-gradient(to right, transparent 50%, rgba(0,0,0,0.6) 50.5%)`;
+                } else if (phase < 0.5) { const size = 200 * (0.5 - phase); overlayStyle = `radial-gradient(circle at right ${size}%, transparent 50%, rgba(0,0,0,0.6) 50.5%)`;
+                } else { const size = 200 * (phase - 0.5); overlayStyle = `radial-gradient(circle at left ${size}%, transparent 50%, rgba(0,0,0,0.6) 50.5%)`; }
+                moonPhaseOverlayEl.style.background = overlayStyle; moonPhaseOverlayEl.style.transform = `rotate(${visualAngle}deg)`;
+            } else { moonEl.style.opacity = 0; }
             
-            const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline;
-            
-            if (activeStationIsOnline) {
-                const activeStation = STATIONS[activeDisplayStationKey];
-                cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden');
-                const locationTitle = document.getElementById('location-title-text');
-                if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke";
-            } else {
-                const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline);
-                if (onlinePrimaryStations.length > 0) {
-                    activeDisplayStationKey = onlinePrimaryStations[0];
-                    const activeStation = STATIONS[activeDisplayStationKey];
-                    cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                    if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden');
-                    const locationTitle = document.getElementById('location-title-text');
-                    if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke";
-                } else {
-                    const secondaryFallbackOrder = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'];
-                    const availableFallbackKey = secondaryFallbackOrder.find(key => STATIONS[key].isOnline);
-
-                    if (availableFallbackKey) {
-                        const fallbackStation = STATIONS[availableFallbackKey];
-                        cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data };
-                        if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden');
-                        const locationTitle = document.getElementById('location-title-text');
-                        if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke";
-                    } else {
-                        if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden');
-                        const locationTitle = document.getElementById('location-title-text');
-                        if (locationTitle) locationTitle.textContent = "Nyíregyháza (Régiós adat)";
-                        const general = cachedData.generalConditions;
-                        if (general) {
-                            cachedData.displayPws = {
-                                temp: general.temperature, heatIndex: null, windChill: null, windSpeed: general.windSpeed, winddir: general.windDirection,
-                                windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity,
-                                pressure: general.pressureAltimeter, solarRadiation: null, uv: null,
-                            };
-                        }
+            let isSunOccluded = false;
+            if (sunRect && sunRect.width > 0) {
+                const clouds = cloudsContainerEl.children;
+                for (let cloud of clouds) {
+                    cloud.classList.remove('is-illuminated');
+                    const cloudRect = cloud.getBoundingClientRect();
+                    if (cloudRect.right > sunRect.left && cloudRect.left < sunRect.right && cloudRect.bottom > sunRect.top && cloudRect.top < sunRect.bottom) {
+                        isSunOccluded = true;
+                        cloud.classList.add('is-illuminated');
                     }
                 }
             }
-            
+            sunEl.classList.toggle('is-occluded', isSunOccluded);
+        }
+
+        function updateWeatherEffects() {
+            const desiredCloudCount = Math.floor(currentSkyState.cloudAmount * (window.innerWidth < 768 ? 0.6 : 1));
+            if (cloudsContainerEl.children.length !== desiredCloudCount) {
+                cloudsContainerEl.innerHTML = '';
+                for (let i = 0; i < desiredCloudCount; i++) {
+                    const cloud = document.createElement('div');
+                    cloud.classList.add('cloud', `type${Math.floor(Math.random() * 4) + 1}`);
+                    cloud.style.top = `${Math.random() * 40}%`; 
+                    const duration = Math.random() * 80 + 90;
+                    const delay = -Math.random() * duration;
+                    cloud.style.animationDuration = `${duration}s`;
+                    cloud.style.animationDelay = `${delay}s`;
+                    cloudsContainerEl.appendChild(cloud);
+                }
+            }
+            cloudsContainerEl.style.opacity = desiredCloudCount > 0 ? '1' : '0';
+            const desiredRainCount = currentSkyState.isRaining ? Math.floor((currentSkyState.precipRate * 50 + 10) * (window.innerWidth < 768 ? 0.5 : 1)) : 0;
+            if (rainContainerEl.children.length !== desiredRainCount) {
+                 rainContainerEl.innerHTML = '';
+                 if (desiredRainCount > 0) {
+                    for (let i = 0; i < desiredRainCount; i++) {
+                        const drop = document.createElement('div');
+                        drop.classList.add('raindrop');
+                        drop.style.left = `${Math.random() * 100}%`; drop.style.top = `${Math.random() * 100}%`;
+                        drop.style.opacity = Math.random() * 0.5 + 0.2;
+                        rainContainerEl.appendChild(drop);
+                    }
+                 }
+            }
+        }
+
+        function createStars() {
+            starsContainerEl.innerHTML = '';
+            const starCount = window.innerWidth < 768 ? 80 : 200;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 2 + 1;
+                star.style.width = `${size}px`; star.style.height = `${size}px`;
+                star.style.top = `${Math.random() * 100}%`; star.style.left = `${Math.random() * 100}%`;
+                star.style.opacity = Math.random() * 0.6 + 0.2;
+                starsContainerEl.appendChild(star);
+            }
+        }
+
+        function animateSky() {
+            updateDynamicVisuals();
+            updateDynamicSky();
+            requestAnimationFrame(animateSky);
+        }
+        
+        // --- API hívások ---
+        async function fetchAdvancedSunCalcData(lat, lon) { const now = new Date(); cachedData.sunTimes = SunCalc.getTimes(now, lat, lon); const moonTimes = SunCalc.getMoonTimes(now, lat, lon, true); let nextMoonrise = moonTimes.rise; let nextMoonset = moonTimes.set; if (!nextMoonrise || nextMoonrise < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonrise = SunCalc.getMoonTimes(tomorrow, lat, lon, true).rise; } if (!nextMoonset || nextMoonset < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonset = SunCalc.getMoonTimes(tomorrow, lat, lon, true).set; } return { sunrise: formatTime(cachedData.sunTimes.sunrise), sunset: formatTime(cachedData.sunTimes.sunset), moonrise: formatTime(nextMoonrise), moonset: formatTime(nextMoonset) }; }
+        async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); stationConfig.isOnline = true; stationConfig.data = data.observations[0]; } catch (error) { stationConfig.isOnline = false; stationConfig.data = null; } finally { if(isWeatherDisplayInitialized) updateStationStatusUI(stationKey); } }
+        async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); lastApiCallTimes.generalConditions = Date.now(); return { temperature: data.temperature, temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, relativeHumidity: data.relativeHumidity, windSpeed: data.windSpeed, windDirection: data.windDirection, dewpoint: data.temperatureDewPoint, skyCoverPhrase: data.cloudCoverPhrase || data.wxPhraseLong || null, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, sunriseTimeLocal: data.sunriseTimeLocal, sunsetTimeLocal: data.sunsetTimeLocal, iconCode: data.iconCode }; }
+        async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 12, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
+
+        // --- Adatfrissítési ciklusok ---
+        async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
+            const now = Date.now();
+            if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
+            await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
+            const promises = [];
+            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => { console.error("General conditions fetch failed:", e); })); }
+            if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); }
+            promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; }));
+            await Promise.allSettled(promises);
+            const stationSelectorContainer = document.querySelector('.station-status-container');
+            const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline;
+            if (activeStationIsOnline) { const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { const onlinePrimaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'].filter(k => STATIONS[k].isOnline); if (onlinePrimaryStations.length > 0) { activeDisplayStationKey = onlinePrimaryStations[0]; const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { const availableFallbackKey = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'].find(key => STATIONS[key].isOnline); if (availableFallbackKey) { const fallbackStation = STATIONS[availableFallbackKey]; cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza (Régiós adat)"; const general = cachedData.generalConditions; if (general) { cachedData.displayPws = { temp: general.temperature, heatIndex: null, windChill: null, windSpeed: general.windSpeed, winddir: general.windDirection, windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity, pressure: general.pressureAltimeter, solarRadiation: null, uv: null }; } } } }
+            const anyStationRaining = Object.values(STATIONS).some(s => s.isOnline && s.data && s.data.metric.precipRate > 0);
+            const maxPrecipRate = Math.max(0, ...Object.values(STATIONS).map(s => (s.isOnline && s.data) ? s.data.metric.precipRate : 0));
+            currentSkyState.isRaining = anyStationRaining; currentSkyState.precipRate = maxPrecipRate;
+            const general = cachedData.generalConditions;
+            if (general && general.iconCode) { 
+                const icon = general.iconCode; 
+                if ([31, 32, 33, 36].includes(icon)) currentSkyState.cloudAmount = 0;
+                else if ([34, 29, 30].includes(icon)) currentSkyState.cloudAmount = 5;
+                else if ([27, 28].includes(icon)) currentSkyState.cloudAmount = 10;
+                else if ([26].includes(icon)) currentSkyState.cloudAmount = 15;
+                else currentSkyState.cloudAmount = 8;
+            } else { currentSkyState.cloudAmount = 0; }
+            updateWeatherEffects();
             Object.keys(STATIONS).forEach(key => updateStationStatusUI(key));
-            updateThemeAndSky(new Date(), cachedData.generalConditions.sunriseTimeLocal, cachedData.generalConditions.sunsetTimeLocal);
+            compileAndRenderDisplayData();
+        }
+        
+        // --- DOM Inicializálás és Renderelés (többi része változatlan) ---
+        function initializeWeatherDisplayDOM() { weatherDisplayEl.innerHTML = `<div class="widget-header"><div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div></div><div class="timestamp-container"><span class="timestamp" id="timestamp-text">--:--:--</span><div class="attribution-line">© Copyright by: Robi</div></div></div><div class="station-status-container">${Object.keys(STATIONS).filter(key => ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'].includes(key)).map(key => `<div class="station-selector" id="${key.toLowerCase()}-selector-container"><input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}"><label for="station-select-${key.toLowerCase()}"><span class="station-status-indicator" id="status-indicator-${key}"></span> ${STATIONS[key].displayName}</label></div>`).join('')}</div><div class="top-info-cards-container"><div class="info-card temp-card"><div class="card-label">Hőmérséklet</div><div class="card-main-value"><span id="top-temp-card-value" class="flippable-value">--</span>°</div><div id="heat-index-secondary" class="heat-index-secondary">Hőérzet: --°</div></div><div class="info-card wind-card" id="wind-card"><div class="wind-card-title">Szél adatok</div><div class="wind-gauge"><div class="wind-data-center" id="wind-data-center"><div class="wind-speed-main"><span id="wind-speed-main-value" class="flippable-value">--</span></div><div class="wind-speed-unit">km/h</div></div></div><div class="wind-data-bottom"><div id="wind-direction-bottom" class="flippable-value">--</div><div class="wind-gust-bottom">Lökés: <span id="wind-gust-value" class="flippable-value">--</span> km/h</div></div></div></div><div class="precip-summary-card" id="precip-summary-card"></div><div class="precipitation-forecast-section"><div class="section-header"><div class="section-title">Órás csapadék előrejelzés</div><div class="section-timestamp" id="forecast-timestamp"></div></div><div class="precipitation-chart-container"><div class="precipitation-chart">${Array.from({ length: 7 }).map((_, i) => `<div class="precip-column"><div class="precip-chance-text" id="precip-chance-text-${i}">--%</div><div class="bar-container"><div class="bar-fill" id="precip-bar-${i}"></div></div><div class="precip-amount-text" id="precip-amount-text-${i}">-- mm</div><div class="precip-hour-label" id="precip-hour-label-${i}">--</div></div>`).join('')}</div></div><div class="section-footer"><span id="forecast-live-timestamp"></span></div></div><div class="weather-details-grid" id="weather-details-grid"></div>`; addStationChangeListeners(); isWeatherDisplayInitialized = true; }
+        function updateStationStatusUI(stationKey) { const stationConfig = STATIONS[stationKey]; if (!stationConfig) return; const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`); if(statusIndicatorEl) { statusIndicatorEl.classList.remove('online', 'offline'); statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline'); } const selectorContainer = document.getElementById(`${stationKey.toLowerCase()}-selector-container`); if(selectorContainer) { selectorContainer.classList.toggle('disabled', !stationConfig.isOnline); } const radioEl = document.getElementById(`station-select-${stationKey.toLowerCase()}`); if(radioEl) { radioEl.checked = (stationKey === activeDisplayStationKey); } }
+        function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
+        function handleStationChange(event) { const selectedStationKey = event.target.value; if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) { activeDisplayStationKey = selectedStationKey; const activeStation = STATIONS[activeDisplayStationKey]; if (activeStation && activeStation.data) { cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; } compileAndRenderDisplayData(); } else if (!STATIONS[selectedStationKey].isOnline) { event.target.checked = false; const previouslyActiveRadio = document.querySelector(`input[value="${activeDisplayStationKey}"]`); if (previouslyActiveRadio) { previouslyActiveRadio.checked = true; } } }
+        function compileAndRenderDisplayData() { if (!cachedData.displayPws) return; renderWeatherData(); renderPrecipitationForecast(); renderHourlyForecastData(); }
+        function updateAnimatedValue(element, newValue) { if (!element) return; if (element.textContent.trim() !== newValue.toString().trim()) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newValue; element.classList.remove('is-flipping'); }, 300); } } }
+        function renderWeatherData() { const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!general || !sunCalcData || !obs) return; document.getElementById('timestamp-text').textContent = `Utolsó frissítés: ${formatTime(new Date(), true)}`; const tempCardEl = document.querySelector('.temp-card'); const heatIndexEl = document.getElementById('heat-index-secondary'); if (tempCardEl && typeof obs.temp !== 'undefined' && obs.temp !== null) { updateAnimatedValue(document.getElementById('top-temp-card-value'), formatValue(obs.temp, '', 1)); tempCardEl.style.setProperty('--current-temp-bg-color', `var(--${getTemperatureColorName(obs.temp)})`); let feltTempText = `Hőérzet: ${NO_DATA_STRING}°`; if (general && typeof general.temperatureFeelsLike !== 'undefined' && general.temperatureFeelsLike !== null) { feltTempText = `Hőérzet: ${formatValue(general.temperatureFeelsLike, '°', 1)}`; } if (heatIndexEl) { heatIndexEl.textContent = feltTempText; } } else { updateAnimatedValue(document.getElementById('top-temp-card-value'), NO_DATA_STRING); if(heatIndexEl) { heatIndexEl.textContent = `Hőérzet: ${NO_DATA_STRING}°`; } } const windCenterEl = document.getElementById('wind-data-center'); if (windCenterEl && typeof obs.windSpeed !== 'undefined' && obs.windSpeed !== null) { const windSpeed = obs.windSpeed || 0; windCenterEl.style.borderColor = `var(--wind-${getWindColorName(windSpeed)})`; const speedMainEl = document.getElementById('wind-speed-main-value'); speedMainEl.style.color = `var(--wind-${getWindColorName(windSpeed)})`; updateAnimatedValue(speedMainEl, formatValue(windSpeed, '', 1)); updateAnimatedValue(document.getElementById('wind-direction-bottom'), degreesToCompass(obs.winddir)); updateAnimatedValue(document.getElementById('wind-gust-value'), formatValue(obs.windGust, '', 1)); } else { updateAnimatedValue(document.getElementById('wind-speed-main-value'), NO_DATA_STRING); updateAnimatedValue(document.getElementById('wind-direction-bottom'), '-'); updateAnimatedValue(document.getElementById('wind-gust-value'), NO_DATA_STRING); if (windCenterEl) windCenterEl.style.borderColor = `var(--wind-calm)`; const speedMainEl = document.getElementById('wind-speed-main-value'); if (speedMainEl) speedMainEl.style.color = `var(--wind-calm)`; } const precipCardEl = document.getElementById('precip-summary-card'); if (precipCardEl) { const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data); const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0); let mainContentHTML = ''; let footerHTML = ''; const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', '); const tooltipHTML = `<div class="station-tooltip-container"><span class="station-list-trigger">Figyelt állomások listája</span><div class="station-tooltip-content">${allMonitoredNames}</div></div>`; if (stationsWithRainToday.length === 0) { mainContentHTML = `<div class="precip-explanation-container"><h5 class="explanation-title">Hogyan működik a Csapadékfigyelő?</h5><p class="explanation-text">Ez a modul <strong>mikro-hálózatot</strong> használ, amely Nyíregyháza környéki privát időjárás-állomások (PWS) valós idejű adatait gyűjti össze. Amikor valamelyik figyelt állomáson csapadékot észlel a rendszer, az azonnal megjelenik itt.</p><h6 class="explanation-subtitle">A mérés elve és a frissítés</h6><p class="explanation-text">Az állomások egy <strong>billenővödrös csapadékmérővel</strong> vannak felszerelve. A billenések gyakorisága adja a csapadék intenzitását (mm/óra). A rendszer <strong>30 másodpercenként</strong> kéri le az adatokat az összes állomásról a maximális pontosság érdekében.</p><h6 class="explanation-subtitle">Mit fog látni, ha esni kezd?</h6><p class="explanation-text">Amint egy állomás esőt jelez, ez a tájékoztató eltűnik, és helyette egy lista jelenik meg. Külön kiemelve láthatja, ha egy helyen <strong>éppen most is esik</strong>, az aktuális intenzitással és a mai napon lehullott teljes csapadékmennyiséggel együtt.</p></div>`; footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`; precipCardEl.classList.remove('is-raining-somewhere'); } else { mainContentHTML = `<div class="precip-station-list">${stationsWithRainToday.sort((a, b) => (b.data.metric.precipTotal - a.data.metric.precipTotal)).map(station => { const isRainingNow = station.data.metric.precipRate > 0; const itemClass = isRainingNow ? 'precip-station-list-item is-raining-now' : 'precip-station-list-item'; const intensityText = getPrecipIntensityDescription(station.data.metric.precipRate); const displayName = station.displayNameShort || station.displayName; return `<div class="${itemClass}"><div class="station-main-row"><span class="precip-station-name">${displayName}</span><span class="precip-station-value" title="Ennyi esett ma eddig">Ma eddig: <strong>${formatValue(station.data.metric.precipTotal, ' mm', 1)}</strong></span></div>${isRainingNow ? `<div class="rain-intensity-text">Most: ${intensityText}</div>` : ''}</div>`; }).join('')}</div>`; footerHTML = `<div class="precip-card-footer"><div class="precip-footer-note">Azok az állomások is láthatóak, ahol ma már esett az eső.</div>${tooltipHTML}</div>`; precipCardEl.classList.add('is-raining-somewhere'); } precipCardEl.innerHTML = `<div class="precip-card-header"><div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div><h4 class="precip-header-title">CsapadékRadar</h4></div><div class="precip-card-content">${mainContentHTML}</div>${footerHTML}`; } const detailsGrid = document.getElementById('weather-details-grid'); if (detailsGrid) { const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→'; detailsGrid.innerHTML = `<div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Harmatpont:</span><span class="value">${formatValue(obs.dewpt, '°C', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-percentage"></i>Páratartalom:</span><span class="value">${formatValue(obs.humidity, '%', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-ruler-combined"></i>Légnyomás:</span><span class="value">${formatValue(general.pressureAltimeter || obs.pressure, ' hPa', 0)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div> <div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság:</span><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás:</span><span class="value">${formatValue(obs.solarRadiation, ' W/m²', 0)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-umbrella-beach"></i>UV Index:</span><span class="value">${formatValue(obs.uv, '', 1)} ${getUVDescription(obs.uv)}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napkelte:</span><span class="value">${sunCalcData.sunrise}</span></div> <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napnyugta:</span><span class="value">${sunCalcData.sunset}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte:</span><span class="value">${sunCalcData.moonrise}</span></div> <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta:</span><span class="value">${sunCalcData.moonset}</span></div>`; } }
+        function renderPrecipitationForecast() { const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull) return; const forecastLiveTimestampEl = document.getElementById('forecast-live-timestamp'); if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) { forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess), true)}`; } for (let i = 0; i < 7; i++) { const chanceEl = document.getElementById(`precip-chance-text-${i}`); const barEl = document.getElementById(`precip-bar-${i}`); const amountEl = document.getElementById(`precip-amount-text-${i}`); const labelEl = document.getElementById(`precip-hour-label-${i}`); if (chanceEl && barEl && amountEl && labelEl) { const hourData = hourlyDataFull[i]; if (hourData) { const chance = hourData.precipChance || 0; const amount = hourData.qpf || 0; const barHeight = Math.min(100, (amount / 5.0) * 100); const barOpacity = 0.15 + (chance / 100) * 0.85; chanceEl.textContent = `${chance}%`; barEl.style.height = `${barHeight}%`; barEl.style.opacity = barOpacity; amountEl.textContent = `${formatValue(amount, ' mm', 1)}`; labelEl.textContent = formatHourOnly(hourData.time); } else { chanceEl.textContent = '--%'; barEl.style.height = '0%'; barEl.style.opacity = 0.15; amountEl.textContent = '-- mm'; labelEl.textContent = '--'; } } } }
+        function renderHourlyForecastData() { const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull || hourlyDataFull.length === 0 || !hourlyForecastContainerEl) { if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); return; } let forecastHTML = ''; hourlyDataFull.forEach(hour => { let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight); forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`; }); if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden'); }
+        async function fetchAndRefreshForecasts() { try { const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon); if (data) { cachedData.hourlyForecast = data; lastApiCallTimes.forecastSuccess = Date.now(); } lastApiCallTimes.forecast = Date.now(); renderPrecipitationForecast(); renderHourlyForecastData(); } catch (e) { /* Hiba csendes kezelése */ } }
+
+        // --- Adatfrissítési ciklusok ---
+        async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) {
+            const now = Date.now();
+            if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM();
+            await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key)));
+            const promises = [];
+            if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => { console.error("General conditions fetch failed:", e); })); }
+            if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); }
+            promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; }));
+            await Promise.allSettled(promises);
+            const stationSelectorContainer = document.querySelector('.station-status-container');
+            const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline;
+            if (activeStationIsOnline) { const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { const onlinePrimaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'].filter(k => STATIONS[k].isOnline); if (onlinePrimaryStations.length > 0) { activeDisplayStationKey = onlinePrimaryStations[0]; const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { const availableFallbackKey = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'].find(key => STATIONS[key].isOnline); if (availableFallbackKey) { const fallbackStation = STATIONS[availableFallbackKey]; cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza (Régiós adat)"; const general = cachedData.generalConditions; if (general) { cachedData.displayPws = { temp: general.temperature, heatIndex: null, windChill: null, windSpeed: general.windSpeed, winddir: general.windDirection, windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity, pressure: general.pressureAltimeter, solarRadiation: null, uv: null }; } } } }
+            const anyStationRaining = Object.values(STATIONS).some(s => s.isOnline && s.data && s.data.metric.precipRate > 0);
+            const maxPrecipRate = Math.max(0, ...Object.values(STATIONS).map(s => (s.isOnline && s.data) ? s.data.metric.precipRate : 0));
+            currentSkyState.isRaining = anyStationRaining; currentSkyState.precipRate = maxPrecipRate;
+            const general = cachedData.generalConditions;
+            if (general && general.iconCode) { 
+                const icon = general.iconCode; 
+                if ([31, 32, 33, 36].includes(icon)) currentSkyState.cloudAmount = 0;
+                else if ([34, 29, 30].includes(icon)) currentSkyState.cloudAmount = 5;
+                else if ([27, 28].includes(icon)) currentSkyState.cloudAmount = 10;
+                else if ([26].includes(icon)) currentSkyState.cloudAmount = 15;
+                else currentSkyState.cloudAmount = 8;
+            } else { currentSkyState.cloudAmount = 0; }
+            updateWeatherEffects();
+            Object.keys(STATIONS).forEach(key => updateStationStatusUI(key));
             compileAndRenderDisplayData();
         }
         
@@ -821,13 +491,21 @@
             setInterval(() => fetchAllDataAndUpdateDisplay(), REFRESH_INTERVAL_PWS);
         }
         
+        // --- App indítása ---
         function initApp() {
             weatherDisplayEl = document.getElementById('weather-display'); 
             hourlyForecastContainerEl = document.getElementById('hourly-forecast-container');
             hourlyForecastTitleEl = document.getElementById('hourly-forecast-title');
+            skyContainerEl = document.getElementById('sky-container');
+            sunEl = document.getElementById('sun'); moonEl = document.getElementById('moon');
+            moonPhaseOverlayEl = document.getElementById('moon-phase-overlay');
+            starsContainerEl = document.getElementById('stars-container');
+            cloudsContainerEl = document.getElementById('clouds-container');
+            rainContainerEl = document.getElementById('rain-container');
+            createStars();
             startMasterLoop();
+            requestAnimationFrame(animateSky);
         }
-
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
