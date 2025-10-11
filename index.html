@@ -104,15 +104,15 @@
         .wind-beaufort-desc { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
         
         .pws-details-container { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
-        /* JAVÍTÁS: PWS rács elrendezése frissítve */
-        .pws-details-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 20px; row-gap: 10px; }
-        .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; padding: 4px 0; }
+        .pws-details-grid { display: grid; grid-template-columns: repeat(2, 1fr); column-gap: 20px; row-gap: 10px; }
+        .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 2px 0; }
         .detail-item .label { font-weight: 600; color: var(--current-text-color); margin-right: 4px; display: flex; align-items: center; transition: color 0.6s; white-space: nowrap; }
         .detail-item .label i { margin-right: 8px; width: 16px; font-size: 1em; text-align: center; opacity: 0.8; color: var(--current-icon-color); transition: color 0.6s; }
-        .detail-item .value { color: var(--current-text-muted-color); font-weight: 500; transition: color 0.6s; display: flex; align-items: center; text-align: right; flex-shrink: 0; margin-left: 3px; flex-wrap: wrap; justify-content: flex-end; }
-        .detail-item.full-width { grid-column: 1 / -1; justify-content: center; } /* Új stílus a teljes szélességű elemhez */
-        .pressure-trend-icon { margin-left: 4px; font-weight: 700; }
-        .value .context { font-size: 0.9em; margin-left: 4px; color: var(--current-text-muted-color); }
+        .detail-item .value-group { display: flex; flex-direction: column; align-items: flex-end; }
+        .detail-item .value { color: var(--current-text-color); font-weight: 600; }
+        .detail-item .context { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 1px; }
+        .pressure-trend-icon { margin-left: 4px; font-weight: 700; color: var(--current-text-color); }
+        .detail-item.full-width { grid-column: 1 / -1; justify-content: center; }
         
         .precip-summary-card { display: flex; flex-direction: column; gap: 0; background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 0; margin-bottom: 20px; transition: all 0.5s ease; overflow: hidden; }
         .precip-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4); background-color: rgba(0,0,0,0.1); }
@@ -120,17 +120,17 @@
         .precip-header-icon i { font-size: 22px; color: var(--current-icon-color); transition: color 0.5s ease; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         .precip-header-title { font-size: 16px; font-weight: 800; color: var(--current-text-color); margin: 0; letter-spacing: 0.5px; }
         .precip-card-content { padding: 12px 16px; width: 100%; box-sizing: border-box; }
-        .precip-station-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
-        .precip-station-card { background-color: rgba(0,0,0,0.15); border: 1px solid var(--current-container-border-color); border-radius: 10px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: all 0.4s ease; }
+        .precip-station-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .precip-station-card { background-color: rgba(0,0,0,0.15); border: 1px solid var(--current-container-border-color); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; transition: all 0.4s ease; }
         .precip-station-card.is-raining-now { border-color: rgba(from var(--current-icon-color) r g b / 0.6); box-shadow: 0 0 12px -3px rgba(from var(--current-icon-color) r g b / 0.4); }
         .station-card-header { display: flex; justify-content: space-between; align-items: center; }
-        .station-card-name { font-weight: 700; font-size: 14px; color: var(--current-text-color); }
-        .station-card-status-icon { width: 10px; height: 10px; border-radius: 50%; background-color: var(--current-icon-color); box-shadow: 0 0 8px var(--current-icon-color); }
+        .station-card-name { font-weight: 700; font-size: 13px; color: var(--current-text-color); }
+        .station-card-status-icon { width: 8px; height: 8px; border-radius: 50%; background-color: var(--current-icon-color); box-shadow: 0 0 8px var(--current-icon-color); }
         .station-card-main { text-align: center; }
-        .station-card-total-label { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
-        .station-card-total-value { font-size: 26px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; }
+        .station-card-total-label { font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); }
+        .station-card-total-value { font-size: 24px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; }
         .station-card-total-value span { font-size: 0.6em; font-weight: 600; color: var(--current-text-muted-color); margin-left: 2px; }
-        .station-card-footer-info { font-size: 12px; text-align: center; font-weight: 600; color: var(--current-text-muted-color); border-top: 1px solid var(--current-container-border-color); padding-top: 6px; min-height: 16px; }
+        .station-card-footer-info { font-size: 11px; text-align: center; font-weight: 600; color: var(--current-text-muted-color); border-top: 1px solid var(--current-container-border-color); padding-top: 5px; min-height: 14px; }
         .station-card-footer-info.live-intensity { color: var(--current-text-color); font-style: italic; }
         .precip-explanation-container { display: flex; flex-direction: column; align-items: flex-start; text-align: left; gap: 10px; padding: 12px 4px; }
         .explanation-title { font-size: 15px; font-weight: 700; color: var(--current-text-color); margin: 0; width: 100%; text-align: center; padding-bottom: 8px; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.3); }
@@ -187,11 +187,13 @@
             .pws-details-grid { grid-template-columns: repeat(3, 1fr); } 
             .detail-item.full-width { grid-column: auto; justify-content: space-between; }
         }
+        @media (min-width: 768px) {
+            .precip-station-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+        }
         @media (min-width: 1000px) { .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width: 768px) { .precip-station-grid { grid-template-columns: 1fr 1fr; } .current-conditions-card { grid-template-columns: 1fr; gap: 0; } .conditions-section:first-child { border-right: none; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--current-container-border-color); } }
+        @media (max-width: 768px) { .current-conditions-card { grid-template-columns: 1fr; gap: 0; } .conditions-section:first-child { border-right: none; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--current-container-border-color); } }
         
         @media (max-width: 480px) { 
-            .precip-station-grid { grid-template-columns: 1fr; } 
             .current-temp-value { font-size: 48px; } 
             .wind-primary-display { gap: 12px; } 
             .wind-direction-arrow { font-size: 36px; } 
@@ -346,15 +348,15 @@
             const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→';
             
             detailsGrid.innerHTML = `
-                <div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Páratartalom</span><span class="value">${formatValue(obs.humidity, '%', 0)}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-tachometer-alt"></i>Légnyomás</span><span class="value">${formatValue(general.pressureAltimeter || obs.pressure, ' hPa', 1)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás</span><span class="value">${formatValue(obs.solarRadiation, ' W/m²', 0)} <span class="context">${getSolarRadiationDescription(obs.solarRadiation)}</span></span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-shield-sun"></i>UV Index</span><span class="value">${formatValue(obs.uv, '', 1)} ${getUVDescription(obs.uv)}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-sunrise"></i>Napkelte</span><span class="value">${sunCalcData.sunrise}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-sunset"></i>Napnyugta</span><span class="value">${sunCalcData.sunset}</span></div>
-                <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte</span><span class="value">${sunCalcData.moonrise}</span></div>
-                <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta</span><span class="value">${sunCalcData.moonset}</span></div>
-                <div class="detail-item full-width"><span class="label"><i class="fas fa-eye"></i>Látótávolság</span><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div>`;
+                <div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Páratartalom</span><div class="value-group"><span class="value">${formatValue(obs.humidity, '%', 0)}</span></div></div>
+                <div class="detail-item"><span class="label"><i class="fas fa-tachometer-alt"></i>Légnyomás</span><div class="value-group"><span class="value">${formatValue(general.pressureAltimeter || obs.pressure, ' hPa', 1)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div></div>
+                <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás</span><div class="value-group"><span class="value">${formatValue(obs.solarRadiation, ' W/m²', 0)}</span><span class="context">${getSolarRadiationDescription(obs.solarRadiation)}</span></div></div>
+                <div class="detail-item"><span class="label"><i class="fas fa-shield-sun"></i>UV Index</span><div class="value-group"><span class="value">${formatValue(obs.uv, '', 1)}</span><span class="context">${getUVDescription(obs.uv)}</span></div></div>
+                <div class="detail-item"><span class="label"><i class="fas fa-sunrise"></i>Napkelte</span><div class="value-group"><span class="value">${sunCalcData.sunrise}</span></div></div>
+                <div class="detail-item"><span class="label"><i class="fas fa-sunset"></i>Napnyugta</span><div class="value-group"><span class="value">${sunCalcData.sunset}</span></div></div>
+                <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte</span><div class="value-group"><span class="value">${sunCalcData.moonrise}</span></div></div>
+                <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta</span><div class="value-group"><span class="value">${sunCalcData.moonset}</span></div></div>
+                <div class="detail-item full-width"><span class="label"><i class="fas fa-eye"></i>Látótávolság</span><div class="value-group"><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div></div>`;
 
             const precipCardEl = document.getElementById('precip-summary-card');
             if (precipCardEl) { const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data); const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0); let mainContentHTML = ''; const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', '); const tooltipHTML = `<div class="station-tooltip-container"><span class="station-list-trigger">Figyelt állomások listája</span><div class="station-tooltip-content">${allMonitoredNames}</div></div>`; let footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`; if (stationsWithRainToday.length === 0) { mainContentHTML = `<div class="precip-explanation-container"><h5 class="explanation-title">Hogyan működik a Csapadékfigyelő?</h5><p class="explanation-text">Ez a modul <strong>mikro-hálózatot</strong> használ, amely Nyíregyháza környéki privát időjárás-állomások (PWS) valós idejű adatait gyűjti össze. Amikor valamelyik figyelt állomáson csapadékot észlel a rendszer, az azonnal megjelenik itt.</p></div>`; } else { mainContentHTML = `<div class="precip-station-grid">${stationsWithRainToday.sort((a, b) => (b.data.metric.precipTotal - a.data.metric.precipTotal)).map(station => { const isRainingNow = station.data.metric.precipRate > 0; const cardClass = isRainingNow ? 'precip-station-card is-raining-now' : 'precip-station-card'; const displayName = station.displayNameShort || station.displayName; let footerInfoHTML = ''; if (isRainingNow) { footerInfoHTML = `<div class="station-card-footer-info live-intensity">Most: ${getPrecipIntensityDescription(station.data.metric.precipRate)}</div>`; } else if (station.lastRainTimestamp) { footerInfoHTML = `<div class="station-card-footer-info">Utoljára: ${formatTime(station.lastRainTimestamp)}</div>`; } else { footerInfoHTML = `<div class="station-card-footer-info">Jelenleg nem esik</div>`; } return `<div class="${cardClass}"><div class="station-card-header"><span class="station-card-name">${displayName}</span> ${isRainingNow ? '<div class="station-card-status-icon"></div>' : ''}</div><div class="station-card-main"><div class="station-card-total-label">Ma eddig</div><div class="station-card-total-value">${formatValue(station.data.metric.precipTotal, '', 1)}<span>mm</span></div></div>${footerInfoHTML}</div>`; }).join('')}</div>`; } precipCardEl.innerHTML = `<div class="precip-card-header"><div class="precip-header-title-group"><div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div><h4 class="precip-header-title">CsapadékRadar</h4></div><span class="section-timestamp" id="radar-timestamp"></span></div><div class="precip-card-content">${mainContentHTML}</div>${footerHTML}`; document.getElementById('radar-timestamp').textContent = `Frissítve: ${formatTime(now, true)}`; }
