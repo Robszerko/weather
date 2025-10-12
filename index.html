@@ -23,7 +23,7 @@
             --cloud-shadow-color: #d8d8d8;
             --hot: #EF4444; --warm: #F97316; --mild: #22C55E; --cool: #3B82F6; --cold: #6366F1;
             --current-temp-bg-color: var(--mild);
-            --wind-calm: #6366F1; --wind-light: #3B82F6; --wind-moderate: #22C55E; --wind-strong: #F97316;
+            --wind-calm: #93C5FD; --wind-light: #3B82F6; --wind-moderate: #22C55E; --wind-strong: #F97316;
             --current-wind-color: var(--wind-calm);
             --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: var(--accent-interactive-night); --current-widget-bg: var(--bg-widget-night); --current-widget-border: var(--border-widget-night); --current-container-border-color: var(--border-widget-night);
         }
@@ -59,7 +59,7 @@
         @keyframes flash-anim { 0%, 100% { opacity: 0; } 50% { opacity: 0.3; } }
 
         .is-hidden { display: none !important; }
-        body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box; position: relative; overflow-x: hidden; }
+        body { font-family: 'Inter', sans-serif; font-weight: 500; background-color: #020617; min-height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; text-align: center; padding: 5vh 20px; box-sizing: border-box; position: relative; overflow-x: hidden; }
         .weather-widget { border-radius: 18px; padding: 22px 24px; width: 100%; max-width: 800px; box-sizing: border-box; margin: 0 auto; position: relative; z-index: 30; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 5px 18px rgba(0,0,0,0.12), 0 2px 7px rgba(0,0,0,0.18); backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%); transition: all 0.6s ease-in-out; }
         #weather-display { position: relative; z-index: 1; display: flex; flex-direction: column; }
         .widget-header { text-align: center; margin-bottom: 10px; padding-bottom: 12px; }
@@ -86,23 +86,36 @@
         .current-temp-value { font-size: 52px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
         .current-temp-value span:last-child { font-weight: 600; font-size: 0.5em; vertical-align: super; }
         .temp-secondary-info { display: flex; justify-content: center; gap: 12px; font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
+
+        /* --- MÓDOSÍTOTT HŐMÉRSÉKLET SKÁLA --- */
         .temp-range-visualizer { margin-top: 12px; }
-        .temp-range-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--current-text-color); margin-bottom: 4px; }
-        .temp-range-bar { position: relative; height: 6px; background-color: rgba(0,0,0,0.2); border-radius: 3px; }
+        .temp-range-bar { position: relative; height: 6px; background-color: rgba(0,0,0,0.2); border-radius: 3px; margin-bottom: 8px; }
         .temp-range-bar .track { height: 100%; background: linear-gradient(to right, var(--cool), var(--mild), var(--warm)); border-radius: 3px; }
         .temp-range-bar .thumb { position: absolute; top: 50%; width: 14px; height: 14px; background-color: #fff; border: 2px solid var(--current-text-color); border-radius: 50%; transform: translate(-50%, -50%); transition: left 0.5s ease-out; }
-
-        .wind-primary-display { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 10px; }
-        .wind-direction-arrow { font-size: 40px; color: var(--current-wind-color); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
-        .wind-speeds { font-weight: 600; }
-        .wind-speeds div { display: flex; align-items: center; gap: 6px; }
-        .wind-speeds .label { font-size: 12px; color: var(--current-text-muted-color); width: 45px; }
-        .wind-speeds .value { font-size: 20px; color: var(--current-text-color); }
-        .wind-speeds .unit { font-size: 12px; margin-left: 2px; color: var(--current-text-muted-color); }
-        .wind-secondary-info { text-align: center; }
-        .wind-direction-full { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
-        .wind-beaufort-desc { font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
+        .temp-range-details { display: flex; justify-content: space-between; text-align: center; }
+        .temp-detail-min, .temp-detail-max { display: flex; flex-direction: column; align-items: center; }
+        .temp-detail-label { font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); text-transform: uppercase; letter-spacing: 0.5px; }
+        .temp-detail-value { font-size: 16px; font-weight: 700; color: var(--current-text-color); line-height: 1.2; }
+        .temp-detail-time { font-size: 11px; font-weight: 600; color: var(--current-icon-color); }
         
+        /* --- MÓDOSÍTOTT SZÉL SZEKCIÓ --- */
+        .wind-display-flex-container { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .wind-gauge-container { flex-shrink: 0; }
+        .wind-gauge { margin: 0 auto; position: relative; width: 120px; height: 120px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--current-container-border-color); border-radius: 50%; }
+        .wind-data-center { z-index: 2; width: 110px; height: 110px; background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); border-radius: 50%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .wind-speed-main { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; color: var(--current-wind-color); font-weight: 800; font-size: 38px; }
+        .wind-speed-unit { font-size: 14px; font-weight: 500; color: var(--current-text-muted-color); margin-top: 2px; }
+        .wind-details-container { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; text-align: left; flex-grow: 1; max-width: 170px; }
+        .wind-direction-info { display: flex; align-items: center; gap: 8px; }
+        .wind-direction-arrow { font-size: 20px; color: var(--current-wind-color); transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1); }
+        .wind-direction-full { font-size: 14px; font-weight: 600; text-transform: capitalize; color: var(--current-text-color); }
+        .wind-detail-item { font-size: 12px; color: var(--current-text-muted-color); font-weight: 500; width: 100%; display: flex; justify-content: space-between; }
+        .wind-detail-item strong { color: var(--current-text-color); font-weight: 700; }
+        #wind-gust-span { margin-right: 2px; }
+        .wind-legend-container { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; padding: 6px; background-color: rgba(0,0,0,0.15); border-radius: 8px; width: 100%; box-sizing: border-box; flex-wrap: wrap; }
+        .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: var(--current-text-muted-color); }
+        .legend-color-box { width: 12px; height: 12px; border-radius: 3px; }
+
         .pws-details-container { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
         .pws-details-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 12px; row-gap: 4px; }
         .detail-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 2px 0; }
@@ -184,9 +197,8 @@
         @media (max-width: 768px) { .current-conditions-card { grid-template-columns: 1fr; gap: 0; } .conditions-section:first-child { border-right: none; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--current-container-border-color); } }
         
         @media (max-width: 480px) { 
-            .current-temp-value { font-size: 48px; } 
-            .wind-primary-display { gap: 12px; } 
-            .wind-direction-arrow { font-size: 36px; } 
+            .current-temp-value { font-size: 48px; }
+            .wind-display-flex-container { flex-direction: column; }
         }
     </style>
 </head>
@@ -217,7 +229,7 @@
         const STATIONS = { NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null, lastRainTimestamp: null }, KOSSUTH: { id: 'INYREG42', name: 'Nyíregyháza Kossuth út 50', displayName: 'Kossuth út 50', displayNameShort: 'Kossuth út', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure', 'precip'], isOnline: false, data: null, lastRainTimestamp: null }, KERT_UTCA: { id: 'INYREG37', name: 'Nyíregyháza Kert utca', displayName: 'Kert u.', provides: ['temp', 'wind', 'humidity', 'solar', 'uv', 'pressure'], isOnline: false, data: null, lastRainTimestamp: null }, SOSTOHEGY: { id: 'INYREG20', name: 'Sóstóhegy (Állatpark)', displayName: 'Sóstóhegy', displayNameShort: 'Sóstóhegy', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null, lastRainTimestamp: null }, BORBANYA: { id: 'INYREG30', name: 'Borbánya', displayName: 'Borbánya', displayNameShort: 'Borbánya', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null, lastRainTimestamp: null }, OROS_DERUS: { id: 'INYREG35', name: 'Oros Derűs utca', displayName: 'Oros', displayNameShort: 'Oros', provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null, lastRainTimestamp: null }, KEMECSE: { id: 'IKEMEC1', name: 'Kemecse', displayName: 'Kemecse', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, NAGYHALASZ: { id: 'INAGYH4', name: 'Nagyhalász', displayName: 'Nagyhalász', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, RAMOCSAHAZA: { id: 'IRAMOC1', name: 'Ramocsaháza', displayName: 'Ramocsaháza', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, SENYO: { id: 'ISNY1', name: 'Sényő', displayName: 'Sényő', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, SZAKOLY: { id: 'ISZAKO1', name: 'Szakoly', displayName: 'Szakoly', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, NYIRADONY: { id: 'INYRAD1', name: 'Nyíradony', displayName: 'Nyíradony', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, NYIRBOGAT: { id: 'INYRBO3', name: 'Nyírbogát', displayName: 'Nyírbogát', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, NAPKOR: { id: 'INAPKO1', name: 'Napkor', displayName: 'Napkor', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, GAVAVENCSELLO: { id: 'IGVAVE1', name: 'Gávavencsellő', displayName: 'Gávavencsellő', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, PATROHA: { id: 'IPTROH1', name: 'Pátroha', displayName: 'Pátroha', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, AJAK: { id: 'IAJAK4', name: 'Ajak', displayName: 'Ajak', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, KISVARDA: { id: 'IKISVR2', name: 'Kisvárda', displayName: 'Kisvárda', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, VASAROSNAMENY: { id: 'IVSROS2', name: 'Vásárosnamény', displayName: 'Vásárosnamény', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, FEHERGYARMAT: { id: 'IFEHRG1', name: 'Fehérgyarmat', displayName: 'Fehérgyarmat', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, PORCSALMA: { id: 'IPORCS2', name: 'Porcsalma', displayName: 'Porcsalma', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, CSENGER: { id: 'ICSENG10', name: 'Csenger', displayName: 'Csenger', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, MATESZALKA: { id: 'IMTSZALK4', name: 'Mátészalka', displayName: 'Mátészalka', provides: ['precip'], isOnline: false, data: null, lastRainTimestamp: null }, };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT';
         let lastApiCallTimes = { generalConditions: 0, forecast: 0, forecastSuccess: 0 };
-        let cachedData = { displayPws: null, generalConditions: {}, hourlyForecast: [], sunCalc: null, sunTimes: null };
+        let cachedData = { displayPws: null, generalConditions: {}, hourlyForecast: [], sunCalc: null, sunTimes: null, dailyForecastMetrics: null };
         let isWeatherDisplayInitialized = false;
         let weatherDisplayEl, hourlyForecastContainerEl, hourlyForecastTitleEl;
         let skyContainerEl, skyGlowEl, starsContainerEl, cloudsContainerEl, precipitationContainerEl, hazeContainerEl, lightningFlashEl;
@@ -233,7 +245,6 @@
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function getBeaufortDescription(speed) { if (speed === null || typeof speed === 'undefined') return 'Ismeretlen'; if (speed < 1) return 'Szélcsend'; if (speed <= 5) return 'Gyenge szellő'; if (speed <= 11) return 'Enyhe szellő'; if (speed <= 19) return 'Gyenge szél'; if (speed <= 28) return 'Mérsékelt szél'; if (speed <= 38) return 'Élénk szél'; if (speed <= 49) return 'Erős szél'; if (speed <= 61) return 'Viharos szél'; if (speed <= 74) return 'Vihar'; if (speed <= 88) return 'Szélvihar'; if (speed <= 102) return 'Heves vihar'; if (speed <= 117) return 'Orkán'; return 'Orkán'; }
-        
         function getSolarRadiationColor(w_m2) { if (w_m2 === null || typeof w_m2 === 'undefined' || w_m2 < 50) return 'var(--cool)'; if (w_m2 < 250) return 'var(--mild)'; if (w_m2 < 500) return 'var(--warm)'; return 'var(--hot)'; }
         function getUVColor(uv) { if (uv === null || typeof uv === 'undefined') return 'var(--cool)'; if (uv <= 2) return 'var(--mild)'; if (uv <= 5) return 'var(--warm)'; if (uv <= 7) return '#F97316'; if (uv <= 10) return 'var(--hot)'; return '#A134A1'; }
 
@@ -256,7 +267,7 @@
         async function fetchAdvancedSunCalcData(lat, lon) { const now = new Date(); cachedData.sunTimes = SunCalc.getTimes(now, lat, lon); const moonTimes = SunCalc.getMoonTimes(now, lat, lon, true); let nextMoonrise = moonTimes.rise; let nextMoonset = moonTimes.set; if (!nextMoonrise || nextMoonrise < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonrise = SunCalc.getMoonTimes(tomorrow, lat, lon, true).rise; } if (!nextMoonset || nextMoonset < now) { const tomorrow = new Date(); tomorrow.setDate(now.getDate() + 1); nextMoonset = SunCalc.getMoonTimes(tomorrow, lat, lon, true).set; } return { sunrise: formatTime(cachedData.sunTimes.sunrise), sunset: formatTime(cachedData.sunTimes.sunset), moonrise: formatTime(nextMoonrise), moonset: formatTime(nextMoonset) }; }
         async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); const observation = data.observations[0]; stationConfig.isOnline = true; stationConfig.data = observation; if (observation.metric.precipRate > 0) { stationConfig.lastRainTimestamp = new Date(observation.obsTimeLocal).getTime(); } } catch (error) { stationConfig.isOnline = false; } finally { if(isWeatherDisplayInitialized) updateStationStatusUI(stationKey); } }
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); lastApiCallTimes.generalConditions = Date.now(); return { temperature: data.temperature, temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, temperatureMax24Hour: data.temperatureMax24Hour, temperatureMin24Hour: data.temperatureMin24Hour, relativeHumidity: data.relativeHumidity, windSpeed: data.windSpeed, windDirection: data.windDirection, dewpoint: data.temperatureDewPoint, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, iconCode: data.iconCode }; }
-        async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 12, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
+        async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 24, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) { const now = Date.now(); if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM(); await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key))); const promises = []; if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => { console.error("General conditions fetch failed:", e); })); } if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); } promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; })); await Promise.allSettled(promises); const stationSelectorContainer = document.querySelector('.station-status-container'); const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline; if (activeStationIsOnline) { const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { const onlinePrimaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA'].filter(k => STATIONS[k].isOnline); if (onlinePrimaryStations.length > 0) { activeDisplayStationKey = onlinePrimaryStations[0]; const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.remove('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { const availableFallbackKey = ['SOSTOHEGY', 'BORBANYA', 'OROS_DERUS'].find(key => STATIONS[key].isOnline); if (availableFallbackKey) { const fallbackStation = STATIONS[availableFallbackKey]; cachedData.displayPws = { ...fallbackStation.data.metric, ...fallbackStation.data }; if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza és környéke"; } else { if (stationSelectorContainer) stationSelectorContainer.classList.add('is-hidden'); const locationTitle = document.getElementById('location-title-text'); if (locationTitle) locationTitle.textContent = "Nyíregyháza (Régiós adat)"; const general = cachedData.generalConditions; if (general) { cachedData.displayPws = { temp: general.temperature, heatIndex: null, windChill: null, windSpeed: general.windSpeed, winddir: general.windDirection, windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity, pressure: general.pressureAltimeter, solarRadiation: null, uv: null }; } } } } const maxPrecipRate = Math.max(0, ...Object.values(STATIONS).map(s => (s.isOnline && s.data) ? s.data.metric.precipRate : 0)); currentSkyState.precipRate = maxPrecipRate; const general = cachedData.generalConditions; if (general && general.iconCode) { const icon = general.iconCode; if ([31, 32, 33, 36].includes(icon)) currentSkyState.cloudAmount = 0; else if ([34, 29, 30].includes(icon)) currentSkyState.cloudAmount = 5; else if ([27, 28].includes(icon)) currentSkyState.cloudAmount = 10; else if ([26].includes(icon)) currentSkyState.cloudAmount = 15; else currentSkyState.cloudAmount = 8; currentSkyState.isThundering = [3, 4, 37, 38, 47].includes(icon); currentSkyState.isFoggy = [19, 20, 21, 22].includes(icon); currentSkyState.isSnowing = [5,6,7,8,10,13,14,15,16,41,42,43,46].includes(icon); } currentSkyState.windSpeed = general.windSpeed || 0; updateBackgroundWeatherEffects(); Object.keys(STATIONS).forEach(key => updateStationStatusUI(key)); compileAndRenderDisplayData(); }
         
@@ -272,12 +283,59 @@
                     <div class="conditions-section">
                         <h4 class="section-title">Hőmérséklet</h4>
                         <div class="temp-primary-display"><div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div><div class="temp-secondary-info"><span id="feels-like-temp">Hőérzet: --°</span><span id="dew-point-temp">Harmatpont: --°</span></div></div>
-                        <div class="temp-range-visualizer"><div class="temp-range-labels"><span id="min-temp-label">--°</span><span>Napi Min/Max</span><span id="max-temp-label">--°</span></div><div class="temp-range-bar"><div class="track"></div><div class="thumb" id="temp-range-thumb" style="left: 50%;"></div></div></div>
+                        <div class="temp-range-visualizer">
+                            <div class="temp-range-bar">
+                                <div class="track"></div>
+                                <div class="thumb" id="temp-range-thumb" style="left: 50%;"></div>
+                            </div>
+                            <div class="temp-range-details">
+                                <div class="temp-detail-min">
+                                    <span class="temp-detail-label">Napi Min.</span>
+                                    <span class="temp-detail-value" id="min-temp-label">--°</span>
+                                    <span class="temp-detail-time" id="min-temp-time">--:-- körül</span>
+                                </div>
+                                <div class="temp-detail-max">
+                                    <span class="temp-detail-label">Napi Max.</span>
+                                    <span class="temp-detail-value" id="max-temp-label">--°</span>
+                                    <span class="temp-detail-time" id="max-temp-time">--:-- körül</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <div class="conditions-section">
-                        <h4 class="section-title">Szél</h4>
-                        <div class="wind-primary-display"><i class="fas fa-location-arrow wind-direction-arrow" id="wind-direction-arrow"></i><div class="wind-speeds"><div><span class="label">Szél:</span> <span class="value"><span id="wind-speed-span" class="flippable-value">--</span></span> <span class="unit">km/h</span></div><div><span class="label">Lökés:</span> <span class="value"><span id="wind-gust-span" class="flippable-value">--</span></span> <span class="unit">km/h</span></div></div></div>
-                        <div class="wind-secondary-info"><div class="wind-direction-full" id="wind-direction-full">--</div><div class="wind-beaufort-desc" id="wind-beaufort-desc">--</div></div>
+                        <h4 class="section-title">Szél adatok</h4>
+                        <div class="wind-display-flex-container">
+                            <div class="wind-gauge-container">
+                                <div class="wind-gauge" id="wind-gauge-circle">
+                                    <div class="wind-data-center">
+                                        <div class="wind-speed-main">
+                                            <span id="wind-speed-span" class="flippable-value">--</span>
+                                            <span class="wind-speed-unit">km/h</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="wind-details-container">
+                                <div class="wind-direction-info">
+                                    <i class="fas fa-location-arrow wind-direction-arrow" id="wind-direction-arrow"></i>
+                                    <span class="wind-direction-full" id="wind-direction-full">--</span>
+                                </div>
+                                <div class="wind-detail-item">
+                                    <span>Széllökés:</span>
+                                    <strong><span id="wind-gust-span" class="flippable-value">--</span> km/h</strong>
+                                </div>
+                                <div class="wind-detail-item">
+                                    <span>Besorolás:</span>
+                                    <strong id="wind-beaufort-desc">--</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="wind-legend-container">
+                            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--wind-calm);"></span> &lt; 5</div>
+                            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--wind-light);"></span> 5-20</div>
+                            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--wind-moderate);"></span> 20-40</div>
+                            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--wind-strong);"></span> &gt; 40 km/h</div>
+                        </div>
                     </div>
                 </div>
 
@@ -318,18 +376,30 @@
             updateAnimatedValue(document.getElementById('current-temp-span'), formatValue(obs.temp, '', 1));
             document.getElementById('feels-like-temp').textContent = `Hőérzet: ${formatValue(general.temperatureFeelsLike, '°', 1)}`;
             document.getElementById('dew-point-temp').textContent = `Harmatpont: ${formatValue(obs.dewpt, '°', 1)}`;
+            
             const minTemp = general.temperatureMin24Hour;
             const maxTemp = general.temperatureMax24Hour;
-            if (minTemp !== null && maxTemp !== null && obs.temp !== null) { document.getElementById('min-temp-label').textContent = `${formatValue(minTemp, '°', 0)}`; document.getElementById('max-temp-label').textContent = `${formatValue(maxTemp, '°', 0)}`; const range = maxTemp - minTemp; let positionPercent = 50; if (range > 0) { positionPercent = ((obs.temp - minTemp) / range) * 100; } document.getElementById('temp-range-thumb').style.left = `${Math.max(0, Math.min(100, positionPercent))}%`; }
-            
+            const dailyMetrics = cachedData.dailyForecastMetrics;
+            document.getElementById('min-temp-label').textContent = formatValue(minTemp, '°', 0);
+            document.getElementById('max-temp-label').textContent = formatValue(maxTemp, '°', 0);
+            const minTimeEl = document.getElementById('min-temp-time');
+            if (dailyMetrics && dailyMetrics.minTime) { minTimeEl.textContent = `${formatTime(dailyMetrics.minTime)} körül`; } else { minTimeEl.textContent = `Időpont N/A`; }
+            const maxTimeEl = document.getElementById('max-temp-time');
+            if (dailyMetrics && dailyMetrics.maxTime) { maxTimeEl.textContent = `${formatTime(dailyMetrics.maxTime)} körül`; } else { maxTimeEl.textContent = `Időpont N/A`; }
+            if (minTemp !== null && maxTemp !== null && obs.temp !== null) { const range = maxTemp - minTemp; let positionPercent = 50; if (range > 0) { positionPercent = ((obs.temp - minTemp) / range) * 100; } document.getElementById('temp-range-thumb').style.left = `${Math.max(0, Math.min(100, positionPercent))}%`; }
+
             const windSpeed = obs.windSpeed || 0;
             const windGust = obs.windGust || 0;
             const windDir = obs.winddir;
             const windArrow = document.getElementById('wind-direction-arrow');
-            if (windDir !== null) { windArrow.style.transform = `rotate(${windDir}deg)`; }
-            windArrow.style.color = `var(--wind-${getWindColorName(windSpeed)})`;
+            if (windDir !== null) { windArrow.style.transform = `rotate(${windDir - 45}deg)`; } // -45 fok korrekció az ikon alapértelmezett tájolásához
+            
+            const windColor = `var(--wind-${getWindColorName(windSpeed)})`;
+            windArrow.style.color = windColor;
+            document.querySelector('.wind-speed-main').style.color = windColor;
+            
             updateAnimatedValue(document.getElementById('wind-speed-span'), formatValue(windSpeed, '', 1));
-            updateAnimatedValue(document.getElementById('wind-gust-span'), formatValue(windGust, '', 1));
+            updateAnimatedValue(document.getElementById('wind-gust-span'), formatValue(windGust, '', 0));
             document.getElementById('wind-direction-full').textContent = degreesToCompass(windDir);
             document.getElementById('wind-beaufort-desc').textContent = getBeaufortDescription(windSpeed);
             
@@ -388,8 +458,41 @@
                 }
             }
         }
-        function renderHourlyForecastData() { const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull || hourlyDataFull.length === 0 || !hourlyForecastContainerEl) { if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); return; } const forecastLiveTimestampEl = document.getElementById('hourly-forecast-timestamp'); if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) { forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess))}`; } let forecastHTML = ''; hourlyDataFull.forEach(hour => { let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight); forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`; }); if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden'); }
-        async function fetchAndRefreshForecasts() { try { const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon); if (data) { cachedData.hourlyForecast = data; lastApiCallTimes.forecastSuccess = Date.now(); } lastApiCallTimes.forecast = Date.now(); renderPrecipitationForecast(); renderHourlyForecastData(); } catch (e) { /* Hiba csendes kezelése */ } }
+        function renderHourlyForecastData() { const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull || hourlyDataFull.length === 0 || !hourlyForecastContainerEl) { if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); return; } const forecastLiveTimestampEl = document.getElementById('hourly-forecast-timestamp'); if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) { forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess))}`; } let forecastHTML = ''; hourlyDataFull.slice(0, 12).forEach(hour => { let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight); forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`; }); if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden'); }
+        
+        function calculateDailyForecastMetrics() {
+            const hourlyData = cachedData.hourlyForecast;
+            if (!hourlyData || hourlyData.length < 1) {
+                cachedData.dailyForecastMetrics = { minTemp: null, minTime: null, maxTemp: null, maxTime: null };
+                return;
+            }
+            const relevantForecasts = hourlyData.slice(0, 24);
+            if (relevantForecasts.length === 0) {
+                cachedData.dailyForecastMetrics = { minTemp: null, minTime: null, maxTemp: null, maxTime: null };
+                return;
+            }
+            let minForecast = relevantForecasts[0];
+            let maxForecast = relevantForecasts[0];
+            for (const forecast of relevantForecasts) {
+                if (forecast.temp < minForecast.temp) { minForecast = forecast; }
+                if (forecast.temp > maxForecast.temp) { maxForecast = forecast; }
+            }
+            cachedData.dailyForecastMetrics = { minTemp: minForecast.temp, minTime: minForecast.time, maxTemp: maxForecast.temp, maxTime: maxForecast.time };
+        }
+
+        async function fetchAndRefreshForecasts() { 
+            try { 
+                const data = await fetchHourlyForecastData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon); 
+                if (data) { 
+                    cachedData.hourlyForecast = data; 
+                    lastApiCallTimes.forecastSuccess = Date.now(); 
+                    calculateDailyForecastMetrics();
+                } 
+                lastApiCallTimes.forecast = Date.now(); 
+                renderPrecipitationForecast(); 
+                renderHourlyForecastData(); 
+            } catch (e) { /* Hiba csendes kezelése */ } 
+        }
 
         function startMasterLoop() { fetchAllDataAndUpdateDisplay(true); setInterval(() => fetchAllDataAndUpdateDisplay(), REFRESH_INTERVAL_PWS); }
         
