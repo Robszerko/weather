@@ -87,7 +87,6 @@
         .current-temp-value span:last-child { font-weight: 600; font-size: 0.5em; vertical-align: super; }
         .temp-secondary-info { display: flex; justify-content: center; gap: 12px; font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
 
-        /* --- MÓDOSÍTOTT HŐMÉRSÉKLET SKÁLA --- */
         .temp-range-visualizer { margin-top: 12px; }
         .temp-range-bar { position: relative; height: 6px; background-color: rgba(0,0,0,0.2); border-radius: 3px; margin-bottom: 8px; }
         .temp-range-bar .track { height: 100%; background: linear-gradient(to right, var(--cool), var(--mild), var(--warm)); border-radius: 3px; }
@@ -98,7 +97,6 @@
         .temp-detail-value { font-size: 16px; font-weight: 700; color: var(--current-text-color); line-height: 1.2; }
         .temp-detail-time { font-size: 11px; font-weight: 600; color: var(--current-icon-color); }
         
-        /* --- MÓDOSÍTOTT SZÉL SZEKCIÓ --- */
         .wind-display-flex-container { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
         .wind-gauge-container { flex-shrink: 0; }
         .wind-gauge { margin: 0 auto; position: relative; width: 120px; height: 120px; display: flex; justify-content: center; align-items: center; border: 1px solid var(--current-container-border-color); border-radius: 50%; }
@@ -125,6 +123,17 @@
         .pressure-trend-icon { margin-left: 4px; }
         .detail-item.full-width { grid-column: 1 / -1; justify-content: center; }
         
+        /* --- ÚJRATERVEZETT CSAPADÉK ELŐREJELZÉS --- */
+        .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
+        .precip-forecast-list { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
+        .precip-forecast-item { display: grid; grid-template-columns: 45px 1fr 70px; align-items: center; gap: 12px; }
+        .forecast-time { font-size: 13px; font-weight: 700; color: var(--current-text-color); text-align: left; }
+        .forecast-bar-container { position: relative; height: 8px; background-color: rgba(0,0,0,0.2); border-radius: 4px; overflow: hidden; }
+        .forecast-bar-fill { height: 100%; background-color: var(--current-icon-color); border-radius: 4px; transition: width 0.6s ease-out, opacity 0.6s ease-out; }
+        .forecast-details { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+        .forecast-chance { font-size: 12px; font-weight: 700; color: var(--current-text-color); }
+        .forecast-amount { font-size: 10.5px; font-weight: 600; color: var(--current-text-muted-color); }
+
         .precip-summary-card { display: flex; flex-direction: column; gap: 0; background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 0; margin-bottom: 20px; transition: all 0.5s ease; overflow: hidden; }
         .precip-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4); background-color: rgba(0,0,0,0.1); }
         .precip-header-title-group { display: flex; align-items: center; gap: 12px; }
@@ -156,15 +165,6 @@
 
         .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         .section-timestamp { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
-        .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
-        .precipitation-chart-container { width: 100%; overflow-x: auto; padding-top: 5px; }
-        .precipitation-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .precip-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
-        .precip-chance-text { font-size: 11px; font-weight: 700; color: var(--current-text-color); }
-        .bar-container { width: 18px; height: 40px; background-color: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; }
-        .bar-fill { width: 100%; background-color: var(--current-icon-color); transition: height 0.6s ease-out, opacity 0.6s ease-out; }
-        .precip-amount-text { font-size: 10.5px; font-weight: 600; color: var(--current-text-muted-color); }
-        .precip-hour-label { font-size: 12px; font-weight: 500; color: var(--current-text-color); }
         
         .flippable-value { display: inline-block; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; }
         .flippable-value.is-flipping { transform: rotateX(90deg) scale(0.5); }
@@ -239,7 +239,7 @@
         // --- Segédfüggvények ---
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if (includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
-        function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + 'h'; } catch (e) { return '--'; } }
+        function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + ':00'; } catch (e) { return '--'; } }
         
         function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nem esik'; if (rate > 0 && rate <= 0.1) return 'Pár csepp'; if (rate > 0.1 && rate <= 0.25) return 'Szitálás'; if (rate > 0.25 && rate <= 0.5) return 'Csepereg'; if (rate > 0.5 && rate <= 1.0) return 'Enyhe eső'; if (rate > 1.0 && rate <= 4.0) return 'Gyenge eső'; if (rate > 4.0 && rate <= 10.0) return 'Mérsékelt eső'; if (rate > 10.0 && rate <= 25.0) return 'Intenzív eső'; if (rate > 25.0 && rate <= 50.0) return 'Zápor'; return 'Felhőszakadás'; }
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
@@ -345,8 +345,24 @@
                 </div>
 
                 <div class="precipitation-forecast-section">
-                    <div class="section-header"><div class="section-title">Órás csapadék előrejelzés</div><span class="section-timestamp" id="precip-forecast-timestamp"></span></div>
-                    <div class="precipitation-chart-container"><div class="precipitation-chart">${Array.from({ length: 7 }).map((_, i) => `<div class="precip-column"><div class="precip-chance-text" id="precip-chance-text-${i}">--%</div><div class="bar-container"><div class="bar-fill" id="precip-bar-${i}"></div></div><div class="precip-amount-text" id="precip-amount-text-${i}">-- mm</div><div class="precip-hour-label" id="precip-hour-label-${i}">--</div></div>`).join('')}</div></div>
+                    <div class="section-header">
+                        <div class="section-title">Órás csapadék előrejelzés</div>
+                        <span class="section-timestamp" id="precip-forecast-timestamp"></span>
+                    </div>
+                    <div class="precip-forecast-list">
+                        ${Array.from({ length: 7 }).map((_, i) => `
+                            <div class="precip-forecast-item">
+                                <div class="forecast-time" id="precip-time-${i}">--:--</div>
+                                <div class="forecast-bar-container">
+                                    <div class="forecast-bar-fill" id="precip-bar-fill-${i}"></div>
+                                </div>
+                                <div class="forecast-details">
+                                    <div class="forecast-chance" id="precip-chance-${i}">--%</div>
+                                    <div class="forecast-amount" id="precip-amount-${i}">-- mm</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
                 
                 <div class="precip-summary-card" id="precip-summary-card"></div>
@@ -430,30 +446,30 @@
             }
 
             for (let i = 0; i < 7; i++) {
-                const barEl = document.getElementById(`precip-bar-${i}`);
-                const chanceEl = document.getElementById(`precip-chance-text-${i}`);
-                const amountEl = document.getElementById(`precip-amount-text-${i}`);
-                const labelEl = document.getElementById(`precip-hour-label-${i}`);
+                const timeEl = document.getElementById(`precip-time-${i}`);
+                const barFillEl = document.getElementById(`precip-bar-fill-${i}`);
+                const chanceEl = document.getElementById(`precip-chance-${i}`);
+                const amountEl = document.getElementById(`precip-amount-${i}`);
 
-                if (barEl && chanceEl && amountEl && labelEl) {
+                if (timeEl && barFillEl && chanceEl && amountEl) {
                     const hourData = hourlyDataFull[i];
                     if (hourData) {
                         const chance = hourData.precipChance || 0;
                         const amount = hourData.qpf || 0;
-                        const barHeight = Math.min(100, (amount / 3.0) * 100); 
-                        const barOpacity = 0.3 + (chance / 100) * 0.7;
+                        const barWidth = Math.min(100, (amount / 3.0) * 100); // Sáv hossza a mennyiség alapján
+                        const barOpacity = 0.3 + (chance / 100) * 0.7; // Átlátszóság az esély alapján
 
+                        timeEl.textContent = formatHourOnly(hourData.time);
+                        barFillEl.style.width = `${barWidth}%`;
+                        barFillEl.style.opacity = barOpacity;
                         chanceEl.textContent = `${chance}%`;
-                        barEl.style.height = `${barHeight}%`;
-                        barEl.style.opacity = barOpacity;
                         amountEl.textContent = `${formatValue(amount, ' mm', 1)}`;
-                        labelEl.textContent = formatHourOnly(hourData.time);
                     } else {
+                        timeEl.textContent = '--:--';
+                        barFillEl.style.width = '0%';
+                        barFillEl.style.opacity = '0.15';
                         chanceEl.textContent = '--%';
-                        barEl.style.height = '0%';
-                        barEl.style.opacity = 0.15;
                         amountEl.textContent = '-- mm';
-                        labelEl.textContent = '--';
                     }
                 }
             }
