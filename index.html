@@ -87,15 +87,20 @@
         .current-temp-value span:last-child { font-weight: 600; font-size: 0.5em; vertical-align: super; }
         .temp-secondary-info { display: flex; justify-content: center; gap: 12px; font-size: 12px; font-weight: 500; color: var(--current-text-muted-color); }
 
-        .temp-range-visualizer { margin-top: 12px; }
-        .temp-range-bar { position: relative; height: 6px; background-color: rgba(0,0,0,0.2); border-radius: 3px; margin-bottom: 8px; }
-        .temp-range-bar .track { height: 100%; background: linear-gradient(to right, var(--cool), var(--mild), var(--warm)); border-radius: 3px; }
-        .temp-range-bar .thumb { position: absolute; top: 50%; width: 14px; height: 14px; background-color: #fff; border: 2px solid var(--current-text-color); border-radius: 50%; transform: translate(-50%, -50%); transition: left 0.5s ease-out; }
-        .temp-range-details { display: flex; justify-content: space-between; text-align: center; }
-        .temp-detail-min, .temp-detail-max { display: flex; flex-direction: column; align-items: center; }
-        .temp-detail-label { font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); text-transform: uppercase; letter-spacing: 0.5px; }
-        .temp-detail-value { font-size: 16px; font-weight: 700; color: var(--current-text-color); line-height: 1.2; }
-        .temp-detail-time { font-size: 11px; font-weight: 600; color: var(--current-icon-color); }
+        /* --- ÚJ HŐMÉRSÉKLET ELŐREJELZŐ GRAFIKON --- */
+        .temp-forecast-visualizer { margin-top: 15px; }
+        .temp-forecast-visualizer .section-header { justify-content: center; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .temp-forecast-visualizer .section-header h4 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--current-text-muted-color); }
+        .temp-chart { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; height: 60px; }
+        .chart-column { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; }
+        .chart-temp-label { font-size: 12px; font-weight: 700; color: var(--current-text-color); }
+        .chart-bar-wrapper { width: 16px; height: 100%; background-color: rgba(0,0,0,0.2); border-radius: 4px; display: flex; align-items: flex-end; overflow: hidden; }
+        .chart-bar-fill { width: 100%; background-color: var(--mild); border-top-left-radius: 3px; border-top-right-radius: 3px; transition: height 0.6s ease-out, background-color 0.6s ease-out; }
+        .chart-hour-label { font-size: 11px; font-weight: 600; color: var(--current-text-color); }
+        .info-tooltip-container { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+        .info-tooltip-trigger { font-size: 11px; font-weight: 600; color: var(--current-icon-color); border: 1px solid var(--current-icon-color); border-radius: 50%; width: 14px; height: 14px; display: flex; justify-content: center; align-items: center; cursor: help; }
+        .info-tooltip-content { visibility: hidden; opacity: 0; width: 220px; background-color: var(--bg-widget-night); color: var(--text-primary-night); text-align: left; padding: 10px; border-radius: 8px; border: 1px solid var(--border-widget-night); position: absolute; z-index: 100; bottom: 150%; left: 50%; transform: translateX(-50%); transition: opacity 0.3s, visibility 0.3s; pointer-events: none; font-size: 11px; line-height: 1.5; }
+        .info-tooltip-container:hover .info-tooltip-content { visibility: visible; opacity: 1; }
         
         .wind-display-flex-container { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
         .wind-gauge-container { flex-shrink: 0; }
@@ -236,7 +241,7 @@
         // --- Segédfüggvények ---
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, includeSeconds = false) { if (!dateOrIsoString) return NO_DATA_STRING; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return NO_DATA_STRING; const options = { hour: '2-digit', minute: '2-digit' }; if (includeSeconds) options.second = '2-digit'; return date.toLocaleTimeString('hu-HU', options); } catch (e) { return NO_DATA_STRING; } }
-        function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--:--'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--:--'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + ':00'; } catch (e) { return '--:--'; } }
+        function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--h'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--h'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + 'h'; } catch (e) { return '--h'; } }
         
         function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nem esik'; if (rate > 0 && rate <= 0.1) return 'Pár csepp'; if (rate > 0.1 && rate <= 0.25) return 'Szitálás'; if (rate > 0.25 && rate <= 0.5) return 'Csepereg'; if (rate > 0.5 && rate <= 1.0) return 'Enyhe eső'; if (rate > 1.0 && rate <= 4.0) return 'Gyenge eső'; if (rate > 4.0 && rate <= 10.0) return 'Mérsékelt eső'; if (rate > 10.0 && rate <= 25.0) return 'Intenzív eső'; if (rate > 25.0 && rate <= 50.0) return 'Zápor'; return 'Felhőszakadás'; }
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
@@ -244,6 +249,8 @@
         function getBeaufortDescription(speed) { if (speed === null || typeof speed === 'undefined') return 'Ismeretlen'; if (speed < 1) return 'Szélcsend'; if (speed <= 5) return 'Gyenge szellő'; if (speed <= 11) return 'Enyhe szellő'; if (speed <= 19) return 'Gyenge szél'; if (speed <= 28) return 'Mérsékelt szél'; if (speed <= 38) return 'Élénk szél'; if (speed <= 49) return 'Erős szél'; if (speed <= 61) return 'Viharos szél'; if (speed <= 74) return 'Vihar'; if (speed <= 88) return 'Szélvihar'; if (speed <= 102) return 'Heves vihar'; if (speed <= 117) return 'Orkán'; return 'Orkán'; }
         function getSolarRadiationColor(w_m2) { if (w_m2 === null || typeof w_m2 === 'undefined' || w_m2 < 50) return 'var(--cool)'; if (w_m2 < 250) return 'var(--mild)'; if (w_m2 < 500) return 'var(--warm)'; return 'var(--hot)'; }
         function getUVColor(uv) { if (uv === null || typeof uv === 'undefined') return 'var(--cool)'; if (uv <= 2) return 'var(--mild)'; if (uv <= 5) return 'var(--warm)'; if (uv <= 7) return '#F97316'; if (uv <= 10) return 'var(--hot)'; return '#A134A1'; }
+        function getTempColor(temp) { if (temp === null || typeof temp === 'undefined') return 'var(--mild)'; if (temp <= 5) return 'var(--cold)'; if (temp <= 12) return 'var(--cool)'; if (temp <= 22) return 'var(--mild)'; if (temp <= 28) return 'var(--warm)'; return 'var(--hot)'; }
+
 
         function mapIconCodeToHungarianText(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const textMap = { 32: 'Napos', 36: 'Napos', 31: 'Tiszta ég', 33: 'Tiszta ég', 34: isDay ? 'Részben napos' : 'Részben felhős', 29: isDay ? 'Részben napos' : 'Részben felhős', 30: isDay ? 'Részben napos' : 'Részben felhős', 27: 'Felhős', 28: 'Felhős', 26: 'Borult', 11: 'Zápor', 12: 'Zápor', 40: 'Zápor', 39: isDay ? 'Zápor' : 'Éjjeli zápor', 45: isDay ? 'Zápor' : 'Éjjeli zápor', 3: 'Zivatar', 4: 'Zivatar', 37: 'Zivatar', 38: 'Zivatar', 47: 'Zivatar', 5: 'Havas eső', 6: 'Ónos eső', 7: 'Havas eső', 8: 'Ónos eső', 10: 'Ónos eső', 18: 'Havas eső', 13: 'Hózápor', 14: 'Hózápor', 15: 'Hófúvás', 16: 'Havazás', 41: 'Havazás', 42: 'Havazás', 43: 'Hófúvás', 46: 'Hózápor', 9: 'Eső', 19: 'Párás', 20: 'Ködös', 21: 'Párás', 22: 'Füstös', 23: 'Szeles', 24: 'Szeles' }; return textMap[iconCode] || 'Ismeretlen'; }
         function mapTwcIconToFontAwesome(iconCode, dayOrNight) { const isDay = dayOrNight === 'D'; const iconMap = { 32:'fas fa-sun',36:'fas fa-sun',31:'fas fa-moon',33:'fas fa-moon',34:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',29:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',30:isDay ?'fas fa-cloud-sun':'fas fa-cloud-moon',27:'fas fa-cloud',28:'fas fa-cloud',26:'fas fa-cloud',11:'fas fa-cloud-showers-heavy',12:'fas fa-cloud-showers-heavy',40:'fas fa-cloud-showers-heavy',39:isDay ?'fas fa-cloud-sun-rain':'fas fa-cloud-moon-rain',45:isDay ?'fas fa-cloud-sun-rain':'fas fa-cloud-moon-rain',3:'fas fa-cloud-bolt',4:'fas fa-cloud-bolt',37:'fas fa-cloud-bolt',38:'fas fa-cloud-bolt',47:'fas fa-cloud-bolt',5:'fas fa-snowflake',6:'fas fa-snowflake',7:'fas fa-snowflake',8:'fas fa-snowflake',10:'fas fa-cloud-sleet',18:'fas fa-smog',13:'fas fa-snowflake',14:'fas fa-snowflake',15:'fas fa-snowflake',16:'fas fa-snowflake',41:'fas fa-snowflake',42:'fas fa-snowflake',43:'fas fa-snowflake',46:'fas fa-snowflake',9:'fas fa-cloud-rain',19:'fas fa-smog',20:'fas fa-smog',21:'fas fa-smog',22:'fas fa-smog',23:'fas fa-wind',24:'fas fa-wind' }; return iconMap[iconCode] || 'fas fa-question-circle'; }
@@ -279,23 +286,28 @@
                 <div class="current-conditions-card">
                     <div class="conditions-section">
                         <h4 class="section-title">Hőmérséklet</h4>
-                        <div class="temp-primary-display"><div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div><div class="temp-secondary-info"><span id="feels-like-temp">Hőérzet: --°</span></div></div>
-                        <div class="temp-range-visualizer">
-                            <div class="temp-range-bar">
-                                <div class="track"></div>
-                                <div class="thumb" id="temp-range-thumb" style="left: 50%;"></div>
+                        <div class="temp-primary-display">
+                            <div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div>
+                            <div class="temp-secondary-info"><span id="feels-like-temp">Hőérzet: --°</span></div>
+                        </div>
+                        <div class="temp-forecast-visualizer">
+                            <div class="section-header">
+                                <h4>Órás Hőmérséklet Előrejelzés</h4>
+                                <div class="info-tooltip-container">
+                                    <span class="info-tooltip-trigger">i</span>
+                                    <div class="info-tooltip-content">Ez a grafikon a következő 6 óra várható hőmérséklet-változását mutatja. Az oszlopok magassága a hőmérsékleti tartományon belüli relatív értéket, színük pedig a hideg/meleg skálát jelöli.</div>
+                                </div>
                             </div>
-                            <div class="temp-range-details">
-                                <div class="temp-detail-min">
-                                    <span class="temp-detail-label">Napi Min.</span>
-                                    <span class="temp-detail-value" id="min-temp-label">--°</span>
-                                    <span class="temp-detail-time" id="min-temp-time">--:-- körül</span>
-                                </div>
-                                <div class="temp-detail-max">
-                                    <span class="temp-detail-label">Napi Max.</span>
-                                    <span class="temp-detail-value" id="max-temp-label">--°</span>
-                                    <span class="temp-detail-time" id="max-temp-time">--:-- körül</span>
-                                </div>
+                            <div class="temp-chart">
+                                ${Array.from({ length: 6 }).map((_, i) => `
+                                    <div class="chart-column">
+                                        <div class="chart-temp-label" id="chart-temp-label-${i}">--°</div>
+                                        <div class="chart-bar-wrapper">
+                                            <div class="chart-bar-fill" id="chart-bar-fill-${i}"></div>
+                                        </div>
+                                        <div class="chart-hour-label" id="chart-hour-label-${i}">--</div>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                     </div>
@@ -354,7 +366,13 @@
 
                 <div class="precipitation-forecast-section">
                     <div class="section-header">
-                        <div class="section-title">Órás csapadék előrejelzés</div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="section-title" style="margin-bottom: 0;">Órás csapadék előrejelzés</div>
+                            <div class="info-tooltip-container">
+                                <span class="info-tooltip-trigger">i</span>
+                                <div class="info-tooltip-content">A sáv <strong>szélessége</strong> a várható csapadék mennyiségét jelzi, míg az <strong>élénksége</strong> (láthatósága) a csapadék esélyét mutatja. A pontos esély százalékban a sáv mellett olvasható.</div>
+                            </div>
+                        </div>
                         <span class="section-timestamp" id="precip-forecast-timestamp"></span>
                     </div>
                     <div class="precip-forecast-list">
@@ -398,20 +416,49 @@
             document.getElementById('pws-timestamp').textContent = `Frissítve: ${formatTime(now, true)}`;
             
             updateAnimatedValue(document.getElementById('current-temp-span'), formatValue(obs.temp, '', 1));
-
-            // MINDIG a weather.com adatot használjuk a fő hőérzet kijelzéshez
             document.getElementById('feels-like-temp').textContent = `Hőérzet: ${formatValue(general.temperatureFeelsLike, '°', 1)}`;
             
-            const minTemp = general.temperatureMin24Hour;
-            const maxTemp = general.temperatureMax24Hour;
-            const dailyMetrics = cachedData.dailyForecastMetrics;
-            document.getElementById('min-temp-label').textContent = formatValue(minTemp, '°', 0);
-            document.getElementById('max-temp-label').textContent = formatValue(maxTemp, '°', 0);
-            const minTimeEl = document.getElementById('min-temp-time');
-            if (dailyMetrics && dailyMetrics.minTime) { minTimeEl.textContent = `${formatTime(dailyMetrics.minTime)} körül`; } else { minTimeEl.textContent = `Időpont N/A`; }
-            const maxTimeEl = document.getElementById('max-temp-time');
-            if (dailyMetrics && dailyMetrics.maxTime) { maxTimeEl.textContent = `${formatTime(dailyMetrics.maxTime)} körül`; } else { maxTimeEl.textContent = `Időpont N/A`; }
-            if (minTemp !== null && maxTemp !== null && obs.temp !== null) { const range = maxTemp - minTemp; let positionPercent = 50; if (range > 0) { positionPercent = ((obs.temp - minTemp) / range) * 100; } document.getElementById('temp-range-thumb').style.left = `${Math.max(0, Math.min(100, positionPercent))}%`; }
+            // Hőmérséklet előrejelző mini-grafikon
+            const hourlyForecast = cachedData.hourlyForecast;
+            if (hourlyForecast && hourlyForecast.length > 0) {
+                const nowMs = new Date().getTime();
+                let startIndex = hourlyForecast.findIndex(hour => new Date(hour.time).getTime() > nowMs);
+                if (startIndex === -1) startIndex = 0; // Ha nincs jövőbeli, mutassuk az utolsókat
+
+                const nextHours = hourlyForecast.slice(startIndex, startIndex + 6);
+                const temps = nextHours.map(h => h.temp).filter(t => t !== null);
+                
+                if (temps.length > 0) {
+                    const minTemp = Math.min(...temps);
+                    const maxTemp = Math.max(...temps);
+                    const tempRange = maxTemp - minTemp;
+
+                    for (let i = 0; i < 6; i++) {
+                        const tempLabel = document.getElementById(`chart-temp-label-${i}`);
+                        const barFill = document.getElementById(`chart-bar-fill-${i}`);
+                        const hourLabel = document.getElementById(`chart-hour-label-${i}`);
+                        const hourData = nextHours[i];
+
+                        if (tempLabel && barFill && hourLabel) {
+                            if (hourData) {
+                                tempLabel.textContent = `${formatValue(hourData.temp, '°', 0)}`;
+                                let barHeight = 10; // Minimum magasság
+                                if (tempRange > 0) {
+                                    barHeight = 10 + ((hourData.temp - minTemp) / tempRange) * 90;
+                                }
+                                barFill.style.height = `${barHeight}%`;
+                                barFill.style.backgroundColor = getTempColor(hourData.temp);
+                                hourLabel.textContent = formatHourOnly(hourData.time);
+                            } else {
+                                tempLabel.textContent = '--°';
+                                barFill.style.height = `0%`;
+                                hourLabel.textContent = '--';
+                            }
+                        }
+                    }
+                }
+            }
+
 
             const windSpeed = obs.windSpeed ?? general.windSpeed;
             const windGust = obs.windGust;
@@ -493,7 +540,35 @@
                 }
             }
         }
-        function renderHourlyForecastData() { const hourlyDataFull = cachedData.hourlyForecast; if (!hourlyDataFull || hourlyDataFull.length === 0 || !hourlyForecastContainerEl) { if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); return; } const forecastLiveTimestampEl = document.getElementById('hourly-forecast-timestamp'); if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) { forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess))}`; } let forecastHTML = ''; hourlyDataFull.slice(0, 12).forEach(hour => { let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight); forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`; }); if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden'); }
+        function renderHourlyForecastData() { 
+            const hourlyDataFull = cachedData.hourlyForecast; 
+            if (!hourlyDataFull || hourlyDataFull.length === 0 || !hourlyForecastContainerEl) { 
+                if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden'); 
+                if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden'); 
+                return; 
+            } 
+            
+            const forecastLiveTimestampEl = document.getElementById('hourly-forecast-timestamp'); 
+            if (forecastLiveTimestampEl && lastApiCallTimes.forecastSuccess > 0) { 
+                forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastApiCallTimes.forecastSuccess))}`; 
+            } 
+
+            const nowMs = new Date().getTime();
+            let startIndex = hourlyDataFull.findIndex(hour => new Date(hour.time).getTime() > nowMs);
+            if (startIndex === -1) startIndex = 0; // Ha nincs jövőbeli adat, mutassuk az elejétől
+
+            const forecastsToShow = hourlyDataFull.slice(startIndex, startIndex + 12);
+
+            let forecastHTML = ''; 
+            forecastsToShow.forEach(hour => { 
+                let conditionText = hour.wxPhraseShort || mapIconCodeToHungarianText(hour.iconCode, hour.dayOrNight); 
+                forecastHTML += `<div class="hourly-forecast-card"><div class="hourly-primary-info"><div class="hourly-time">${formatTime(hour.time)}</div><div class="hourly-icon-and-condition"><i class="hourly-icon ${mapTwcIconToFontAwesome(hour.iconCode, hour.dayOrNight)}"></i><div class="hourly-condition-text">${conditionText}</div></div><div class="hourly-temp">${formatValue(hour.temp, '°', 0, '--')}</div></div><div class="hourly-secondary-details"><div class="hourly-detail-row"><span><i class="fas fa-tint"></i> Csapadék</span><strong>${formatValue(hour.precipChance, '%', 0, '--')}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-wind"></i> Szél</span><strong title="${degreesToCompass(hour.windDirection)}">${degreesToCompassAbbreviated(hour.windDirection)} ${formatValue(hour.windSpeed, 'km/h', 0)}</strong></div><div class="hourly-detail-row"><span><i class="fas fa-hand-holding-water"></i> Pára</span><strong>${formatValue(hour.humidity, '%', 0)}</strong></div></div></div>`; 
+            }); 
+            
+            if(hourlyForecastContainerEl) hourlyForecastContainerEl.innerHTML = forecastHTML; 
+            if(hourlyForecastContainerEl) hourlyForecastContainerEl.classList.remove('is-hidden'); 
+            if(hourlyForecastTitleEl) hourlyForecastTitleEl.classList.remove('is-hidden'); 
+        }
         
         function calculateDailyForecastMetrics() {
             const hourlyData = cachedData.hourlyForecast;
