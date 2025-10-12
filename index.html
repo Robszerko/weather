@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Időjárás Monitor - Nyíregyháza</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="httpshttps://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"></script>
     <style>
         :root {
@@ -121,7 +121,6 @@
         .detail-item .label i { margin-right: 6px; width: 12px; font-size: 0.9em; text-align: center; opacity: 0.8; color: var(--current-icon-color); }
         .detail-item .value { font-weight: 700; font-size: 12px; color: var(--current-text-color); display: flex; align-items: center; }
         .pressure-trend-icon { margin-left: 4px; }
-        .detail-item.full-width { grid-column: 1 / -1; justify-content: center; }
         
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
         .precip-forecast-list { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
@@ -186,8 +185,7 @@
         @media (min-width: 420px) { .hourly-forecast-container { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 640px) { 
             .hourly-forecast-container { grid-template-columns: repeat(3, 1fr); } 
-            .pws-details-grid { grid-template-columns: repeat(3, 1fr); } 
-            .detail-item.full-width { grid-column: auto; justify-content: space-between; }
+            .pws-details-grid { grid-template-columns: repeat(3, 1fr); }
         }
         @media (min-width: 768px) {
             .precip-station-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
@@ -268,7 +266,7 @@
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); lastApiCallTimes.generalConditions = Date.now(); return { temperature: data.temperature, temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, temperatureMax24Hour: data.temperatureMax24Hour, temperatureMin24Hour: data.temperatureMin24Hour, relativeHumidity: data.relativeHumidity, windSpeed: data.windSpeed, windDirection: data.windDirection, dewpoint: data.temperatureDewPoint, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, uvIndex: data.uvIndex, iconCode: data.iconCode }; }
         async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 24, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
 
-        async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) { const now = Date.now(); if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM(); await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key))); const promises = []; if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => console.error("General conditions fetch failed:", e))); } if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); } promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; })); await Promise.allSettled(promises); const stationSelectorContainer = document.querySelector('.station-status-container'); const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline; if (activeStationIsOnline) { const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; } else { const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS']; const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline); if (onlinePrimaryStations.length > 0) { activeDisplayStationKey = onlinePrimaryStations[0]; const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; } else { const general = cachedData.generalConditions; if (general) { cachedData.displayPws = { temp: general.temperature, heatIndex: null, windChill: null, windSpeed: general.windSpeed, winddir: general.windDirection, windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity, pressure: general.pressureAltimeter, solarRadiation: null, uv: general.uvIndex }; } } } const maxPrecipRate = Math.max(0, ...Object.values(STATIONS).map(s => (s.isOnline && s.data) ? s.data.metric.precipRate : 0)); currentSkyState.precipRate = maxPrecipRate; const general = cachedData.generalConditions; if (general && general.iconCode) { const icon = general.iconCode; if ([31, 32, 33, 36].includes(icon)) currentSkyState.cloudAmount = 0; else if ([34, 29, 30].includes(icon)) currentSkyState.cloudAmount = 5; else if ([27, 28].includes(icon)) currentSkyState.cloudAmount = 10; else if ([26].includes(icon)) currentSkyState.cloudAmount = 15; else currentSkyState.cloudAmount = 8; currentSkyState.isThundering = [3, 4, 37, 38, 47].includes(icon); currentSkyState.isFoggy = [19, 20, 21, 22].includes(icon); currentSkyState.isSnowing = [5,6,7,8,10,13,14,15,16,41,42,43,46].includes(icon); } currentSkyState.windSpeed = general.windSpeed || 0; updateBackgroundWeatherEffects(); Object.keys(STATIONS).forEach(key => updateStationStatusUI(key)); compileAndRenderDisplayData(); }
+        async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) { const now = Date.now(); if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM(); await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key))); const promises = []; if (isInitialLoad || now - lastApiCallTimes.generalConditions > REFRESH_INTERVAL_GENERAL_CONDITIONS) { promises.push(fetchGeneralConditionsData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { if (data) Object.assign(cachedData.generalConditions, data); }).catch(e => console.error("General conditions fetch failed:", e))); } if (isInitialLoad || now - lastApiCallTimes.forecast > REFRESH_INTERVAL_FORECAST) { promises.push(fetchAndRefreshForecasts()); } promises.push(fetchAdvancedSunCalcData(NYIREGYHAZA_COORDS.lat, NYIREGYHAZA_COORDS.lon).then(data => { cachedData.sunCalc = data; })); await Promise.allSettled(promises); const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS']; const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline; if (activeStationIsOnline) { const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; } else { const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline); if (onlinePrimaryStations.length > 0) { activeDisplayStationKey = onlinePrimaryStations[0]; const activeStation = STATIONS[activeDisplayStationKey]; cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; } else { const general = cachedData.generalConditions; if (general && Object.keys(general).length > 0) { cachedData.displayPws = { temp: general.temperature, heatIndex: general.temperatureFeelsLike, windChill: general.temperatureFeelsLike, windSpeed: general.windSpeed, winddir: general.windDirection, windGust: null, dewpt: general.dewpoint, humidity: general.relativeHumidity, pressure: general.pressureAltimeter, solarRadiation: null, uv: general.uvIndex }; } else { cachedData.displayPws = {}; } } } const maxPrecipRate = Math.max(0, ...Object.values(STATIONS).map(s => (s.isOnline && s.data) ? s.data.metric.precipRate : 0)); currentSkyState.precipRate = maxPrecipRate; const general = cachedData.generalConditions; if (general && general.iconCode) { const icon = general.iconCode; if ([31, 32, 33, 36].includes(icon)) currentSkyState.cloudAmount = 0; else if ([34, 29, 30].includes(icon)) currentSkyState.cloudAmount = 5; else if ([27, 28].includes(icon)) currentSkyState.cloudAmount = 10; else if ([26].includes(icon)) currentSkyState.cloudAmount = 15; else currentSkyState.cloudAmount = 8; currentSkyState.isThundering = [3, 4, 37, 38, 47].includes(icon); currentSkyState.isFoggy = [19, 20, 21, 22].includes(icon); currentSkyState.isSnowing = [5,6,7,8,10,13,14,15,16,41,42,43,46].includes(icon); } currentSkyState.windSpeed = general.windSpeed || 0; updateBackgroundWeatherEffects(); Object.keys(STATIONS).forEach(key => updateStationStatusUI(key)); compileAndRenderDisplayData(); }
         
         function initializeWeatherDisplayDOM() {
             weatherDisplayEl.innerHTML = `
@@ -281,7 +279,7 @@
                 <div class="current-conditions-card">
                     <div class="conditions-section">
                         <h4 class="section-title">Hőmérséklet</h4>
-                        <div class="temp-primary-display"><div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div><div class="temp-secondary-info"><span id="feels-like-temp">Hőérzet: --°</span><span id="dew-point-temp">Harmatpont: --°</span></div></div>
+                        <div class="temp-primary-display"><div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div><div class="temp-secondary-info"><span id="feels-like-temp">Hőérzet: --°</span></div></div>
                         <div class="temp-range-visualizer">
                             <div class="temp-range-bar">
                                 <div class="track"></div>
@@ -340,7 +338,18 @@
 
                 <div class="pws-details-container">
                     <div class="section-header"><div class="section-title">Részletes adatok</div><span class="section-timestamp" id="pws-timestamp"></span></div>
-                    <div class="pws-details-grid" id="pws-details-grid"></div>
+                    <div class="pws-details-grid" id="pws-details-grid">
+                        <div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Páratartalom</span><span class="value" id="detail-humidity">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-tachometer-alt"></i>Légnyomás</span><span class="value" id="detail-pressure">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás</span><span class="value" id="detail-solar">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-shield-sun"></i>UV Index</span><span class="value" id="detail-uv">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-sunrise"></i>Napkelte</span><span class="value" id="detail-sunrise">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-sunset"></i>Napnyugta</span><span class="value" id="detail-sunset">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte</span><span class="value" id="detail-moonrise">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta</span><span class="value" id="detail-moonset">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-eye"></i>Látótávolság</span><span class="value" id="detail-visibility">--</span></div>
+                        <div class="detail-item"><span class="label"><i class="fas fa-droplet"></i>Harmatpont</span><span class="value" id="detail-dewpoint">--</span></div>
+                    </div>
                 </div>
 
                 <div class="precipitation-forecast-section">
@@ -374,7 +383,7 @@
         function updateStationStatusUI(stationKey) { const stationConfig = STATIONS[stationKey]; if (!stationConfig) return; const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`); if(statusIndicatorEl) { statusIndicatorEl.classList.remove('online', 'offline'); statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline'); } const selectorContainer = document.getElementById(`${stationKey.toLowerCase()}-selector-container`); if(selectorContainer) { selectorContainer.classList.toggle('disabled', !stationConfig.isOnline); } const radioEl = document.getElementById(`station-select-${stationKey.toLowerCase()}`); if(radioEl) { radioEl.checked = (stationKey === activeDisplayStationKey); } }
         function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
         function handleStationChange(event) { const selectedStationKey = event.target.value; if (STATIONS[selectedStationKey].isOnline && selectedStationKey !== activeDisplayStationKey) { activeDisplayStationKey = selectedStationKey; const activeStation = STATIONS[activeDisplayStationKey]; if (activeStation && activeStation.data) { cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; } compileAndRenderDisplayData(); } else if (!STATIONS[selectedStationKey].isOnline) { event.target.checked = false; const previouslyActiveRadio = document.querySelector(`input[value="${activeDisplayStationKey}"]`); if (previouslyActiveRadio) { previouslyActiveRadio.checked = true; } } }
-        function compileAndRenderDisplayData() { if (!cachedData.displayPws) return; renderWeatherData(); renderPrecipitationForecast(); renderHourlyForecastData(); }
+        function compileAndRenderDisplayData() { if (!cachedData.displayPws || Object.keys(cachedData.displayPws).length === 0) return; renderWeatherData(); renderPrecipitationForecast(); renderHourlyForecastData(); }
         
         function updateAnimatedValue(element, newValue) { if (!element) return; const currentValue = element.textContent.trim(); const newFormattedValue = newValue.toString().trim(); if (currentValue !== newFormattedValue) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newFormattedValue; element.classList.remove('is-flipping'); }, 200); } } }
 
@@ -389,8 +398,9 @@
             document.getElementById('pws-timestamp').textContent = `Frissítve: ${formatTime(now, true)}`;
             
             updateAnimatedValue(document.getElementById('current-temp-span'), formatValue(obs.temp, '', 1));
+
+            // MINDIG a weather.com adatot használjuk a fő hőérzet kijelzéshez
             document.getElementById('feels-like-temp').textContent = `Hőérzet: ${formatValue(general.temperatureFeelsLike, '°', 1)}`;
-            document.getElementById('dew-point-temp').textContent = `Harmatpont: ${formatValue(obs.dewpt, '°', 1)}`;
             
             const minTemp = general.temperatureMin24Hour;
             const maxTemp = general.temperatureMax24Hour;
@@ -418,24 +428,29 @@
             document.getElementById('wind-direction-full').textContent = degreesToCompass(windDir);
             document.getElementById('wind-beaufort-desc').textContent = getBeaufortDescription(windSpeed);
             
-            const detailsGrid = document.getElementById('pws-details-grid');
             const pressureTrendCode = general.pressureTendencyCode; let trendSymbol = ''; if (pressureTrendCode === 0) trendSymbol = '↑'; else if (pressureTrendCode === 1) trendSymbol = '↓'; else if (pressureTrendCode === 2) trendSymbol = '→';
             
             const humidity = obs.humidity ?? general.relativeHumidity;
             const pressure = obs.pressure ?? general.pressureAltimeter;
             const solarRadiation = obs.solarRadiation; 
             const uv = obs.uv ?? general.uvIndex;
-
-            detailsGrid.innerHTML = `
-                <div class="detail-item"><span class="label"><i class="fas fa-tint"></i>Páratartalom</span><span class="value">${formatValue(humidity, '%', 0)}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-tachometer-alt"></i>Légnyomás</span><span class="value">${formatValue(pressure, ' hPa', 1)}<span class="pressure-trend-icon">${trendSymbol}</span></span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-sun"></i>Napsugárzás</span><span class="value" style="color: ${getSolarRadiationColor(solarRadiation)}">${formatValue(solarRadiation, ' W/m²', 0)}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-shield-sun"></i>UV Index</span><span class="value" style="color: ${getUVColor(uv)}">${formatValue(uv, '', 1)}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-sunrise"></i>Napkelte</span><span class="value">${sunCalcData.sunrise}</span></div>
-                <div class="detail-item"><span class="label"><i class="fas fa-sunset"></i>Napnyugta</span><span class="value">${sunCalcData.sunset}</span></div>
-                <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdkelte</span><span class="value">${sunCalcData.moonrise}</span></div>
-                <div class="detail-item"><span class="label"><i class="far fa-moon"></i>Holdnyugta</span><span class="value">${sunCalcData.moonset}</span></div>
-                <div class="detail-item full-width"><span class="label"><i class="fas fa-eye"></i>Látótávolság</span><span class="value">${formatValue(general.visibility, ' km', 1)}</span></div>`;
+            const dewpoint = obs.dewpt ?? general.dewpoint;
+            
+            document.getElementById('detail-humidity').textContent = formatValue(humidity, '%', 0);
+            const pressureEl = document.getElementById('detail-pressure');
+            pressureEl.innerHTML = `${formatValue(pressure, ' hPa', 1)}<span class="pressure-trend-icon">${trendSymbol}</span>`;
+            const solarEl = document.getElementById('detail-solar');
+            solarEl.textContent = formatValue(solarRadiation, ' W/m²', 0);
+            solarEl.style.color = getSolarRadiationColor(solarRadiation);
+            const uvEl = document.getElementById('detail-uv');
+            uvEl.textContent = formatValue(uv, '', 1);
+            uvEl.style.color = getUVColor(uv);
+            document.getElementById('detail-sunrise').textContent = sunCalcData.sunrise;
+            document.getElementById('detail-sunset').textContent = sunCalcData.sunset;
+            document.getElementById('detail-moonrise').textContent = sunCalcData.moonrise;
+            document.getElementById('detail-moonset').textContent = sunCalcData.moonset;
+            document.getElementById('detail-visibility').textContent = formatValue(general.visibility, ' km', 1);
+            document.getElementById('detail-dewpoint').textContent = formatValue(dewpoint, '°', 1);
 
             const precipCardEl = document.getElementById('precip-summary-card');
             if (precipCardEl) { const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data); const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0); let mainContentHTML = ''; const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', '); const tooltipHTML = `<div class="station-tooltip-container"><span class="station-list-trigger">Figyelt állomások listája</span><div class="station-tooltip-content">${allMonitoredNames}</div></div>`; let footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`; if (stationsWithRainToday.length === 0) { mainContentHTML = `<div class="precip-explanation-container"><h5 class="explanation-title">Hogyan működik a Csapadékfigyelő?</h5><p class="explanation-text">Ez a modul <strong>mikro-hálózatot</strong> használ, amely Nyíregyháza környéki privát időjárás-állomások (PWS) valós idejű adatait gyűjti össze. Amikor valamelyik figyelt állomáson csapadékot észlel a rendszer, az azonnal megjelenik itt.</p></div>`; } else { mainContentHTML = `<div class="precip-station-grid">${stationsWithRainToday.sort((a, b) => (b.data.metric.precipTotal - a.data.metric.precipTotal)).map(station => { const isRainingNow = station.data.metric.precipRate > 0; const cardClass = isRainingNow ? 'precip-station-card is-raining-now' : 'precip-station-card'; const displayName = station.displayNameShort || station.displayName; let footerInfoHTML = ''; if (isRainingNow) { footerInfoHTML = `<div class="station-card-footer-info live-intensity">Most: ${getPrecipIntensityDescription(station.data.metric.precipRate)}</div>`; } else if (station.lastRainTimestamp) { footerInfoHTML = `<div class="station-card-footer-info">Utoljára: ${formatTime(station.lastRainTimestamp)}</div>`; } else { footerInfoHTML = `<div class="station-card-footer-info">Jelenleg nem esik</div>`; } return `<div class="${cardClass}"><div class="station-card-header"><span class="station-card-name">${displayName}</span> ${isRainingNow ? '<div class="station-card-status-icon"></div>' : ''}</div><div class="station-card-main"><div class="station-card-total-label">Ma eddig</div><div class="station-card-total-value">${formatValue(station.data.metric.precipTotal, '', 1)}<span>mm</span></div></div>${footerInfoHTML}</div>`; }).join('')}</div>`; } precipCardEl.innerHTML = `<div class="precip-card-header"><div class="precip-header-title-group"><div class="precip-header-icon"><i class="fas fa-satellite-dish"></i></div><h4 class="precip-header-title">CsapadékRadar</h4></div><span class="section-timestamp" id="radar-timestamp"></span></div><div class="precip-card-content">${mainContentHTML}</div>${footerHTML}`; document.getElementById('radar-timestamp').textContent = `Frissítve: ${formatTime(now, true)}`; }
