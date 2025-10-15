@@ -68,7 +68,7 @@
         .location-title { font-size: 22px; font-weight: 800; color: var(--current-text-color); line-height: 1.1; letter-spacing: -0.5px; }
         .timestamp-container { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-top: 10px;}
         .timestamp { font-size: 12.5px; font-weight: 500; color: var(--current-text-muted-color); transition: color 0.6s; }
-        .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.8; line-height: 1.4; }
+        .attribution-line { font-size: 11px; color: var(--current-text-muted-color); opacity: 0.8; line-height: 1.4; margin-top: 8px; }
         .station-status-container { display: flex; justify-content: center; align-items: center; gap: 6px; background-color: rgba(0,0,0,0.2); border-radius: 10px; padding: 5px; margin: 10px auto 0 auto; max-width: max-content; flex-wrap: wrap;}
         .station-selector { display: flex; align-items: center; }
         .station-selector input[type="radio"] { display: none; }
@@ -214,7 +214,7 @@
         };
         let activeDisplayStationKey = 'NYIREGYHAZI_UT'; 
         let cachedData = { displayPws: null, generalConditions: {}, sunCalc: null, sunTimes: null };
-        let forecastCache = {}; // Új, állomásonkénti gyorsítótár
+        let forecastCache = {};
         let isWeatherDisplayInitialized = false; 
         let weatherDisplayEl, hourlyForecastContainerEl, hourlyForecastTitleEl; 
         let skyContainerEl, skyGlowEl, starsContainerEl, cloudsContainerEl, precipitationContainerEl, hazeContainerEl, lightningFlashEl; 
@@ -254,7 +254,6 @@
         async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); const observation = data.observations[0]; stationConfig.isOnline = true; stationConfig.data = observation; if (observation.metric.precipRate > 0) { stationConfig.lastRainTimestamp = new Date(observation.obsTimeLocal).getTime(); } } catch (error) { stationConfig.isOnline = false; } finally { if(isWeatherDisplayInitialized) updateStationStatusUI(stationKey); } }
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); return { temperature: data.temperature, temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, temperatureMax24Hour: data.temperatureMax24Hour, temperatureMin24Hour: data.temperatureMin24Hour, relativeHumidity: data.relativeHumidity, windSpeed: data.windSpeed, windDirection: data.windDirection, dewpoint: data.temperatureDewPoint, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, uvIndex: data.uvIndex, iconCode: data.iconCode }; }
         async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 48, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
-        async function fetchDailyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/daily/5day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`Napi előrejelzés API hiba`); const data = await response.json(); if (data && data.narrative && data.narrative.length > 0) { return { narrative: data.narrative[0], temperatureMax: data.temperatureMax[0], temperatureMin: data.temperatureMin[0] }; } throw new Error('Hiányos napi előrejelzési adat.'); } catch (error) { console.error("Daily forecast fetch failed:", error); throw error; } }
         
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) { 
             if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM(); 
@@ -286,7 +285,7 @@
                     activeDisplayStationKey = onlinePrimaryStations[0]; 
                     const activeStation = STATIONS[activeDisplayStationKey]; 
                     cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                    await fetchAndDisplayForecastsForStation(activeDisplayStationKey); // Update forecast for the new station
+                    await fetchAndDisplayForecastsForStation(activeDisplayStationKey);
                 } else { 
                     const general = cachedData.generalConditions; 
                     if (general && Object.keys(general).length > 0) { 
@@ -320,7 +319,13 @@
         function initializeWeatherDisplayDOM() {
             const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
             weatherDisplayEl.innerHTML = `
-                <div class="widget-header"><div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div></div><div class="timestamp-container"><span class="timestamp" id="main-timestamp">--:--:--</span></div></div>
+                <div class="widget-header">
+                    <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div></div>
+                    <div class="timestamp-container">
+                        <span class="timestamp" id="main-timestamp">--:--:--</span>
+                        <div class="attribution-line">Az időjárás monitort Robi készítette © Copyright by: Robi</div>
+                    </div>
+                </div>
                 <div class="station-status-container">${displayableStations.map(key => `<div class="station-selector" id="${key.toLowerCase()}-selector-container"><input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}"><label for="station-select-${key.toLowerCase()}"><span class="station-status-indicator" id="status-indicator-${key}"></span> ${STATIONS[key].displayNameShort || STATIONS[key].displayName}</label></div>`).join('')}</div>
                 <div class="current-conditions-card">
                     <div class="conditions-section">
@@ -340,7 +345,7 @@
                                     </div>
                                     <div id="max-temp-label" class="range-label">--°<span class="time-label"></span></div>
                                 </div>
-                                <div class="range-disclaimer">*A jelzett időpontok az előrejelzés alapján becsültek.</div>
+                                <div class="range-disclaimer">*A jelzett időpontok az előrejelzés alapján becsültek és bármelyik frissítéssel változhatnak!</div>
                             </div>
                         </div>
                     </div>
@@ -376,8 +381,7 @@
                     <div class="precip-summary-text" id="precip-summary-text">--</div>
                     <div class="precip-forecast-list">${Array.from({ length: 7 }).map((_, i) => `<div class="precip-forecast-item" id="precip-item-${i}"><div class="forecast-time" id="precip-time-${i}">--:--</div><div class="chance-visualizer"><svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="16"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="16" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg><div class="chance-percentage" id="precip-chance-${i}">--%</div></div><div class="intensity-details"><div class="forecast-bar-container"><div class="forecast-bar-fill" id="precip-bar-fill-${i}"></div></div><div class="intensity-text" id="precip-intensity-${i}">--</div></div><div class="forecast-type-icon"><i id="precip-icon-${i}" class="fas fa-tint"></i></div></div>`).join('')}</div>
                 </div>
-                <div class="precip-summary-card" id="precip-summary-card"></div>
-                <div class="attribution-line" style="margin-top: 20px;">© Copyright by: Robi</div>`;
+                <div class="precip-summary-card" id="precip-summary-card"></div>`;
             addStationChangeListeners(); isWeatherDisplayInitialized = true;
         }
         function updateStationStatusUI(stationKey) { const stationConfig = STATIONS[stationKey]; if (!stationConfig) return; const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`); if(statusIndicatorEl) { statusIndicatorEl.classList.remove('online', 'offline'); statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline'); } const selectorContainer = document.getElementById(`${stationKey.toLowerCase()}-selector-container`); if(selectorContainer) { selectorContainer.classList.toggle('disabled', !stationConfig.isOnline); } const radioEl = document.getElementById(`station-select-${stationKey.toLowerCase()}`); if(radioEl) { radioEl.checked = (stationKey === activeDisplayStationKey); } }
@@ -391,7 +395,7 @@
                     cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; 
                 }
                 document.getElementById('location-title-text').textContent = STATIONS[activeDisplayStationKey].name;
-                await fetchAndDisplayForecastsForStation(selectedStationKey); // Új előrejelzés lekérése
+                await fetchAndDisplayForecastsForStation(selectedStationKey);
                 compileAndRenderDisplayData(); 
             } else if (!STATIONS[selectedStationKey].isOnline) { 
                 event.target.checked = false; 
@@ -444,7 +448,7 @@
             if (minTemp !== null && minTime !== null) {
                 const minTimeObj = new Date(minTime);
                 const hasMinPassed = now > minTimeObj && dayLabel === 'Ma';
-                const minVerb = hasMinPassed ? 'volt' : 'lesz';
+                const minVerb = hasMinPassed ? 'volt' : 'várható';
                 const minDayPrefix = (dayLabel === 'Ma' && hasMinPassed) ? '' : dayLabel + ' ';
                 const minText = `A minimum ${minDayPrefix}${formatTime(minTimeObj)}-kor ${minVerb}`;
                 minTempLabel.innerHTML = `${formatValue(minTemp, '°', 0)}<span class="time-label">${minText}</span>`;
@@ -455,7 +459,7 @@
             if (maxTemp !== null && maxTime !== null) {
                 const maxTimeObj = new Date(maxTime);
                 const hasMaxPassed = now > maxTimeObj && dayLabel === 'Ma';
-                const maxVerb = hasMaxPassed ? 'volt' : 'lesz';
+                const maxVerb = hasMaxPassed ? 'volt' : 'várható';
                 const maxDayPrefix = (dayLabel === 'Ma' && hasMaxPassed) ? '' : dayLabel + ' ';
                 const maxText = `A maximum ${maxDayPrefix}${formatTime(maxTimeObj)}-kor ${maxVerb}`;
                 maxTempLabel.innerHTML = `${formatValue(maxTemp, '°', 0)}<span class="time-label">${maxText}</span>`;
@@ -567,14 +571,11 @@
             const coords = STATIONS[stationKey].coords;
 
             if (stationCache && (now - stationCache.lastFetch) < REFRESH_INTERVAL_FORECAST) {
-                return; // Használjuk a gyorsítótárat
+                return;
             }
             
             try {
                 const hourlyData = await fetchHourlyForecastData(coords.lat, coords.lon);
-                // A napi előrejelzést már nem használjuk a min/max értékekhez, de a szöveges részhez még kellhet
-                // const dailyData = await fetchDailyForecastData(coords.lat, coords.lon); 
-
                 if (hourlyData) {
                     const todayMetrics = calculateForecastMetricsForDay(new Date(), hourlyData);
                     const tomorrow = new Date();
@@ -583,7 +584,6 @@
 
                     forecastCache[stationKey] = {
                         hourly: hourlyData,
-                        // daily: dailyData,
                         todayMetrics: todayMetrics,
                         tomorrowMetrics: tomorrowMetrics,
                         lastFetch: now
