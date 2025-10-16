@@ -9,8 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"></script>
     <style>
         :root {
-            --bg-widget-night: rgba(15, 23, 42, 0.7);
-            --border-widget-night: rgba(56, 189, 248, 0.25);
+            --bg-widget-night: rgba(28, 39, 58, 0.85);
+            --border-widget-night: rgba(56, 189, 248, 0.35);
             --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.7) 0%, rgba(225, 238, 252, 0.65) 100%);
             --border-widget-day: rgba(0, 122, 255, 0.2);
             --accent-interactive-night: #00BFFF;
@@ -24,7 +24,12 @@
             --hot: #EF4444; --warm: #F97316; --mild: #22C55E; --cool: #3B82F6; --cold: #6366F1;
             --wind-calm: #93C5FD; --wind-light: #3B82F6; --wind-moderate: #22C55E; --wind-strong: #F97316; --wind-gale: #EF4444; --wind-storm: #be123c;
             --current-wind-color: var(--wind-calm);
-            --current-text-color: var(--text-primary-night); --current-text-muted-color: var(--text-secondary-night); --current-icon-color: var(--accent-interactive-night); --current-widget-bg: var(--bg-widget-night); --current-widget-border: var(--border-widget-night); --current-container-border-color: var(--border-widget-night);
+            --current-widget-bg: var(--bg-widget-night);
+            --current-widget-border: var(--border-widget-night);
+            --current-container-border-color: var(--border-widget-night);
+            --current-text-color: var(--text-primary-night);
+            --current-text-muted-color: var(--text-secondary-night);
+            --current-icon-color: var(--accent-interactive-night);
             --precip-rain-color: #3b82f6;
             --precip-snow-color: #a5f3fc;
         }
@@ -255,6 +260,25 @@
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); return { temperature: data.temperature, temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, temperatureMax24Hour: data.temperatureMax24Hour, temperatureMin24Hour: data.temperatureMin24Hour, relativeHumidity: data.relativeHumidity, windSpeed: data.windSpeed, windDirection: data.windDirection, dewpoint: data.temperatureDewPoint, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, uvIndex: data.uvIndex, iconCode: data.iconCode }; }
         async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 48, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
         
+        function updateTheme(isNight) {
+            const root = document.documentElement;
+            if (isNight) {
+                root.style.setProperty('--current-widget-bg', 'var(--bg-widget-night)');
+                root.style.setProperty('--current-widget-border', 'var(--border-widget-night)');
+                root.style.setProperty('--current-container-border-color', 'var(--border-widget-night)');
+                root.style.setProperty('--current-text-color', 'var(--text-primary-night)');
+                root.style.setProperty('--current-text-muted-color', 'var(--text-secondary-night)');
+                root.style.setProperty('--current-icon-color', 'var(--accent-interactive-night)');
+            } else {
+                root.style.setProperty('--current-widget-bg', 'var(--bg-widget-day)');
+                root.style.setProperty('--current-widget-border', 'var(--border-widget-day)');
+                root.style.setProperty('--current-container-border-color', 'var(--border-widget-day)');
+                root.style.setProperty('--current-text-color', 'var(--text-primary-day)');
+                root.style.setProperty('--current-text-muted-color', 'var(--text-secondary-day)');
+                root.style.setProperty('--current-icon-color', 'var(--accent-interactive-day)');
+            }
+        }
+
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) { 
             if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM(); 
             
@@ -299,6 +323,9 @@
             const maxPrecipRate = Math.max(0, ...Object.values(STATIONS).map(s => (s.isOnline && s.data) ? s.data.metric.precipRate : 0)); 
             currentSkyState.precipRate = maxPrecipRate; 
             const general = cachedData.generalConditions; 
+            if (general && general.dayOrNight) {
+                updateTheme(general.dayOrNight === 'N');
+            }
             if (general && general.iconCode) { 
                 const icon = general.iconCode; 
                 if ([31, 32, 33, 36].includes(icon)) currentSkyState.cloudAmount = 0; 
@@ -394,7 +421,17 @@
                 if (activeStation && activeStation.data) { 
                     cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data }; 
                 }
-                document.getElementById('location-title-text').textContent = STATIONS[activeDisplayStationKey].name;
+                document.getElementById('location-title-text').textContent = activeStation.name;
+
+                try {
+                    const newGeneralData = await fetchGeneralConditionsData(activeStation.coords.lat, activeStation.coords.lon);
+                    if (newGeneralData) {
+                        cachedData.generalConditions = newGeneralData;
+                    }
+                } catch (e) {
+                    console.error(`Failed to fetch general conditions for ${selectedStationKey}`, e);
+                }
+
                 await fetchAndDisplayForecastsForStation(selectedStationKey);
                 compileAndRenderDisplayData(); 
             } else if (!STATIONS[selectedStationKey].isOnline) { 
