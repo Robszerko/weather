@@ -9,30 +9,48 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.8.0/suncalc.min.js"></script>
     <style>
         :root {
+            /* --- ÉJSZAKAI TÉMA --- */
             --bg-widget-night: rgba(28, 39, 58, 0.85);
             --border-widget-night: rgba(56, 189, 248, 0.35);
-            --bg-widget-day: linear-gradient(160deg, rgba(240, 248, 255, 0.7) 0%, rgba(225, 238, 252, 0.65) 100%);
-            --border-widget-day: rgba(0, 122, 255, 0.2);
             --accent-interactive-night: #00BFFF;
             --text-primary-night: #EAEAEA;
             --text-secondary-night: #BCCCDC;
+            
+            /* --- NAPPALI TÉMA --- */
+            --bg-widget-day: linear-gradient(160deg, rgba(250, 252, 255, 0.85) 0%, rgba(235, 242, 252, 0.8) 100%);
+            --border-widget-day: rgba(0, 122, 255, 0.2);
             --accent-interactive-day: #007AFF;
             --text-primary-day: #111827;
             --text-secondary-day: #374151;
+
+            /* --- ÁLTALÁNOS SZÍNEK --- */
             --cloud-base-color: #f5f5f5;
             --cloud-shadow-color: #d8d8d8;
             --hot: #EF4444; --warm: #F97316; --mild: #22C55E; --cool: #3B82F6; --cold: #6366F1;
-            --wind-calm: #93C5FD; --wind-light: #3B82F6; --wind-moderate: #22C55E; --wind-strong: #F97316; --wind-gale: #EF4444; --wind-storm: #be123c;
-            --current-wind-color: var(--wind-calm);
+            
+            /* --- SZÉL SZÍNEK --- */
+            --wind-calm-night: #93C5FD; --wind-light-night: #3B82F6; --wind-moderate-night: #22C55E;
+            --wind-calm-day: #60a5fa; --wind-light-day: #2563eb; --wind-moderate-day: #16a34a;
+            --wind-strong: #F97316; --wind-gale: #EF4444; --wind-storm: #be123c;
+
+            /* --- KOCKÁZATI SZÍNEK --- */
+            --risk-very-low-night: #22c55e; --risk-low-night: #a3e635; --risk-moderate-night: #facc15;
+            --risk-very-low-day: #16a34a; --risk-low-day: #65a30d; --risk-moderate-day: #f59e0b;
+            --risk-high: #f97316; --risk-very-high: #ef4444;
+
+            /* --- AKTUÁLISAN HASZNÁLT VÁLTOZÓK --- */
+            --current-wind-calm: var(--wind-calm-night); --current-wind-light: var(--wind-light-night); --current-wind-moderate: var(--wind-moderate-night);
+            --current-risk-very-low: var(--risk-very-low-night); --current-risk-low: var(--risk-low-night); --current-risk-moderate: var(--risk-moderate-night);
+            --current-wind-color: var(--current-wind-calm);
             --current-widget-bg: var(--bg-widget-night);
             --current-widget-border: var(--border-widget-night);
             --current-container-border-color: var(--border-widget-night);
             --current-text-color: var(--text-primary-night);
             --current-text-muted-color: var(--text-secondary-night);
             --current-icon-color: var(--accent-interactive-night);
+
             --precip-rain-color: #3b82f6;
             --precip-snow-color: #a5f3fc;
-            --risk-very-low: #22c55e; --risk-low: #a3e635; --risk-moderate: #facc15; --risk-high: #f97316; --risk-very-high: #ef4444;
         }
         
         #sky-container { 
@@ -93,18 +111,18 @@
         .temp-primary-display { text-align: center; margin-bottom: 8px; }
         .current-temp-value { font-size: 56px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
         .current-temp-value span:last-child { font-weight: 600; font-size: 0.5em; vertical-align: super; margin-left: 2px; }
-        .temp-feels-like-container { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--current-text-muted-color); background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 6px 12px; margin: 8px auto 24px auto; }
+        .temp-feels-like-container { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--current-text-muted-color); background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 6px 12px; margin: 8px auto 0 auto; max-width: fit-content; }
         .temp-feels-like-container i { color: var(--current-icon-color); }
         .temp-feels-like-container strong { color: var(--current-text-color); font-weight: 700; }
-        .daily-temp-range-visualizer { width: 100%; max-width: 280px; margin: 0 auto; }
-        .daily-temp-range-visualizer h4 { margin: 0 0 8px 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--current-text-muted-color); }
-        .range-bar-wrapper { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
-        .range-label { font-size: 14px; font-weight: 700; color: var(--current-text-color); text-align: center; flex-shrink: 0; width: 70px; line-height: 1.2; }
-        .range-label .time-label { display: block; font-size: 0.7em; font-weight: 500; color: var(--current-text-muted-color); white-space: normal; }
-        .range-bar-container { position: relative; flex-grow: 1; height: 8px; }
-        .range-bar-bg { width: 100%; height: 100%; border-radius: 4px; background: linear-gradient(to right, var(--cold), var(--cool), var(--mild), var(--warm), var(--hot)); }
-        #current-temp-marker { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); color: #fff; font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); transition: left 0.8s ease-out; }
-        .range-disclaimer { font-size: 10px; font-style: italic; color: var(--current-text-muted-color); margin-top: 8px; }
+        
+        .compact-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; width: 100%; max-width: 340px; }
+        .compact-detail-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; }
+        .compact-detail-header { display: flex; align-items: center; margin-bottom: 4px; }
+        .compact-detail-header i { color: var(--current-icon-color); width: 16px; text-align: center; margin-right: 6px; font-size: 0.9em; }
+        .compact-detail-header .label { font-size: 11px; font-weight: 500; color: var(--current-text-muted-color); }
+        .compact-detail-value { font-size: 16px; font-weight: 700; color: var(--current-text-color); }
+        .pressure-trend-icon { font-size: 0.8em; margin-left: 2px; }
+
         .conditions-section:first-child { border-right: 1px solid var(--current-container-border-color); padding-right: 16px; }
         
         .info-tooltip-container { position: relative; display: inline-flex; align-items: center; justify-content: center; }
@@ -133,47 +151,33 @@
         .wind-legend-container { width: 100%; margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--current-container-border-color); } 
         .wind-legend-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--current-text-muted-color); margin-bottom: 5px; } 
         .wind-legend-bar-container { position: relative; width: 100%; height: 10px; margin-bottom: 4px; }
-        .wind-legend-bar { width: 100%; height: 100%; border-radius: 5px; background: linear-gradient(to right, var(--wind-calm), var(--wind-light), var(--wind-moderate), var(--wind-strong), var(--wind-gale), var(--wind-storm)); } 
-        #wind-speed-marker { position: absolute; top: -10px; left: 0%; color: #fff; font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); transform: translateX(-50%); transition: left 0.8s ease-out; }
+        .wind-legend-bar { width: 100%; height: 100%; border-radius: 5px; background: linear-gradient(to right, var(--current-wind-calm), var(--current-wind-light), var(--current-wind-moderate), var(--wind-strong), var(--wind-gale), var(--wind-storm)); } 
+        #wind-speed-marker { position: absolute; top: -10px; left: 0%; color: var(--current-text-color); font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); transform: translateX(-50%); transition: left 0.8s ease-out, color 0.6s ease-in-out; }
         .wind-legend-labels { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--current-text-muted-color); margin-top: 4px; padding: 0 5px; }
 
-        .pws-details-container { background-color: transparent; border: none; padding: 0; margin-top: 20px; }
-        .pws-details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .detail-pod { background-color: rgba(0,0,0,0.15); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; transition: all 0.3s ease; }
-        .detail-pod:hover { transform: translateY(-3px); background-color: rgba(0,0,0,0.25); }
-        .pod-icon-container { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 6px; transition: background-color 0.5s; }
-        .pod-icon-container i { color: #fff; font-size: 14px; }
-        .pod-data { display: flex; flex-direction: column; align-items: center; }
-        .pod-data .value { font-size: 15px; font-weight: 700; color: var(--current-text-color); line-height: 1.2; }
-        .pod-data .label { font-size: 10px; font-weight: 500; color: var(--current-text-muted-color); line-height: 1.1; }
-        .pressure-trend-icon { font-size: 0.8em; margin-left: 2px; }
-        #detail-pod-humidity .pod-icon-container { background-color: #3b82f6; }
-        #detail-pod-pressure .pod-icon-container { background-color: #8b5cf6; }
-        #detail-pod-sun .pod-icon-container { background-color: #f59e0b; }
-        #detail-pod-moon .pod-icon-container { background-color: #64748b; }
-        #detail-pod-visibility .pod-icon-container { background-color: #06b6d4; }
-        #detail-pod-dewpoint .pod-icon-container { background-color: #14b8a6; }
-        #detail-pod-windchill .pod-icon-container { background-color: #60a5fa; }
-        #detail-pod-windrun .pod-icon-container { background-color: #2dd4bf; }
-        #detail-pod-cloudbase .pod-icon-container { background-color: #94a3b8; }
-        #detail-pod-abshumidity .pod-icon-container { background-color: #38bdf8; }
-        #detail-pod-diurnalrange .pod-icon-container { background-color: #f472b6; }
-        #detail-pod-altitude .pod-icon-container { background-color: #16a34a; }
-        #detail-pod-daylength .pod-icon-container { background-color: #facc15; }
-        #detail-pod-vaporpressure .pod-icon-container { background-color: #a78bfa; }
-
-        .risk-assessment-container { padding: 12px 14px; }
-        .risk-assessment-content { display: flex; flex-direction: column; align-items: center; gap: 10px; background-color: rgba(0,0,0,0.15); border-radius: 12px; padding: 16px; }
+        .risk-assessment-container { padding: 12px 14px; margin-bottom: 20px; }
+        .risk-assessment-content { display: flex; flex-direction: column; align-items: center; gap: 10px; background-color: rgba(0,0,0,0.15); border-radius: 12px; padding: 16px; border: 1px solid var(--current-container-border-color); }
         .risk-level-text { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: color 0.5s ease; }
         .risk-bar-container { width: 100%; max-width: 250px; height: 10px; background-color: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; }
         .risk-bar-fill { width: 0%; height: 100%; border-radius: 5px; transition: width 0.8s ease-out, background-color 0.5s ease; }
 
-
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
         .precip-summary-text { font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; background-color: rgba(0,0,0,0.15); margin-bottom: 12px; text-align: center; color: var(--current-text-color); }
-        .precip-forecast-list { display: flex; flex-direction: column; gap: 8px; margin-top: 5px; }
-        .precip-forecast-item { display: grid; grid-template-columns: 45px 50px 1fr 30px; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.15); }
-        .precip-forecast-item:last-child { border-bottom: none; } .precip-forecast-item.first-hour { background-color: rgba(0,0,0,0.1); margin: -4px -8px; padding: 8px; border-radius: 6px; border-bottom: none; } .forecast-time { font-size: 13px; font-weight: 700; color: var(--current-text-color); text-align: center; } .chance-visualizer { position: relative; width: 40px; height: 40px; } .chance-visualizer svg { transform: rotate(-90deg); width: 100%; height: 100%; } .chance-visualizer circle { fill: transparent; stroke-width: 4px; } .chance-visualizer .bg-circle { stroke: rgba(0,0,0,0.2); } .chance-visualizer .progress-circle { stroke: var(--current-icon-color); transition: stroke-dashoffset 0.6s ease-out; } .chance-percentage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 11px; font-weight: 700; color: var(--current-text-color); } .intensity-details { display: flex; flex-direction: column; gap: 4px; text-align: left; } .forecast-bar-container { position: relative; height: 6px; background-color: rgba(0,0,0,0.2); border-radius: 3px; overflow: hidden; } .forecast-bar-fill { height: 100%; background-color: var(--precip-rain-color); border-radius: 3px; transition: width 0.6s ease-out; } .precip-forecast-item.is-snow .forecast-bar-fill { background-color: var(--precip-snow-color); } .intensity-text { font-size: 11px; font-weight: 600; color: var(--current-text-muted-color); } .forecast-type-icon { font-size: 16px; text-align: center; color: var(--precip-rain-color); } .precip-forecast-item.is-snow .forecast-type-icon { color: var(--precip-snow-color); }
+        .precip-forecast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
+        .precip-forecast-item { background-color: rgba(0,0,0,0.1); border: 1px solid rgba(from var(--current-container-border-color) r g b / 0.15); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .forecast-time { font-size: 14px; font-weight: 700; color: var(--current-text-color); text-align: center; }
+        .precip-item-content { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
+        .chance-visualizer { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
+        .chance-visualizer svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+        .chance-visualizer circle { fill: transparent; stroke-width: 6px; }
+        .chance-visualizer .bg-circle { stroke: rgba(0,0,0,0.2); }
+        .chance-visualizer .progress-circle { stroke: var(--current-icon-color); transition: stroke-dashoffset 0.6s ease-out; }
+        .chance-percentage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 800; color: var(--current-text-color); }
+        .intensity-details { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+        .intensity-text { font-size: 12px; font-weight: 600; color: var(--current-text-muted-color); }
+        .qpf-value { font-size: 13px; font-weight: 700; color: var(--current-text-color); }
+        .forecast-type-icon { font-size: 20px; text-align: center; color: var(--precip-rain-color); margin-left: auto; }
+        .precip-forecast-item.is-snow .forecast-type-icon { color: var(--precip-snow-color); }
 
         .precip-summary-card { display: flex; flex-direction: column; gap: 0; background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 0; margin-bottom: 20px; transition: all 0.5s ease; overflow: hidden; }
         .precip-card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid rgba(from var(--current-container-border-color) r g b / 0.4); background-color: rgba(0,0,0,0.1); }
@@ -196,12 +200,13 @@
         .hourly-forecast-container { width: 100%; max-width: 800px; display: grid; grid-template-columns: 1fr; gap: 8px; padding: 4px; box-sizing: border-box; margin: 0 auto; }
         .hourly-forecast-card { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px; border-radius: 12px; background: var(--current-widget-bg); border: 1px solid var(--current-widget-border); box-shadow: 0 2px 8px rgba(0,0,0,0.1); color: var(--current-text-color); transition: all 0.6s; } .hourly-primary-info { display: flex; flex-direction: row; align-items: center; justify-content: space-around; gap: 6px; } .hourly-time { font-size: 12px; font-weight: 700; flex-shrink: 0; } .hourly-icon-and-condition { display: flex; flex-direction: column; align-items: center; gap: 2px; } .hourly-icon { font-size: 20px; color: var(--current-icon-color); } .hourly-condition-text { font-size: 9.5px; font-weight: 500; color: var(--current-text-muted-color); white-space: nowrap; text-align: center; } .hourly-temp { font-size: 16px; font-weight: 700; flex-shrink: 0; } .hourly-secondary-details { display: flex; flex-direction: column; align-items: stretch; gap: 3px; font-size: 10px; border-top: 1px solid var(--current-container-border-color); padding-top: 5px; margin-top: 3px; } .hourly-detail-row { display: flex; justify-content: space-between; align-items: center; } .hourly-detail-row span { display: flex; align-items: center; gap: 5px; } .hourly-detail-row i { width: 12px; text-align: center; opacity: 0.7; }
         
+        @media (max-width: 420px) { .precip-forecast-grid { grid-template-columns: 1fr; } }
         @media (min-width: 420px) { .hourly-forecast-container { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 640px) { .hourly-forecast-container { grid-template-columns: repeat(3, 1fr); } .precip-forecast-item { grid-template-columns: 50px 60px 1fr 40px; gap: 12px; } .pws-details-grid { grid-template-columns: repeat(3, 1fr); } }
-        @media (min-width: 768px) { .precip-station-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } .pws-details-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 640px) { .hourly-forecast-container { grid-template-columns: repeat(3, 1fr); } .compact-details-grid { max-width: none; } }
+        @media (min-width: 768px) { .precip-station-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } }
         @media (min-width: 1000px) { .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 768px) { .current-conditions-card { grid-template-columns: 1fr; gap: 0; } .conditions-section:first-child { border-right: none; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--current-container-border-color); } }
-        @media (max-width: 480px) { .current-temp-value { font-size: 48px; } .wind-main-display { grid-template-columns: 80px 1fr; } .wind-compass-container { width: 80px; height: 80px; } #wind-compass-arrow { font-size: 28px; } .pws-details-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px) { .current-temp-value { font-size: 48px; } .wind-main-display { grid-template-columns: 80px 1fr; } .wind-compass-container { width: 80px; height: 80px; } #wind-compass-arrow { font-size: 28px; } .compact-details-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -257,12 +262,14 @@
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
         function formatTime(dateOrIsoString, options = {}) { const { includeSeconds = false, prefix = '' } = options; if (!dateOrIsoString) return 'N/A'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return 'N/A'; const timeOptions = { hour: '2-digit', minute: '2-digit' }; if (includeSeconds) timeOptions.second = '2-digit'; const timeString = date.toLocaleTimeString('hu-HU', timeOptions); return prefix ? `${prefix} ${timeString}` : timeString; } catch (e) { return 'N/A'; } }
         function formatHourOnly(dateOrIsoString) { if (!dateOrIsoString) return '--h'; try { const date = new Date(dateOrIsoString); if (isNaN(date.getTime())) return '--h'; return date.toLocaleTimeString('hu-HU', { hour: '2-digit' }) + 'h'; } catch (e) { return '--h'; } }
+        function formatDateWithDay(date) { if (!date) return ''; return new Intl.DateTimeFormat('hu-HU', { month: 'long', day: 'numeric', weekday: 'long' }).format(date); }
+        function getTimeOfDay(date) { if (!date) return ''; const hour = new Date(date).getHours(); if (hour >= 5 && hour < 10) return 'reggeli'; if (hour >= 10 && hour < 13) return 'déli'; if (hour >= 13 && hour < 18) return 'délutáni'; if (hour >= 18 && hour < 22) return 'esti'; return 'éjszakai'; }
         
         function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nincs'; if (rate > 0 && rate <= 0.2) return 'Pár csepp'; if (rate > 0.2 && rate <= 0.5) return 'Szitálás'; if (rate > 0.5 && rate <= 1.0) return 'Enyhe eső'; if (rate > 1.0 && rate <= 4.0) return 'Mérsékelt eső'; if (rate > 4.0 && rate <= 10.0) return 'Intenzív eső'; if (rate > 10.0 && rate <= 25.0) return 'Zápor'; return 'Felhőszakadás'; }
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function getBeaufort(speed) { if (speed === null || typeof speed === 'undefined') return { num: 0, desc: 'Szélcsend' }; if (speed < 1) return { num: 0, desc: 'Szélcsend' }; if (speed <= 5) return { num: 1, desc: 'Gyenge szellő' }; if (speed <= 11) return { num: 2, desc: 'Enyhe szellő' }; if (speed <= 19) return { num: 3, desc: 'Gyenge szél' }; if (speed <= 28) return { num: 4, desc: 'Mérsékelt szél' }; if (speed <= 38) return { num: 5, desc: 'Élénk szél' }; if (speed <= 49) return { num: 6, desc: 'Erős szél' }; if (speed <= 61) return { num: 7, desc: 'Viharos szél' }; if (speed <= 74) return { num: 8, desc: 'Vihar' }; if (speed <= 88) return { num: 9, desc: 'Szélvihar' }; if (speed <= 102) return { num: 10, desc: 'Heves vihar' }; if (speed <= 117) return { num: 11, desc: 'Orkán' }; return { num: 12, desc: 'Orkán' }; }
-        function getWindColor(speed) { if (speed == null) return 'var(--wind-calm)'; if (speed <= 5) return 'var(--wind-calm)'; if (speed <= 19) return 'var(--wind-light)'; if (speed <= 38) return 'var(--wind-moderate)'; if (speed <= 61) return 'var(--wind-strong)'; if (speed <= 88) return 'var(--wind-gale)'; return 'var(--wind-storm)'; }
+        function getWindColor(speed) { if (speed == null) return 'var(--current-wind-calm)'; if (speed <= 5) return 'var(--current-wind-calm)'; if (speed <= 19) return 'var(--current-wind-light)'; if (speed <= 38) return 'var(--current-wind-moderate)'; if (speed <= 61) return 'var(--wind-strong)'; if (speed <= 88) return 'var(--wind-gale)'; return 'var(--wind-storm)'; }
         function getSolarRadiationColor(w_m2) { if (w_m2 === null || typeof w_m2 === 'undefined' || w_m2 < 50) return 'var(--cool)'; if (w_m2 < 250) return 'var(--mild)'; if (w_m2 < 500) return 'var(--warm)'; return 'var(--hot)'; }
         function getUVColor(uv) { if (uv === null || typeof uv === 'undefined') return 'var(--cool)'; if (uv <= 2) return 'var(--mild)'; if (uv <= 5) return 'var(--warm)'; if (uv <= 7) return '#F97316'; if (uv <= 10) return 'var(--hot)'; return '#A134A1'; }
         
@@ -296,6 +303,12 @@
                 root.style.setProperty('--current-text-color', 'var(--text-primary-night)');
                 root.style.setProperty('--current-text-muted-color', 'var(--text-secondary-night)');
                 root.style.setProperty('--current-icon-color', 'var(--accent-interactive-night)');
+                root.style.setProperty('--current-wind-calm', 'var(--wind-calm-night)');
+                root.style.setProperty('--current-wind-light', 'var(--wind-light-night)');
+                root.style.setProperty('--current-wind-moderate', 'var(--wind-moderate-night)');
+                root.style.setProperty('--current-risk-very-low', 'var(--risk-very-low-night)');
+                root.style.setProperty('--current-risk-low', 'var(--risk-low-night)');
+                root.style.setProperty('--current-risk-moderate', 'var(--risk-moderate-night)');
             } else {
                 root.style.setProperty('--current-widget-bg', 'var(--bg-widget-day)');
                 root.style.setProperty('--current-widget-border', 'var(--border-widget-day)');
@@ -303,6 +316,12 @@
                 root.style.setProperty('--current-text-color', 'var(--text-primary-day)');
                 root.style.setProperty('--current-text-muted-color', 'var(--text-secondary-day)');
                 root.style.setProperty('--current-icon-color', 'var(--accent-interactive-day)');
+                root.style.setProperty('--current-wind-calm', 'var(--wind-calm-day)');
+                root.style.setProperty('--current-wind-light', 'var(--wind-light-day)');
+                root.style.setProperty('--current-wind-moderate', 'var(--wind-moderate-day)');
+                root.style.setProperty('--current-risk-very-low', 'var(--risk-very-low-day)');
+                root.style.setProperty('--current-risk-low', 'var(--risk-low-day)');
+                root.style.setProperty('--current-risk-moderate', 'var(--risk-moderate-day)');
             }
         }
 
@@ -378,6 +397,16 @@
         
         function initializeWeatherDisplayDOM() {
             const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
+            const detailItems = {
+                humidity: { label: 'Pára', icon: 'fas fa-tint' },
+                pressure: { label: 'Légnyomás', icon: 'fas fa-tachometer-alt' },
+                dewpoint: { label: 'Harmatpont', icon: 'fas fa-droplet' },
+                solar: { label: 'Napsugárzás', icon: 'fas fa-sun' },
+                uv: { label: 'UV Index', icon: 'fas fa-shield-sun' },
+                windchill: { label: 'Szélhűtés', icon: 'fas fa-temperature-empty' },
+                visibility: { label: 'Látótávolság', icon: 'fas fa-eye' },
+                windrun: { label: 'Napi Szélút', icon: 'fas fa-route' }
+            };
             
             weatherDisplayEl.innerHTML = `
                 <div class="widget-header">
@@ -391,22 +420,19 @@
                 <div class="current-conditions-card">
                     <div class="conditions-section">
                         <div id="temp-display-card" class="temp-display-card">
-                            <h4 class="section-title">Hőmérséklet</h4>
+                            <h4 class="section-title">Hőmérséklet & Adatok</h4>
                             <div class="temp-primary-display"><div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div></div>
                             <div class="temp-feels-like-container"><i class="fas fa-user"></i><span>Hőérzet: <strong id="feels-like-temp">--°</strong></span></div>
-                             <div class="daily-temp-range-visualizer">
-                                <h4>Napi Hőmérséklet</h4>
-                                <div class="range-bar-wrapper">
-                                    <div id="min-temp-label" class="range-label">--°<span class="time-label"></span></div>
-                                    <div class="range-bar-container">
-                                        <div class="range-bar-bg"></div>
-                                        <div id="current-temp-marker">
-                                            <i class="fas fa-caret-down"></i>
+                            <div class="compact-details-grid">
+                                ${Object.keys(detailItems).map(key => `
+                                    <div class="compact-detail-item" id="compact-detail-${key}">
+                                        <div class="compact-detail-header">
+                                            <i class="${detailItems[key].icon}"></i>
+                                            <span class="label">${detailItems[key].label}</span>
                                         </div>
+                                        <div class="compact-detail-value" id="compact-value-${key}">--</div>
                                     </div>
-                                    <div id="max-temp-label" class="range-label">--°<span class="time-label"></span></div>
-                                </div>
-                                <div class="range-disclaimer">*A jelzett időpontok az előrejelzés alapján becsültek és bármelyik frissítéssel változhatnak!</div>
+                                `).join('')}
                             </div>
                         </div>
                     </div>
@@ -430,23 +456,9 @@
                         </div>
                     </div>
                 </div>
-                <div class="pws-details-container">
-                    <div class="section-header"><div class="section-title">Részletes adatok</div><span class="section-timestamp" id="pws-timestamp"></span></div>
-                    <div class="pws-details-grid" id="pws-details-grid">
-                        ${['humidity', 'pressure', 'dewpoint', 'solar', 'uv', 'windchill', 'sun', 'moon', 'visibility', 'windrun'].map(key => `
-                            <div class="detail-pod" id="detail-pod-${key}">
-                                <div class="pod-icon-container"><i id="detail-icon-${key}"></i></div>
-                                <div class="pod-data">
-                                    <span class="value" id="detail-value-${key}">--</span>
-                                    <span class="label" id="detail-label-${key}">--</span>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
                  <div id="secondary-panel-container">
-                    <div class="pws-details-container is-hidden" id="risk-assessment-container">
-                        <div class="section-header">
+                    <div class="risk-assessment-container is-hidden" id="risk-assessment-container">
+                         <div class="section-header">
                             <div class="section-title" style="display:flex; align-items:center; gap: 5px;">
                                 Közeli Csapadékkockázat
                                 <div class="info-tooltip-container">
@@ -468,7 +480,23 @@
                 <div class="precipitation-forecast-section">
                     <div class="section-header"><div style="display: flex; align-items: center; gap: 8px;"><div class="section-title" style="margin-bottom: 0;">Órás csapadék előrejelzés</div></div><span class="section-timestamp" id="precip-forecast-timestamp"></span></div>
                     <div class="precip-summary-text" id="precip-summary-text">--</div>
-                    <div class="precip-forecast-list">${Array.from({ length: 7 }).map((_, i) => `<div class="precip-forecast-item" id="precip-item-${i}"><div class="forecast-time" id="precip-time-${i}">--:--</div><div class="chance-visualizer"><svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="16"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="16" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg><div class="chance-percentage" id="precip-chance-${i}">--%</div></div><div class="intensity-details"><div class="forecast-bar-container"><div class="forecast-bar-fill" id="precip-bar-fill-${i}"></div></div><div class="intensity-text" id="precip-intensity-${i}">--</div></div><div class="forecast-type-icon"><i id="precip-icon-${i}" class="fas fa-tint"></i></div></div>`).join('')}</div>
+                    <div class="precip-forecast-grid" id="precip-forecast-list">
+                        ${Array.from({ length: 8 }).map((_, i) => `
+                            <div class="precip-forecast-item" id="precip-item-${i}">
+                                <div class="forecast-time" id="precip-time-${i}">--:--</div>
+                                <div class="precip-item-content">
+                                    <div class="chance-visualizer">
+                                        <svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="16"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="16" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg>
+                                        <div class="chance-percentage" id="precip-chance-${i}">--%</div>
+                                    </div>
+                                    <div class="intensity-details">
+                                        <div class="intensity-text" id="precip-intensity-${i}">--</div>
+                                        <div class="qpf-value" id="precip-qpf-${i}">- mm</div>
+                                    </div>
+                                    <div class="forecast-type-icon"><i id="precip-icon-${i}" class="fas fa-tint"></i></div>
+                                </div>
+                            </div>`).join('')}
+                    </div>
                 </div>`;
             addStationChangeListeners(); isWeatherDisplayInitialized = true;
         }
@@ -507,7 +535,7 @@
         function updateAnimatedValue(element, newValue) { if (!element) return; const currentValue = element.textContent.trim(); const newFormattedValue = newValue.toString().trim(); if (currentValue !== newFormattedValue) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newFormattedValue; element.classList.remove('is-flipping'); }, 200); } } }
         function updateBeaufortVisualizer(speed) { const beaufortData = getBeaufort(speed); const color = getWindColor(speed); document.documentElement.style.setProperty('--current-wind-color', color); const bars = document.querySelectorAll('#beaufort-scale-container .beaufort-bar'); bars.forEach((bar, index) => { bar.classList.toggle('active', index < beaufortData.num); }); document.getElementById('beaufort-grade').textContent = `${beaufortData.num}. fokozat`; document.getElementById('beaufort-desc').textContent = beaufortData.desc; }
 
-        function calculatePrecipRiskIndex(temp, dewpoint, pressureTendency, humidity, vaporPressure) {
+        function calculatePrecipRiskIndex(temp, dewpoint, pressureTendency, humidity) {
             let score = 0;
             if (temp === null || dewpoint === null) return 0;
             
@@ -520,23 +548,24 @@
 
             if (humidity > 90) score += 2;
             else if (humidity > 80) score += 1;
-
+            
+            const vaporPressure = (dewpoint !== null) ? 6.112 * Math.exp((17.67 * dewpoint) / (dewpoint + 243.5)) : null;
             if (vaporPressure > 12) score += 1;
 
             return Math.max(0, score);
         }
 
         function getRiskLevelDetails(score) {
-            if (score <= 1) return { text: 'Nagyon Alacsony', color: 'var(--risk-very-low)', level: 1 };
-            if (score <= 3) return { text: 'Alacsony', color: 'var(--risk-low)', level: 2 };
-            if (score <= 5) return { text: 'Mérsékelt', color: 'var(--risk-moderate)', level: 3 };
+            if (score <= 1) return { text: 'Nagyon Alacsony', color: 'var(--current-risk-very-low)', level: 1 };
+            if (score <= 3) return { text: 'Alacsony', color: 'var(--current-risk-low)', level: 2 };
+            if (score <= 5) return { text: 'Mérsékelt', color: 'var(--current-risk-moderate)', level: 3 };
             if (score <= 7) return { text: 'Magas', color: 'var(--risk-high)', level: 4 };
             return { text: 'Nagyon Magas', color: 'var(--risk-very-high)', level: 5 };
         }
 
         function renderWeatherData() {
-            const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!general || !obs || !sunCalcData) return;
-            const now = new Date(); document.getElementById('main-timestamp').textContent = `Utolsó frissítés: ${formatTime(now, { includeSeconds: true })}`; document.getElementById('pws-timestamp').textContent = `Frissítve: ${formatTime(now, { includeSeconds: true })}`;
+            const obs = cachedData.displayPws; const general = cachedData.generalConditions; if (!general || !obs) return;
+            const now = new Date(); document.getElementById('main-timestamp').textContent = `Utolsó frissítés: ${formatTime(now, { includeSeconds: true })}`;
             
             const currentTemp = obs.temp; 
             const feelsLikeTemp = general.temperatureFeelsLike;
@@ -544,64 +573,6 @@
             document.getElementById('feels-like-temp').textContent = `${formatValue(feelsLikeTemp, '°', 1)}`; 
             const tempCard = document.getElementById('temp-display-card'); 
             if (tempCard) { tempCard.style.backgroundImage = getTempGradient(currentTemp); }
-
-            const activeForecast = forecastCache[activeDisplayStationKey] || {};
-            const todayMetrics = activeForecast.todayMetrics;
-            const tomorrowMetrics = activeForecast.tomorrowMetrics;
-            
-            let displayData = { minTemp: null, minTime: null, maxTemp: null, maxTime: null, dayLabel: 'Ma' };
-
-            if (todayMetrics && todayMetrics.minTime && todayMetrics.maxTime) {
-                const switchoverHour = 17;
-                const todayMinTime = new Date(todayMetrics.minTime);
-                const todayMaxTime = new Date(todayMetrics.maxTime);
-                
-                const useTomorrowData = now.getHours() >= switchoverHour && now > todayMinTime && now > todayMaxTime && tomorrowMetrics;
-
-                if (useTomorrowData) {
-                    displayData = { ...tomorrowMetrics, dayLabel: 'Holnap' };
-                } else {
-                    displayData = { ...todayMetrics, dayLabel: 'Ma' };
-                }
-            }
-
-            const { minTemp, minTime, maxTemp, maxTime, dayLabel } = displayData;
-
-            const minTempLabel = document.getElementById('min-temp-label');
-            const maxTempLabel = document.getElementById('max-temp-label');
-
-            if (minTemp !== null && minTime !== null) {
-                const minTimeObj = new Date(minTime);
-                const hasMinPassed = now > minTimeObj && dayLabel === 'Ma';
-                const minVerb = hasMinPassed ? 'volt' : 'várható';
-                const minDayPrefix = (dayLabel === 'Ma' && hasMinPassed) ? '' : dayLabel + ' ';
-                const minText = `A minimum ${minDayPrefix}${formatTime(minTimeObj)}-kor ${minVerb}`;
-                minTempLabel.innerHTML = `${formatValue(minTemp, '°', 0)}<span class="time-label">${minText}</span>`;
-            } else {
-                 minTempLabel.innerHTML = `${NO_DATA_STRING}°<span class="time-label"></span>`;
-            }
-
-            if (maxTemp !== null && maxTime !== null) {
-                const maxTimeObj = new Date(maxTime);
-                const hasMaxPassed = now > maxTimeObj && dayLabel === 'Ma';
-                const maxVerb = hasMaxPassed ? 'volt' : 'várható';
-                const maxDayPrefix = (dayLabel === 'Ma' && hasMaxPassed) ? '' : dayLabel + ' ';
-                const maxText = `A maximum ${maxDayPrefix}${formatTime(maxTimeObj)}-kor ${maxVerb}`;
-                maxTempLabel.innerHTML = `${formatValue(maxTemp, '°', 0)}<span class="time-label">${maxText}</span>`;
-            } else {
-                maxTempLabel.innerHTML = `${NO_DATA_STRING}°<span class="time-label"></span>`;
-            }
-
-            if (minTemp !== null && maxTemp !== null) {
-                const range = maxTemp - minTemp;
-                const marker = document.getElementById('current-temp-marker');
-                if (range > 0 && marker) {
-                    const currentPosPercent = Math.max(0, Math.min(100, ((currentTemp - minTemp) / range) * 100));
-                    marker.style.left = `${currentPosPercent}%`;
-                } else if(marker) { 
-                    marker.style.left = '50%';
-                }
-            }
             
             const windSpeed = obs.windSpeed ?? general.windSpeed; 
             const windGust = obs.windGust; 
@@ -631,55 +602,19 @@
             else if (pressureTrendCode === 2) trendSymbol = '→';
             
             const humidity = obs.humidity ?? general.relativeHumidity; 
-            document.getElementById('detail-icon-humidity').className = 'fas fa-tint'; 
-            document.getElementById('detail-value-humidity').textContent = formatValue(humidity, '%', 0); 
-            document.getElementById('detail-label-humidity').textContent = 'Pára';
-            
-            const pressure = obs.pressure ?? general.pressureAltimeter; 
-            document.getElementById('detail-icon-pressure').className = 'fas fa-tachometer-alt'; 
-            document.getElementById('detail-value-pressure').innerHTML = `${formatValue(pressure, ' hPa', 1)}<span class="pressure-trend-icon">${trendSymbol}</span>`; 
-            document.getElementById('detail-label-pressure').textContent = 'Légnyomás';
-            
-            const solarRadiation = obs.solarRadiation; 
-            document.getElementById('detail-icon-solar').className = 'fas fa-sun'; 
-            document.getElementById('detail-value-solar').textContent = formatValue(solarRadiation, ' W/m²', 0); 
-            document.getElementById('detail-label-solar').textContent = 'Napsugárzás'; 
-            document.querySelector('#detail-pod-solar .pod-icon-container').style.backgroundColor = getSolarRadiationColor(solarRadiation);
-            
-            const uv = obs.uv ?? general.uvIndex; 
-            document.getElementById('detail-icon-uv').className = 'fas fa-shield-sun'; 
-            document.getElementById('detail-value-uv').textContent = formatValue(uv, '', 1); 
-            document.getElementById('detail-label-uv').textContent = 'UV Index'; 
-            document.querySelector('#detail-pod-uv .pod-icon-container').style.backgroundColor = getUVColor(uv);
-            
-            document.getElementById('detail-icon-sun').className = 'fas fa-sunrise'; 
-            document.getElementById('detail-value-sun').textContent = `${formatTime(sunCalcData.sunrise)} / ${formatTime(sunCalcData.sunset)}`; 
-            document.getElementById('detail-label-sun').textContent = 'Napkelte / Nyugta';
-            
-            document.getElementById('detail-icon-moon').className = 'far fa-moon'; 
-            document.getElementById('detail-value-moon').textContent = `${formatTime(sunCalcData.moonrise)} / ${formatTime(sunCalcData.moonset)}`; 
-            document.getElementById('detail-label-moon').textContent = 'Holdkelte / Nyugta';
-            
-            document.getElementById('detail-icon-visibility').className = 'fas fa-eye'; 
-            document.getElementById('detail-value-visibility').textContent = formatValue(general.visibility, ' km', 1); 
-            document.getElementById('detail-label-visibility').textContent = 'Látótávolság';
-            
             const dewpoint = obs.dewpt ?? general.dewpoint; 
-            document.getElementById('detail-icon-dewpoint').className = 'fas fa-droplet'; 
-            document.getElementById('detail-value-dewpoint').textContent = formatValue(dewpoint, '°', 1); 
-            document.getElementById('detail-label-dewpoint').textContent = 'Harmatpont';
             
-            document.getElementById('detail-icon-windchill').className = 'fas fa-temperature-empty'; 
-            document.getElementById('detail-value-windchill').textContent = formatValue(windChill, '°', 1); 
-            document.getElementById('detail-label-windchill').textContent = 'Szélhűtés';
-            
+            document.getElementById('compact-value-humidity').textContent = formatValue(humidity, '%', 0); 
+            document.getElementById('compact-value-pressure').innerHTML = `${formatValue(obs.pressure ?? general.pressureAltimeter, '', 1)} hPa <span class="pressure-trend-icon">${trendSymbol}</span>`;
+            document.getElementById('compact-value-dewpoint').textContent = formatValue(dewpoint, '°', 1);
+            document.getElementById('compact-value-solar').textContent = formatValue(obs.solarRadiation, ' W/m²', 0);
+            document.getElementById('compact-value-uv').textContent = formatValue(obs.uv ?? general.uvIndex, '', 1);
+            document.getElementById('compact-value-windchill').textContent = formatValue(windChill, '°', 1);
+            document.getElementById('compact-value-visibility').textContent = formatValue(general.visibility, ' km', 1);
             const windRun = (windSpeed !== null && typeof windSpeed !== 'undefined') ? windSpeed * 24 : null;
-            document.getElementById('detail-icon-windrun').className = 'fas fa-route';
-            document.getElementById('detail-value-windrun').textContent = formatValue(windRun, ' km', 0);
-            document.getElementById('detail-label-windrun').textContent = 'Napi Szélút';
-            
-            const vaporPressure = (dewpoint !== null) ? 6.112 * Math.exp((17.67 * dewpoint) / (dewpoint + 243.5)) : null;
-            const riskScore = calculatePrecipRiskIndex(currentTemp, dewpoint, pressureTrendCode, humidity, vaporPressure);
+            document.getElementById('compact-value-windrun').textContent = formatValue(windRun, ' km', 0);
+
+            const riskScore = calculatePrecipRiskIndex(currentTemp, dewpoint, pressureTrendCode, humidity);
             const riskDetails = getRiskLevelDetails(riskScore);
 
             const riskLevelTextEl = document.getElementById('risk-level-text');
@@ -729,20 +664,38 @@
             if (forecastLiveTimestampEl && lastFetchTime > 0) { 
                 forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastFetchTime))}`; 
             }
-            for (let i = 0; i < 7; i++) {
-                const itemEl = document.getElementById(`precip-item-${i}`); const timeEl = document.getElementById(`precip-time-${i}`); const progressCircle = document.getElementById(`precip-progress-${i}`); const chanceEl = document.getElementById(`precip-chance-${i}`); const barFillEl = document.getElementById(`precip-bar-fill-${i}`); const intensityEl = document.getElementById(`precip-intensity-${i}`); const iconEl = document.getElementById(`precip-icon-${i}`);
-                if(i === 0) itemEl.classList.add('first-hour'); else itemEl.classList.remove('first-hour');
-                if (timeEl && progressCircle && chanceEl && barFillEl && intensityEl && iconEl) {
+            for (let i = 0; i < 8; i++) {
+                const itemEl = document.getElementById(`precip-item-${i}`); 
+                const timeEl = document.getElementById(`precip-time-${i}`); 
+                const progressCircle = document.getElementById(`precip-progress-${i}`); 
+                const chanceEl = document.getElementById(`precip-chance-${i}`); 
+                const intensityTextEl = document.getElementById(`precip-intensity-${i}`);
+                const qpfValueEl = document.getElementById(`precip-qpf-${i}`);
+                const iconEl = document.getElementById(`precip-icon-${i}`);
+                
+                if (timeEl && progressCircle && chanceEl && intensityTextEl && qpfValueEl && iconEl) {
                     const hourData = hourlyDataFull[i];
                     if (hourData) {
-                        const chance = hourData.precipChance || 0; const amount = hourData.qpf || 0; const isSnow = SNOW_ICON_CODES.includes(hourData.iconCode);
-                        timeEl.textContent = formatHourOnly(hourData.time); chanceEl.textContent = `${chance}%`;
-                        const radius = progressCircle.r.baseVal.value; const circumference = 2 * Math.PI * radius; progressCircle.style.strokeDasharray = `${circumference} ${circumference}`; progressCircle.style.strokeDashoffset = circumference - (chance / 100) * circumference;
-                        barFillEl.style.width = `${Math.min(100, (amount / 3.0) * 100)}%`;
-                        const intensityText = getPrecipIntensityDescription(amount);
-                        if (amount > 0) { intensityEl.textContent = `${intensityText} (${formatValue(amount, 'mm', 1)})`; } 
-                        else { intensityEl.textContent = "Nem várható"; }
-                        itemEl.classList.toggle('is-snow', isSnow); iconEl.className = isSnow ? 'fas fa-snowflake' : 'fas fa-tint';
+                        itemEl.classList.remove('is-hidden');
+                        const chance = hourData.precipChance || 0; 
+                        const amount = hourData.qpf || 0; 
+                        const isSnow = SNOW_ICON_CODES.includes(hourData.iconCode);
+                        
+                        timeEl.textContent = formatHourOnly(hourData.time); 
+                        chanceEl.textContent = `${chance}%`;
+                        
+                        const radius = progressCircle.r.baseVal.value; 
+                        const circumference = 2 * Math.PI * radius; 
+                        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`; 
+                        progressCircle.style.strokeDashoffset = circumference - (chance / 100) * circumference;
+                        
+                        intensityTextEl.textContent = getPrecipIntensityDescription(amount);
+                        qpfValueEl.textContent = (amount > 0) ? `kb. ${formatValue(amount, 'mm', 1)}` : '- mm';
+                        
+                        itemEl.classList.toggle('is-snow', isSnow); 
+                        iconEl.className = isSnow ? 'fas fa-snowflake' : 'fas fa-tint';
+                    } else {
+                        itemEl.classList.add('is-hidden');
                     }
                 }
             }
