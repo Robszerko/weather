@@ -32,6 +32,7 @@
             --current-icon-color: var(--accent-interactive-night);
             --precip-rain-color: #3b82f6;
             --precip-snow-color: #a5f3fc;
+            --risk-very-low: #22c55e; --risk-low: #a3e635; --risk-moderate: #facc15; --risk-high: #f97316; --risk-very-high: #ef4444;
         }
         
         #sky-container { 
@@ -136,7 +137,6 @@
         #wind-speed-marker { position: absolute; top: -10px; left: 0%; color: #fff; font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); transform: translateX(-50%); transition: left 0.8s ease-out; }
         .wind-legend-labels { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--current-text-muted-color); margin-top: 4px; padding: 0 5px; }
 
-        /* --- ÚJ, ÁTTERVEZETT RÉSZLETES ADATOK PANEL --- */
         .pws-details-container { background-color: transparent; border: none; padding: 0; margin-top: 20px; }
         .pws-details-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .detail-pod { background-color: rgba(0,0,0,0.15); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; text-align: center; transition: all 0.3s ease; }
@@ -161,6 +161,12 @@
         #detail-pod-altitude .pod-icon-container { background-color: #16a34a; }
         #detail-pod-daylength .pod-icon-container { background-color: #facc15; }
         #detail-pod-vaporpressure .pod-icon-container { background-color: #a78bfa; }
+
+        .risk-assessment-container { padding: 12px 14px; }
+        .risk-assessment-content { display: flex; flex-direction: column; align-items: center; gap: 10px; background-color: rgba(0,0,0,0.15); border-radius: 12px; padding: 16px; }
+        .risk-level-text { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: color 0.5s ease; }
+        .risk-bar-container { width: 100%; max-width: 250px; height: 10px; background-color: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; }
+        .risk-bar-fill { width: 0%; height: 100%; border-radius: 5px; transition: width 0.8s ease-out, background-color 0.5s ease; }
 
 
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
@@ -245,12 +251,7 @@
         let lastCheckedDay = new Date().getDate();
 
         const CURIOSITY_EXPLANATIONS = {
-            cloudbase: "A hőmérséklet és a harmatpont különbségéből számított becsült magasság, ahol a felszálló légtömeg telítetté válik és megkezdődik a felhőképződés (gomolyfelhők esetén).",
-            abshumidity: "Megmutatja, hogy egy köbméter levegő ténylegesen hány gramm vízpárát tartalmaz. A relatív páratartalommal ellentétben ez a hőmérséklettől független, pontos érték.",
-            diurnalrange: "A mai napra előrejelzett legmagasabb és legalacsonyabb hőmérséklet közötti különbség. Jól jelzi a napi hőmérséklet-változás mértékét.",
-            altitude: "A helyi légnyomás és a tengerszinti átlagos légnyomás (1013.25 hPa) különbségéből, valamint a hőmérsékletből számított becsült magasság.",
-            daylength: "A napkeltétől napnyugtáig eltelt időtartam, amely megmutatja a mai nap 'világos' óráinak számát.",
-            vaporpressure: "A levegőben lévő vízgőz által a légnyomásra gyakorolt parciális nyomás. Minél magasabb ez az érték, annál több a vízpára a levegőben."
+            risk: "Ez az index a helyi, valós idejű adatokból (hőmérséklet, harmatpont, légnyomás) számol egy kockázati értéket a következő 30-90 percre. Nem egy hivatalos előrejelzés, hanem egy 'légköri feszültség' mutató, ami jelzi, ha a feltételek ideálissá válnak a csapadék kialakulásához."
         };
         
         function formatValue(value, unit = '', precision = 1, notAvailableString = NO_DATA_STRING) { if (value === null || typeof value === 'undefined' || (typeof value === 'number' && isNaN(value)) ) return notAvailableString; if (typeof value === 'number') { return `${value.toFixed(precision)}${unit}`; } return `${value}${unit}`; }
@@ -377,15 +378,7 @@
         
         function initializeWeatherDisplayDOM() {
             const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
-            const curiosities = {
-                cloudbase: { label: 'Felhőalap (becsült)', icon: 'fas fa-layer-group' },
-                abshumidity: { label: 'Abszolút pára', icon: 'fas fa-water' },
-                diurnalrange: { label: 'Napi hőingás', icon: 'fas fa-ruler-horizontal' },
-                altitude: { label: 'Magasság (becsült)', icon: 'fas fa-mountain' },
-                daylength: { label: 'Nappal hossza', icon: 'fas fa-hourglass-half' },
-                vaporpressure: { label: 'Gőznyomás', icon: 'fas fa-compress-arrows-alt' }
-            };
-
+            
             weatherDisplayEl.innerHTML = `
                 <div class="widget-header">
                     <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div></div>
@@ -451,25 +444,23 @@
                         `).join('')}
                     </div>
                 </div>
-                <div id="secondary-panel-container">
-                    <div class="pws-details-container is-hidden" id="curiosities-container">
-                        <div class="section-header"><div class="section-title">Meteorológiai Érdekességek</div><span class="section-timestamp" id="curiosities-timestamp"></span></div>
-                        <div class="pws-details-grid">
-                            ${Object.keys(curiosities).map(key => `
-                                <div class="detail-pod" id="detail-pod-${key}">
-                                    <div class="pod-icon-container"><i id="detail-icon-${key}" class="${curiosities[key].icon}"></i></div>
-                                    <div class="pod-data">
-                                        <span class="value" id="detail-value-${key}">--</span>
-                                        <div class="pod-label-group">
-                                            <span class="label" id="detail-label-${key}">${curiosities[key].label}</span>
-                                            <div class="info-tooltip-container">
-                                                <div class="info-tooltip-trigger">?</div>
-                                                <div class="info-tooltip-content">${CURIOSITY_EXPLANATIONS[key]}</div>
-                                            </div>
-                                        </div>
-                                    </div>
+                 <div id="secondary-panel-container">
+                    <div class="pws-details-container is-hidden" id="risk-assessment-container">
+                        <div class="section-header">
+                            <div class="section-title" style="display:flex; align-items:center; gap: 5px;">
+                                Közeli Csapadékkockázat
+                                <div class="info-tooltip-container">
+                                    <div class="info-tooltip-trigger">?</div>
+                                    <div class="info-tooltip-content">${CURIOSITY_EXPLANATIONS.risk}</div>
                                 </div>
-                            `).join('')}
+                            </div>
+                            <span class="section-timestamp" id="risk-timestamp"></span>
+                        </div>
+                        <div class="risk-assessment-content">
+                            <div id="risk-level-text" class="risk-level-text">--</div>
+                            <div class="risk-bar-container">
+                                <div id="risk-bar-fill" class="risk-bar-fill"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="precip-summary-card is-hidden" id="precip-summary-card"></div>
@@ -516,10 +507,36 @@
         function updateAnimatedValue(element, newValue) { if (!element) return; const currentValue = element.textContent.trim(); const newFormattedValue = newValue.toString().trim(); if (currentValue !== newFormattedValue) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newFormattedValue; element.classList.remove('is-flipping'); }, 200); } } }
         function updateBeaufortVisualizer(speed) { const beaufortData = getBeaufort(speed); const color = getWindColor(speed); document.documentElement.style.setProperty('--current-wind-color', color); const bars = document.querySelectorAll('#beaufort-scale-container .beaufort-bar'); bars.forEach((bar, index) => { bar.classList.toggle('active', index < beaufortData.num); }); document.getElementById('beaufort-grade').textContent = `${beaufortData.num}. fokozat`; document.getElementById('beaufort-desc').textContent = beaufortData.desc; }
 
+        function calculatePrecipRiskIndex(temp, dewpoint, pressureTendency, humidity, vaporPressure) {
+            let score = 0;
+            if (temp === null || dewpoint === null) return 0;
+            
+            const spread = temp - dewpoint;
+            if (spread < 2) score += 3;
+            else if (spread < 4) score += 1;
+
+            if (pressureTendency === 1) score += 2; // Falling
+            if (pressureTendency === 0) score -= 1; // Rising
+
+            if (humidity > 90) score += 2;
+            else if (humidity > 80) score += 1;
+
+            if (vaporPressure > 12) score += 1;
+
+            return Math.max(0, score);
+        }
+
+        function getRiskLevelDetails(score) {
+            if (score <= 1) return { text: 'Nagyon Alacsony', color: 'var(--risk-very-low)', level: 1 };
+            if (score <= 3) return { text: 'Alacsony', color: 'var(--risk-low)', level: 2 };
+            if (score <= 5) return { text: 'Mérsékelt', color: 'var(--risk-moderate)', level: 3 };
+            if (score <= 7) return { text: 'Magas', color: 'var(--risk-high)', level: 4 };
+            return { text: 'Nagyon Magas', color: 'var(--risk-very-high)', level: 5 };
+        }
+
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; const sunCalcData = cachedData.sunCalc; if (!general || !obs || !sunCalcData) return;
             const now = new Date(); document.getElementById('main-timestamp').textContent = `Utolsó frissítés: ${formatTime(now, { includeSeconds: true })}`; document.getElementById('pws-timestamp').textContent = `Frissítve: ${formatTime(now, { includeSeconds: true })}`;
-            document.getElementById('curiosities-timestamp').textContent = `Frissítve: ${formatTime(now, { includeSeconds: true })}`;
             
             const currentTemp = obs.temp; 
             const feelsLikeTemp = general.temperatureFeelsLike;
@@ -660,29 +677,21 @@
             document.getElementById('detail-icon-windrun').className = 'fas fa-route';
             document.getElementById('detail-value-windrun').textContent = formatValue(windRun, ' km', 0);
             document.getElementById('detail-label-windrun').textContent = 'Napi Szélút';
-
-            const cloudBase = (currentTemp !== null && dewpoint !== null) ? (currentTemp - dewpoint) * 125 : null;
-            document.getElementById('detail-value-cloudbase').textContent = formatValue(cloudBase, ' m', 0);
-
-            const vaporPressure = (dewpoint !== null) ? 6.112 * Math.exp((17.67 * dewpoint) / (dewpoint + 243.5)) : null;
-            const absoluteHumidity = (vaporPressure !== null && currentTemp !== null) ? (216.7 * (vaporPressure / (currentTemp + 273.15))) : null;
-            document.getElementById('detail-value-abshumidity').textContent = formatValue(absoluteHumidity, ' g/m³', 2);
-
-            const diurnalRange = (maxTemp !== null && minTemp !== null) ? maxTemp - minTemp : null;
-            document.getElementById('detail-value-diurnalrange').textContent = formatValue(diurnalRange, '°C', 1);
-
-            const altitude = (pressure !== null && currentTemp !== null) ? ((((1013.25 / pressure) ** (1 / 5.257)) - 1) * (currentTemp + 273.15)) / 0.0065 : null;
-            document.getElementById('detail-value-altitude').textContent = formatValue(altitude, ' m', 0);
-
-            const dayLengthMs = sunCalcData.sunset.getTime() - sunCalcData.sunrise.getTime();
-            const dayHours = Math.floor(dayLengthMs / 3600000);
-            const dayMinutes = Math.round((dayLengthMs % 3600000) / 60000);
-            document.getElementById('detail-value-daylength').textContent = `${dayHours} óra ${dayMinutes} p`;
             
-            document.getElementById('detail-value-vaporpressure').textContent = formatValue(vaporPressure, ' hPa', 2);
+            const vaporPressure = (dewpoint !== null) ? 6.112 * Math.exp((17.67 * dewpoint) / (dewpoint + 243.5)) : null;
+            const riskScore = calculatePrecipRiskIndex(currentTemp, dewpoint, pressureTrendCode, humidity, vaporPressure);
+            const riskDetails = getRiskLevelDetails(riskScore);
+
+            const riskLevelTextEl = document.getElementById('risk-level-text');
+            const riskBarFillEl = document.getElementById('risk-bar-fill');
+            riskLevelTextEl.textContent = riskDetails.text;
+            riskLevelTextEl.style.color = riskDetails.color;
+            riskBarFillEl.style.backgroundColor = riskDetails.color;
+            riskBarFillEl.style.width = `${(riskDetails.level / 5) * 100}%`;
+            document.getElementById('risk-timestamp').textContent = `Frissítve: ${formatTime(now, { includeSeconds: true })}`;
             
             const precipCardEl = document.getElementById('precip-summary-card'); 
-            const curiositiesEl = document.getElementById('curiosities-container');
+            const riskEl = document.getElementById('risk-assessment-container');
             const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data); 
             const stationsWithRainToday = precipStations.filter(s => s.data.metric.precipTotal > 0); 
             
@@ -692,7 +701,7 @@
 
             if(rainDetectedToday) {
                 precipCardEl.classList.remove('is-hidden');
-                curiositiesEl.classList.add('is-hidden');
+                riskEl.classList.add('is-hidden');
                 let mainContentHTML = '';
                 if (stationsWithRainToday.length === 0) { 
                     mainContentHTML = `<div class="precip-explanation-container"><p class="explanation-text">A mai nap folyamán már észleltünk csapadékot a hálózatban. Jelenleg egy állomás sem jelez esőt.</p></div>`; 
@@ -704,7 +713,7 @@
                 document.getElementById('radar-timestamp').textContent = `Frissítve: ${formatTime(now, { includeSeconds: true })}`;
             } else {
                 precipCardEl.classList.add('is-hidden');
-                curiositiesEl.classList.remove('is-hidden');
+                riskEl.classList.remove('is-hidden');
             }
         }
 
