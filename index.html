@@ -152,15 +152,23 @@
         .wind-legend-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--current-text-muted-color); margin-bottom: 5px; } 
         .wind-legend-bar-container { position: relative; width: 100%; height: 10px; margin-bottom: 4px; }
         .wind-legend-bar { width: 100%; height: 100%; border-radius: 5px; background: linear-gradient(to right, var(--current-wind-calm), var(--current-wind-light), var(--current-wind-moderate), var(--wind-strong), var(--wind-gale), var(--wind-storm)); } 
-        #wind-speed-marker { position: absolute; top: -10px; left: 0%; color: var(--current-text-color); font-size: 1.5em; text-shadow: 0 1px 3px rgba(0,0,0,0.5); transform: translateX(-50%); transition: left 0.8s ease-out, color 0.6s ease-in-out; }
+        #wind-speed-marker { position: absolute; top: -10px; left: 0%; color: var(--current-text-color); font-size: 1.5em; text-shadow: 0 1px 2px rgba(0,0,0,0.4); transform: translateX(-50%); transition: left 0.8s ease-out, color 0.6s ease-in-out; }
         .wind-legend-labels { display: flex; justify-content: space-between; font-size: 10px; font-weight: 600; color: var(--current-text-muted-color); margin-top: 4px; padding: 0 5px; }
 
         .risk-assessment-container { padding: 12px 14px; margin-bottom: 20px; }
         .risk-assessment-content { display: flex; flex-direction: column; align-items: center; gap: 10px; background-color: rgba(0,0,0,0.15); border-radius: 12px; padding: 16px; border: 1px solid var(--current-container-border-color); }
-        .risk-level-text { font-size: 20px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: color 0.5s ease; }
-        .risk-bar-container { width: 100%; max-width: 250px; height: 10px; background-color: rgba(0,0,0,0.3); border-radius: 5px; overflow: hidden; }
-        .risk-bar-fill { width: 0%; height: 100%; border-radius: 5px; transition: width 0.8s ease-out, background-color 0.5s ease; }
-
+        .risk-gauge-wrapper { position: relative; width: 100%; max-width: 260px; text-align: center; }
+        .risk-gauge-bar-container { position: relative; width: 100%; height: 10px; background: linear-gradient(to right, var(--current-risk-very-low), var(--current-risk-low), var(--current-risk-moderate), var(--risk-high), var(--risk-very-high)); border-radius: 5px; }
+        #risk-gauge-marker { z-index: 10; position: absolute; top: -10px; left: 0; color: var(--current-text-color); font-size: 1.5em; text-shadow: 0 1px 2px rgba(0,0,0,0.4); transform: translateX(-50%); transition: left 0.8s ease-out, color 0.6s ease-in-out; }
+        #risk-gauge-value { z-index: 10; font-size: 11px; font-weight: 600; color: var(--current-text-color); position: absolute; top: -26px; left: 0; transform: translateX(-50%); transition: left 0.8s ease-out, color 0.6s ease-in-out; background-color: rgba(0,0,0,0.4); padding: 2px 5px; border-radius: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.4); }
+        .risk-level-text { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; transition: color 0.5s ease; margin-top: 15px; }
+        .risk-key-indicators { display: flex; justify-content: space-around; width: 100%; max-width: 280px; margin-top: 15px; }
+        .risk-indicator { display: flex; flex-direction: column; align-items: center; font-size: 12px; }
+        .risk-indicator .label { font-weight: 500; color: var(--current-text-muted-color); }
+        .risk-indicator .value { font-weight: 700; color: var(--current-text-color); font-size: 14px; }
+        .risk-indicator .value i { margin-right: 4px; }
+        .risk-explanation { font-size: 11px; line-height: 1.5; color: var(--current-text-muted-color); margin-top: 12px; max-width: 300px; }
+        
         .precipitation-forecast-section { background-color: rgba(0,0,0,0.08); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 12px 14px; margin-bottom: 20px; }
         .precip-summary-text { font-size: 13px; font-weight: 600; padding: 8px 12px; border-radius: 8px; background-color: rgba(0,0,0,0.15); margin-bottom: 12px; text-align: center; color: var(--current-text-color); }
         .precip-forecast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
@@ -459,20 +467,27 @@
                  <div id="secondary-panel-container">
                     <div class="risk-assessment-container is-hidden" id="risk-assessment-container">
                          <div class="section-header">
-                            <div class="section-title" style="display:flex; align-items:center; gap: 5px;">
-                                Közeli Csapadékkockázat
-                                <div class="info-tooltip-container">
-                                    <div class="info-tooltip-trigger">?</div>
-                                    <div class="info-tooltip-content">${CURIOSITY_EXPLANATIONS.risk}</div>
-                                </div>
-                            </div>
+                            <div class="section-title">Közeli Csapadékkockázat</div>
                             <span class="section-timestamp" id="risk-timestamp"></span>
                         </div>
                         <div class="risk-assessment-content">
-                            <div id="risk-level-text" class="risk-level-text">--</div>
-                            <div class="risk-bar-container">
-                                <div id="risk-bar-fill" class="risk-bar-fill"></div>
+                             <div class="risk-gauge-wrapper">
+                                <div id="risk-gauge-value">0 / 8</div>
+                                <i class="fas fa-caret-down" id="risk-gauge-marker"></i>
+                                <div class="risk-gauge-bar-container"></div>
                             </div>
+                            <div id="risk-level-text" class="risk-level-text">--</div>
+                            <div class="risk-key-indicators">
+                                <div class="risk-indicator">
+                                    <span class="label">Hőm-Harmatp.</span>
+                                    <span class="value" id="risk-spread-value">--</span>
+                                </div>
+                                <div class="risk-indicator">
+                                    <span class="label">Légnyomás</span>
+                                    <span class="value" id="risk-pressure-trend">--</span>
+                                </div>
+                            </div>
+                            <p class="risk-explanation">${CURIOSITY_EXPLANATIONS.risk}</p>
                         </div>
                     </div>
                     <div class="precip-summary-card is-hidden" id="precip-summary-card"></div>
@@ -556,11 +571,29 @@
         }
 
         function getRiskLevelDetails(score) {
-            if (score <= 1) return { text: 'Nagyon Alacsony', color: 'var(--current-risk-very-low)', level: 1 };
-            if (score <= 3) return { text: 'Alacsony', color: 'var(--current-risk-low)', level: 2 };
-            if (score <= 5) return { text: 'Mérsékelt', color: 'var(--current-risk-moderate)', level: 3 };
-            if (score <= 7) return { text: 'Magas', color: 'var(--risk-high)', level: 4 };
-            return { text: 'Nagyon Magas', color: 'var(--risk-very-high)', level: 5 };
+            const maxScore = 8;
+            let level = 0;
+            if (score <= 1) level = 1;
+            else if (score <= 3) level = 2;
+            else if (score <= 5) level = 3;
+            else if (score <= 7) level = 4;
+            else level = 5;
+
+            const textMap = ['Nagyon Alacsony', 'Alacsony', 'Mérsékelt', 'Magas', 'Nagyon Magas'];
+            const colorMap = ['var(--current-risk-very-low)', 'var(--current-risk-low)', 'var(--current-risk-moderate)', 'var(--risk-high)', 'var(--risk-very-high)'];
+
+            return { text: textMap[level-1], color: colorMap[level-1], level, score, maxScore };
+        }
+
+        function getRiskSummaryText(score, spread, pressureTendency) {
+            if (score <= 3) {
+                return `A levegő jelenleg száraz, a légnyomás stabil vagy emelkedik. A csapadék kialakulásának feltételei nem adottak.`;
+            }
+            if (score <= 5) {
+                let reason = spread < 4 ? "csökken a hőmérséklet és a harmatpont közötti különbség" : "a légnyomás lassan csökken";
+                return `A feltételek kezdenek kedvezővé válni a csapadék számára, mivel ${reason}. A kockázat mérsékelt.`;
+            }
+            return `A levegő páratartalma magas és a légnyomás csökken. A feltételek ideálisak csapadék kialakulásához a közeljövőben.`;
         }
 
         function renderWeatherData() {
@@ -597,15 +630,15 @@
 
             const pressureTrendCode = general.pressureTendencyCode; 
             let trendSymbol = ''; 
-            if (pressureTrendCode === 0) trendSymbol = '↑'; 
-            else if (pressureTrendCode === 1) trendSymbol = '↓'; 
-            else if (pressureTrendCode === 2) trendSymbol = '→';
+            if (pressureTrendCode === 0) { trendSymbol = '<i class="fas fa-arrow-up"></i>'; }
+            else if (pressureTrendCode === 1) { trendSymbol = '<i class="fas fa-arrow-down"></i>'; }
+            else { trendSymbol = '<i class="fas fa-arrow-right"></i>'; }
             
             const humidity = obs.humidity ?? general.relativeHumidity; 
             const dewpoint = obs.dewpt ?? general.dewpoint; 
             
             document.getElementById('compact-value-humidity').textContent = formatValue(humidity, '%', 0); 
-            document.getElementById('compact-value-pressure').innerHTML = `${formatValue(obs.pressure ?? general.pressureAltimeter, '', 1)} hPa <span class="pressure-trend-icon">${trendSymbol}</span>`;
+            document.getElementById('compact-value-pressure').innerHTML = `${formatValue(obs.pressure ?? general.pressureAltimeter, '', 1)} hPa ${trendSymbol}`;
             document.getElementById('compact-value-dewpoint').textContent = formatValue(dewpoint, '°', 1);
             document.getElementById('compact-value-solar').textContent = formatValue(obs.solarRadiation, ' W/m²', 0);
             document.getElementById('compact-value-uv').textContent = formatValue(obs.uv ?? general.uvIndex, '', 1);
@@ -616,13 +649,20 @@
 
             const riskScore = calculatePrecipRiskIndex(currentTemp, dewpoint, pressureTrendCode, humidity);
             const riskDetails = getRiskLevelDetails(riskScore);
+            const riskMarker = document.getElementById('risk-gauge-marker');
+            const riskValueEl = document.getElementById('risk-gauge-value');
+            if(riskMarker && riskValueEl) {
+                const riskPercent = Math.max(0, Math.min(100, (riskScore / riskDetails.maxScore) * 100));
+                riskMarker.style.left = `${riskPercent}%`;
+                riskValueEl.style.left = `${riskPercent}%`;
+                riskValueEl.textContent = `${riskScore} / ${riskDetails.maxScore}`;
+            }
 
-            const riskLevelTextEl = document.getElementById('risk-level-text');
-            const riskBarFillEl = document.getElementById('risk-bar-fill');
-            riskLevelTextEl.textContent = riskDetails.text;
-            riskLevelTextEl.style.color = riskDetails.color;
-            riskBarFillEl.style.backgroundColor = riskDetails.color;
-            riskBarFillEl.style.width = `${(riskDetails.level / 5) * 100}%`;
+            document.getElementById('risk-level-text').textContent = riskDetails.text;
+            document.getElementById('risk-level-text').style.color = riskDetails.color;
+            document.getElementById('risk-spread-value').textContent = formatValue(currentTemp - dewpoint, '°C', 1);
+            document.getElementById('risk-pressure-trend').innerHTML = trendSymbol;
+            document.querySelector('.risk-explanation').textContent = getRiskSummaryText(riskScore, currentTemp - dewpoint, pressureTrendCode);
             document.getElementById('risk-timestamp').textContent = `Frissítve: ${formatTime(now, { includeSeconds: true })}`;
             
             const precipCardEl = document.getElementById('precip-summary-card'); 
