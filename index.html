@@ -20,8 +20,8 @@
             --bg-widget-day: linear-gradient(160deg, rgba(250, 252, 255, 0.85) 0%, rgba(235, 242, 252, 0.8) 100%);
             --border-widget-day: rgba(0, 122, 255, 0.2);
             --accent-interactive-day: #007AFF;
-            --text-primary-day: #111827;
-            --text-secondary-day: #374151;
+            --text-primary-day: #FFFFFF; /* Módosítva fehérre a nappali téma esetén */
+            --text-secondary-day: #EAEAEA; /* Módosítva világosabbra a nappali téma esetén */
 
             /* --- ÁLTALÁNOS SZÍNEK --- */
             --cloud-base-color: #f5f5f5;
@@ -193,7 +193,7 @@
         .precip-header-icon i { font-size: 22px; color: var(--current-icon-color); transition: color 0.5s ease; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         .precip-header-title { font-size: 16px; font-weight: 800; color: var(--current-text-color); margin: 0; letter-spacing: 0.5px; }
         .precip-card-content { padding: 12px 16px; width: 100%; box-sizing: border-box; }
-        .precip-station-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .precip-station-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .precip-station-card { background-color: rgba(0,0,0,0.15); border: 1px solid var(--current-container-border-color); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; gap: 6px; transition: all 0.4s ease; }
         .precip-station-card.is-raining-now { border-color: rgba(from var(--current-icon-color) r g b / 0.6); box-shadow: 0 0 12px -3px rgba(from var(--current-icon-color) r g b / 0.4); }
         .station-card-header { display: flex; justify-content: space-between; align-items: center; } .station-card-name { font-weight: 700; font-size: 13px; color: var(--current-text-color); } .station-card-status-icon { width: 8px; height: 8px; border-radius: 50%; background-color: var(--current-icon-color); box-shadow: 0 0 8px var(--current-icon-color); }
@@ -211,7 +211,7 @@
         @media (max-width: 420px) { .precip-forecast-grid { grid-template-columns: 1fr; } }
         @media (min-width: 420px) { .hourly-forecast-container { grid-template-columns: repeat(2, 1fr); } }
         @media (min-width: 640px) { .hourly-forecast-container { grid-template-columns: repeat(3, 1fr); } .compact-details-grid { max-width: none; } }
-        @media (min-width: 768px) { .precip-station-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); } .wind-main-display { grid-template-columns: 120px 1fr; } }
+        @media (min-width: 768px) { .wind-main-display { grid-template-columns: 120px 1fr; } }
         @media (min-width: 1000px) { .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 768px) { .current-conditions-card { grid-template-columns: 1fr; gap: 0; } .conditions-section:first-child { border-right: none; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--current-container-border-color); } }
         @media (max-width: 480px) { .current-temp-value { font-size: 48px; } .wind-main-display { grid-template-columns: 1fr; } .wind-compass-container { width: 120px; height: 120px; } .compact-details-grid { grid-template-columns: 1fr; } }
