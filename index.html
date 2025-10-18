@@ -115,7 +115,7 @@
         .temp-feels-like-container i { color: var(--current-icon-color); }
         .temp-feels-like-container strong { color: var(--current-text-color); font-weight: 700; }
         
-        .compact-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; width: 100%; max-width: 340px; }
+        .compact-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; width: 100%; }
         .compact-detail-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; }
         .compact-detail-header { display: flex; align-items: center; margin-bottom: 4px; }
         .compact-detail-header i { color: var(--current-icon-color); width: 16px; text-align: center; margin-right: 6px; font-size: 0.9em; }
@@ -214,7 +214,7 @@
         @media (min-width: 768px) { .wind-main-display { grid-template-columns: 120px 1fr; } }
         @media (min-width: 1000px) { .hourly-forecast-container { grid-template-columns: repeat(4, 1fr); } }
         @media (max-width: 768px) { .current-conditions-card { grid-template-columns: 1fr; gap: 0; } .conditions-section:first-child { border-right: none; padding-right: 0; padding-bottom: 16px; border-bottom: 1px solid var(--current-container-border-color); } }
-        @media (max-width: 480px) { .current-temp-value { font-size: 48px; } .wind-main-display { grid-template-columns: 1fr; } .wind-compass-container { width: 120px; height: 120px; } .compact-details-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 480px) { .current-temp-value { font-size: 48px; } .wind-main-display { grid-template-columns: 1fr; } .wind-compass-container { width: 120px; height: 120px; } }
     </style>
 </head>
 <body>
@@ -391,11 +391,16 @@
                 humidity: { label: 'Pára', icon: 'fas fa-tint' },
                 pressure: { label: 'Légnyomás', icon: 'fas fa-tachometer-alt' },
                 dewpoint: { label: 'Harmatpont', icon: 'fas fa-droplet' },
-                solar: { label: 'Napsugárzás', icon: 'fas fa-sun' },
                 uv: { label: 'UV Index', icon: 'fas fa-shield-sun' },
-                windchill: { label: 'Szélhűtés', icon: 'fas fa-temperature-empty' },
-                visibility: { label: 'Látótávolság', icon: 'fas fa-eye' },
-                windrun: { label: 'Napi Szélút', icon: 'fas fa-route' }
+                sunrise: { label: 'Napkelte', icon: 'fas fa-sun' },
+                sunset: { label: 'Napnyugta', icon: 'fas fa-sun' },
+                moonrise: { label: 'Holdkelte', icon: 'fas fa-moon' },
+                moonset: { label: 'Holdnyugta', icon: 'fas fa-moon' },
+                tempMax24: { label: 'Max 24ó', icon: 'fas fa-temperature-high' },
+                tempMin24: { label: 'Min 24ó', icon: 'fas fa-temperature-low' },
+                windChill: { label: 'Szélhűtés', icon: 'fas fa-wind' },
+                solarRadiation: { label: 'Napsugárzás', icon: 'fas fa-solar-panel' },
+                visibility: { label: 'Látótáv', icon: 'fas fa-eye' }
             };
             
             weatherDisplayEl.innerHTML = `
@@ -530,6 +535,10 @@
                     if (newGeneralData) {
                         cachedData.generalConditions = newGeneralData;
                     }
+                     const newSunData = await fetchAdvancedSunCalcData(activeStation.coords.lat, activeStation.coords.lon);
+                    if (newSunData) {
+                        cachedData.sunCalc = newSunData;
+                    }
                 } catch (e) {
                     console.error(`Failed to fetch general conditions for ${selectedStationKey}`, e);
                 }
@@ -562,7 +571,6 @@
             const windSpeed = obs.windSpeed ?? general.windSpeed; 
             const windGust = obs.windGust; 
             const windDir = obs.winddir ?? general.windDirection; 
-            const windChill = obs.windChill; 
             const windArrow = document.getElementById('wind-compass-arrow'); 
             if (windDir !== null) { 
                 windArrow.style.transform = `translate(-50%, -50%) rotate(${windDir}deg)`; 
@@ -587,17 +595,30 @@
             else { trendSymbol = '<i class="fas fa-arrow-right"></i>'; }
             
             const humidity = obs.humidity ?? general.relativeHumidity; 
-            const dewpoint = obs.dewpt ?? general.dewpoint; 
+            const dewpoint = obs.dewpt ?? general.dewpoint;
+            const tempMax24 = general.temperatureMax24Hour;
+            const tempMin24 = general.temperatureMin24Hour;
+            const windChill = obs.windChill;
+            const solarRadiation = obs.solarRadiation;
+            const visibility = general.visibility;
             
             document.getElementById('compact-value-humidity').textContent = formatValue(humidity, '%', 0); 
             document.getElementById('compact-value-pressure').innerHTML = `${formatValue(obs.pressure ?? general.pressureAltimeter, '', 1)} hPa ${trendSymbol}`;
             document.getElementById('compact-value-dewpoint').textContent = formatValue(dewpoint, '°', 1);
-            document.getElementById('compact-value-solar').textContent = formatValue(obs.solarRadiation, ' W/m²', 0);
             document.getElementById('compact-value-uv').textContent = formatValue(obs.uv ?? general.uvIndex, '', 1);
-            document.getElementById('compact-value-windchill').textContent = formatValue(windChill, '°', 1);
-            document.getElementById('compact-value-visibility').textContent = formatValue(general.visibility, ' km', 1);
-            const windRun = (windSpeed !== null && typeof windSpeed !== 'undefined') ? windSpeed * 24 : null;
-            document.getElementById('compact-value-windrun').textContent = formatValue(windRun, ' km', 0);
+            document.getElementById('compact-value-tempMax24').textContent = formatValue(tempMax24, '°', 1);
+            document.getElementById('compact-value-tempMin24').textContent = formatValue(tempMin24, '°', 1);
+            document.getElementById('compact-value-windChill').textContent = formatValue(windChill, '°', 1);
+            document.getElementById('compact-value-solarRadiation').textContent = formatValue(solarRadiation, ' W/m²', 0);
+            document.getElementById('compact-value-visibility').textContent = formatValue(visibility, ' km', 1);
+
+            const sunCalcData = cachedData.sunCalc;
+            if (sunCalcData) {
+                document.getElementById('compact-value-sunrise').textContent = formatTime(sunCalcData.sunrise);
+                document.getElementById('compact-value-sunset').textContent = formatTime(sunCalcData.sunset);
+                document.getElementById('compact-value-moonrise').textContent = formatTime(sunCalcData.moonrise);
+                document.getElementById('compact-value-moonset').textContent = formatTime(sunCalcData.moonset);
+            }
             
             const precipCardEl = document.getElementById('precip-summary-card');
             const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
