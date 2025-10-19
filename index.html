@@ -16,9 +16,9 @@
             --text-primary-night: #EAEAEA;
             --text-secondary-night: #BCCCDC;
             
-            /* --- NAPPALI TÉMA --- */
-            --bg-widget-day: linear-gradient(160deg, rgba(60, 120, 180, 0.85) 0%, rgba(40, 80, 130, 0.8) 100%);
-            --border-widget-day: rgba(80, 160, 240, 0.4);
+            /* --- NAPPALI TÉMA (MÓDOSÍTVA) --- */
+            --bg-widget-day: linear-gradient(160deg, rgba(100, 116, 139, 0.85) 0%, rgba(51, 65, 85, 0.8) 100%);
+            --border-widget-day: rgba(255, 255, 255, 0.15);
             --accent-interactive-day: #007AFF;
             --text-primary-day: #FFFFFF;
             --text-secondary-day: #EAEAEA;
@@ -108,7 +108,7 @@
         .section-title { font-size: 13px; font-weight: 700; color: var(--current-text-color); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
         
         .temp-display-card { border-radius: 10px; padding: 16px; background-size: 200% 200%; transition: background 0.8s ease-out, border-color 0.8s ease-out; display: flex; flex-direction: column; align-items: center; justify-content: center; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
-        .temp-primary-display { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+        .temp-primary-display { text-align: center; margin-bottom: 8px; }
         .current-temp-value { font-size: 56px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
         .current-temp-value span:last-child { font-weight: 600; font-size: 0.5em; vertical-align: super; margin-left: 2px; }
         .temp-feels-like-container { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--current-text-muted-color); background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 6px 12px; margin: 8px auto 0 auto; max-width: fit-content; }
@@ -123,52 +123,6 @@
         .compact-detail-value { font-size: 16px; font-weight: 700; color: var(--current-text-color); }
         #compact-value-sun, #compact-value-moon { font-size: 13px; }
         .pressure-trend-icon { font-size: 0.8em; margin-left: 2px; }
-
-        /* Hőmanó Stílusok */
-        #hőmanó-wrapper { display: flex; flex-direction: column; align-items: center; }
-        #hőmanó-svg { width: 80px; height: 80px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3)); }
-        #hőmanó-svg g { transition: opacity 0.4s ease-in-out; }
-        
-        #hőmanó-üzenőfal {
-            background-color: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: 12px;
-            width: 100%;
-            max-width: 220px;
-        }
-        #hőmanó-név {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--current-text-color);
-        }
-        #hőmanó-üzenet {
-            font-size: 11px;
-            font-style: italic;
-            color: var(--current-text-muted-color);
-            min-height: 30px; /* Megakadályozza az ugrálást */
-            line-height: 1.4;
-        }
-        
-        /* Alapértelmezetten rejtett rétegek */
-        #hőmanó-pulcsi, #hőmanó-sál, #hőmanó-télisapka, #hőmanó-napszemüveg, #hőmanó-arc-fázik, #hőmanó-arc-meleg, #hőmanó-arc-alszik, #hőmanó-lehelet, #hőmanó-izzadtság, #hőmanó-zzz { display: none; }
-        
-        /* Állapotok vezérlése */
-        .hőmanó-fázik #hőmanó-arc-fázik, .hőmanó-fázik #hőmanó-lehelet { display: block; }
-        .hőmanó-fázik #hőmanó-arc-alap, .hőmanó-fázik #hőmanó-arc-meleg, .hőmanó-fázik #hőmanó-arc-alszik { display: none; }
-
-        .hőmanó-meleg-van #hőmanó-arc-meleg, .hőmanó-meleg-van #hőmanó-izzadtság { display: block; }
-        .hőmanó-meleg-van #hőmanó-arc-alap, .hőmanó-meleg-van #hőmanó-arc-fázik, .hőmanó-meleg-van #hőmanó-arc-alszik { display: none; }
-
-        .hőmanó-alszik #hőmanó-arc-alszik, .hőmanó-alszik #hőmanó-zzz { display: block; }
-        .hőmanó-alszik #hőmanó-arc-alap, .hőmanó-alszik #hőmanó-arc-fázik, .hőmanó-alszik #hőmanó-arc-meleg { display: none; }
-
-        .hőmanó-öltözet-fagyos #hőmanó-pulcsi, .hőmanó-öltözet-fagyos #hőmanó-sál, .hőmanó-öltözet-fagyos #hőmanó-télisapka { display: block; }
-        .hőmanó-öltözet-hideg #hőmanó-pulcsi, .hőmanó-öltözet-hideg #hőmanó-télisapka { display: block; }
-        .hőmanó-öltözet-hűvös #hőmanó-pulcsi { display: block; }
-        .hőmanó-öltözet-meleg #hőmanó-napszemüveg { display: block; }
-        .hőmanó-öltözet-forró #hőmanó-napszemüveg { display: block; }
-
 
         .conditions-section:first-child { border-right: 1px solid var(--current-container-border-color); padding-right: 16px; }
         
@@ -464,60 +418,6 @@
                             <h4 class="section-title">Hőmérséklet & Adatok</h4>
                             <div class="temp-primary-display">
                                 <div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div>
-                                <div id="hőmanó-wrapper">
-                                    <div id="hőmanó-container">
-                                        <svg id="hőmanó-svg" viewBox="0 0 100 100">
-                                            <g id="hőmanó-törzs"><rect x="30" y="58" width="40" height="35" rx="15" fill="#81D4FA"/></g>
-                                            <g id="hőmanó-pulcsi"><rect x="30" y="58" width="40" height="35" rx="15" fill="#FF7043"/></g>
-                                            <g id="hőmanó-sál"><path d="M 28 60 C 20 72, 80 72, 72 60" fill="#E53935" stroke="#CFD8DC" stroke-width="2"/></g>
-                                            <g id="hőmanó-fej">
-                                                <g id="hőmanó-arc-alap">
-                                                    <circle cx="50" cy="40" r="25" fill="#fdd835"/>
-                                                    <circle cx="42" cy="38" r="4" fill="white"><circle cx="42" cy="38" r="2" fill="black"/></circle>
-                                                    <circle cx="58" cy="38" r="4" fill="white"><circle cx="58" cy="38" r="2" fill="black"/></circle>
-                                                    <path d="M 42 50 Q 50 55 58 50" stroke="#c62828" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                                </g>
-                                                <g id="hőmanó-arc-fázik">
-                                                    <circle cx="50" cy="40" r="25" fill="#B2EBF2"/>
-                                                    <path d="M 40 38 L 44 38" stroke="#1565C0" stroke-width="2.5" stroke-linecap="round"/>
-                                                    <path d="M 56 38 L 60 38" stroke="#1565C0" stroke-width="2.5" stroke-linecap="round"/>
-                                                    <path d="M 42 52 Q 50 48 58 52" stroke="#1565C0" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                                </g>
-                                                <g id="hőmanó-arc-meleg">
-                                                    <circle cx="50" cy="40" r="25" fill="#fdd835"/>
-                                                    <ellipse cx="38" cy="45" rx="5" ry="3" fill="#FF8A65" opacity="0.8"/>
-                                                    <ellipse cx="62" cy="45" rx="5" ry="3" fill="#FF8A65" opacity="0.8"/>
-                                                    <circle cx="42" cy="38" r="4" fill="white"><circle cx="42" cy="38" r="2" fill="black"/></circle>
-                                                    <circle cx="58" cy="38" r="4" fill="white"><circle cx="58" cy="38" r="2" fill="black"/></circle>
-                                                    <path d="M 45 50 C 47 53, 53 53, 55 50" stroke="#c62828" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                                </g>
-                                                 <g id="hőmanó-arc-alszik">
-                                                    <circle cx="50" cy="40" r="25" fill="#CFD8DC"/>
-                                                    <path d="M 38 40 Q 42 44 46 40" stroke="#546E7A" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                                    <path d="M 54 40 Q 58 44 62 40" stroke="#546E7A" stroke-width="2" fill="none" stroke-linecap="round"/>
-                                                    <path d="M 45 50 Q 50 52 55 50" stroke="#546E7A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-                                                </g>
-                                            </g>
-                                            <g id="hőmanó-fülek">
-                                                <path d="M 22 45 C 10 45, 15 20, 28 25 Z" fill="#fdd835" stroke="#e65100" stroke-width="1.5"/>
-                                                <path d="M 78 45 C 90 45, 85 20, 72 25 Z" fill="#fdd835" stroke="#e65100" stroke-width="1.5"/>
-                                            </g>
-                                            <g id="hőmanó-télisapka">
-                                                <path d="M 25 35 C 40 5, 60 5, 75 35 Z" fill="#4CAF50"/>
-                                                <path d="M 23 35 Q 50 42 77 35" fill="white"/>
-                                                <circle cx="50" cy="5" r="7" fill="#FFFFFF"/>
-                                            </g>
-                                            <g id="hőmanó-napszemüveg"><path d="M 30 32 H 70 V 44 H 30 Z" fill="#212121" opacity="0.8" rx="5"/></g>
-                                            <g id="hőmanó-izzadtság"><path d="M 70 28 Q 73 35 68 36 Z" fill="#4FC3F7"/></g>
-                                            <g id="hőmanó-lehelet" opacity="0.7"><path d="M 62 48 Q 70 46 72 52" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-dasharray="2 3" stroke-linecap="round"/></g>
-                                            <g id="hőmanó-zzz" font-family="sans-serif" font-size="10" font-weight="bold" fill="#546E7A"><text x="70" y="30">Z</text><text x="75" y="25">z</text><text x="80" y="20">z</text></g>
-                                        </svg>
-                                    </div>
-                                    <div id="hőmanó-üzenőfal">
-                                        <div id="hőmanó-név">Hőmanó</div>
-                                        <div id="hőmanó-üzenet">Szia! Mindjárt megnézem, milyen idő van!</div>
-                                    </div>
-                                </div>
                             </div>
                             <div class="temp-feels-like-container"><i class="fas fa-user"></i><span>Hőérzet: <strong id="feels-like-temp">--°</strong></span></div>
                             <div class="compact-details-grid">
@@ -659,72 +559,6 @@
         function updateAnimatedValue(element, newValue) { if (!element) return; const currentValue = element.textContent.trim(); const newFormattedValue = newValue.toString().trim(); if (currentValue !== newFormattedValue) { if (!element.classList.contains('is-flipping')) { element.classList.add('is-flipping'); setTimeout(() => { element.textContent = newFormattedValue; element.classList.remove('is-flipping'); }, 200); } } }
         function updateBeaufortVisualizer(speed) { const beaufortData = getBeaufort(speed); const color = getWindColor(speed); document.documentElement.style.setProperty('--current-wind-color', color); const bars = document.querySelectorAll('#beaufort-scale-container .beaufort-bar'); bars.forEach((bar, index) => { bar.classList.toggle('active', index < beaufortData.num); }); document.getElementById('beaufort-grade').textContent = `${beaufortData.num}. fokozat`; document.getElementById('beaufort-desc').textContent = beaufortData.desc; }
 
-        function getHőmanóState(temp, general, date) {
-            const hour = date.getHours();
-            const month = date.getMonth();
-            const phrase = general.wxPhraseLong?.toLowerCase() || '';
-
-            const isEsős = phrase.includes('eső') || phrase.includes('zápor');
-            const isSzeles = (general.windSpeed || 0) > 20;
-            
-            let outfitClass = '';
-            let statusClass = '';
-            let message = "Szia, én vagyok Hőmanó! Mindjárt mondom, mi a helyzet odakint.";
-
-            // 1. prioritás: Alvás
-            if (hour >= 23 || hour < 5) {
-                statusClass = 'hőmanó-alszik';
-                outfitClass = ''; // Nincs külön öltözet alváshoz
-                message = "Zzz... A holnapi időjárás álmomban is ez... Zzz...";
-                return { outfitClass, statusClass, message };
-            }
-
-            // 2. prioritás: Hőmérséklet-alapú állapotok
-            if (temp < 0) {
-                outfitClass = 'hőmanó-öltözet-fagyos';
-                statusClass = 'hőmanó-fázik';
-                message = `Brrr, ${formatValue(temp,'°C')}! Jól öltözz fel, sál, sapka, kesztyű most kötelező!`;
-            } else if (temp < 8) {
-                outfitClass = 'hőmanó-öltözet-hideg';
-                statusClass = 'hőmanó-fázik';
-                message = `Hűvös van, csak ${formatValue(temp,'°C')}! A télikabát még mindig a legjobb barátod.`;
-            } else if (temp < 15) {
-                outfitClass = 'hőmanó-öltözet-hűvös';
-                if (hour < 10 && (month > 1 && month < 5)) message = "Ez a tavaszi reggel még csípős, egy pulcsi jól jön a réteges öltözködéshez!";
-                else if (isSzeles) message = "A pulcsimat a szél miatt vettem fel. Vigyázz, csalóka az idő!";
-                else message = "Ez az igazi tavaszi/őszi pulcsis idő. Tökéletes egy kellemes sétához!";
-            } else if (temp < 22) {
-                outfitClass = '';
-                if (isEsős) message = "Egy póló elég, de az esernyőt ne hagyd otthon! Én már bekészítettem.";
-                else if (hour > 19) message = `Kellemes ${formatValue(temp,'°C')}-os este! Egy vékony pulcsi még jól jöhet.`;
-                else message = "Pólós idő van! Végre nem kell annyi réteget magamra vennem.";
-            } else if (temp < 28) {
-                outfitClass = 'hőmanó-öltözet-meleg';
-                statusClass = 'hőmanó-meleg-van';
-                message = "Irány a strand! Vagy legalább egy árnyékos hely. A napszemüveg kötelező!";
-            } else {
-                outfitClass = 'hőmanó-öltözet-forró';
-                statusClass = 'hőmanó-meleg-van';
-                message = `Olvadok ebben a ${formatValue(temp,'°C')}-ban! Sok folyadék, naptej és árnyék!`;
-            }
-
-            return { outfitClass, statusClass, message };
-        }
-
-
-        function updateHőmanó(temp, general, date) {
-            const container = document.getElementById('hőmanó-container');
-            const messageEl = document.getElementById('hőmanó-üzenet');
-            if (!container || !messageEl || temp === null || typeof temp === 'undefined') return;
-
-            const state = getHőmanóState(temp, general, date);
-            
-            // A classList.className felülírja az összes meglévő classt
-            container.className = `${state.outfitClass} ${state.statusClass}`;
-            messageEl.textContent = state.message;
-        }
-
-
         function renderWeatherData() {
             const obs = cachedData.displayPws; const general = cachedData.generalConditions; if (!general || !obs) return;
             const now = new Date(); document.getElementById('main-timestamp').textContent = `Utolsó frissítés: ${formatTime(now, { includeSeconds: true })}`;
@@ -735,8 +569,6 @@
             document.getElementById('feels-like-temp').textContent = `${formatValue(feelsLikeTemp, '°', 1)}`; 
             const tempCard = document.getElementById('temp-display-card'); 
             if (tempCard) { tempCard.style.backgroundImage = getTempGradient(currentTemp); }
-
-            updateHőmanó(currentTemp, general, now);
             
             const windSpeed = obs.windSpeed ?? general.windSpeed; 
             const windGust = obs.windGust; 
