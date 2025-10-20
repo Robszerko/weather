@@ -361,9 +361,9 @@
                 cachedData.sunCalc = data; 
             });
 
-            const forecastPromise = fetchAndDisplayForecastsForStation(activeDisplayStationKey);
+            await fetchAndDisplayForecastsForStation(activeDisplayStationKey);
 
-            await Promise.allSettled([generalPromise, sunPromise, forecastPromise]); 
+            await Promise.allSettled([generalPromise, sunPromise]); 
             
             const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY']; 
             const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline; 
@@ -414,8 +414,8 @@
         function initializeWeatherDisplayDOM() {
             const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
             const detailItems = {
-                tempMax24: { label: 'Max 24ó', icon: 'fas fa-temperature-high' },
-                tempMin24: { label: 'Min 24ó', icon: 'fas fa-temperature-low' },
+                tempMax24: { label: 'Napi Maximum', icon: 'fas fa-temperature-high' },
+                tempMin24: { label: 'Napi Minimum', icon: 'fas fa-temperature-low' },
                 humidity: { label: 'Pára', icon: 'fas fa-tint' },
                 pressure: { label: 'Légnyomás', icon: 'fas fa-tachometer-alt' },
                 dewpoint: { label: 'Harmatpont', icon: 'fas fa-droplet' },
@@ -587,24 +587,11 @@
 
         function addStationChangeListeners() { document.querySelectorAll('input[name="station-select"]').forEach(radio => radio.addEventListener('change', handleStationChange)); }
         function addPaginationListeners() {
-            const paginationContainer = document.getElementById('forecast-pagination');
-            if (!paginationContainer) return;
-
-            let buttonsHTML = '';
-            for(let i = 0; i < 6; i++) {
-                const startHour = i * 12;
-                const endHour = startHour + 12;
-                buttonsHTML += `<button class="pagination-btn ${i === 0 ? 'active' : ''}" data-page="${i}">${startHour}-${endHour} óra</button>`;
-            }
-            paginationContainer.innerHTML = buttonsHTML;
-            
-            paginationContainer.addEventListener('click', (event) => {
+            forecastPaginationEl.addEventListener('click', (event) => {
                 if (event.target.classList.contains('pagination-btn')) {
                     const newPage = parseInt(event.target.dataset.page, 10);
                     if (newPage !== forecastPage) {
                         forecastPage = newPage;
-                        paginationContainer.querySelector('.pagination-btn.active').classList.remove('active');
-                        event.target.classList.add('active');
                         renderHourlyForecastData();
                     }
                 }
@@ -660,16 +647,21 @@
 
             const tempMax24El = document.getElementById('compact-value-tempMax24');
             const tempMin24El = document.getElementById('compact-value-tempMin24');
-            const forecastMetrics = forecastCache[activeDisplayStationKey]?.todayMetrics;
+            const next24hMetrics = forecastCache[activeDisplayStationKey]?.next24hMetrics;
+            const today = new Date();
 
-            if (forecastMetrics && forecastMetrics.maxTemp !== null && tempMax24El) {
-                tempMax24El.innerHTML = `<span class="detail-main-value">${formatValue(forecastMetrics.maxTemp, '°', 1)}</span><span class="detail-time-layer">várhatóan ${formatTime(forecastMetrics.maxTime)}</span>`;
+            if (next24hMetrics && next24hMetrics.maxTemp !== null && tempMax24El) {
+                const maxDate = new Date(next24hMetrics.maxTime);
+                const dayText = maxDate.getDate() === today.getDate() ? 'ma' : 'holnap';
+                tempMax24El.innerHTML = `<span class="detail-main-value">${formatValue(next24hMetrics.maxTemp, '°', 1)}</span><span class="detail-time-layer">várhatóan ${dayText} ${formatTime(next24hMetrics.maxTime)}</span>`;
             } else if (tempMax24El) {
                 tempMax24El.innerHTML = `<span class="detail-main-value">${formatValue(null, '°', 1)}</span>`;
             }
 
-            if (forecastMetrics && forecastMetrics.minTemp !== null && tempMin24El) {
-                tempMin24El.innerHTML = `<span class="detail-main-value">${formatValue(forecastMetrics.minTemp, '°', 1)}</span><span class="detail-time-layer">várhatóan ${formatTime(forecastMetrics.minTime)}</span>`;
+            if (next24hMetrics && next24hMetrics.minTemp !== null && tempMin24El) {
+                const minDate = new Date(next24hMetrics.minTime);
+                const dayText = minDate.getDate() === today.getDate() ? 'ma' : 'holnap';
+                tempMin24El.innerHTML = `<span class="detail-main-value">${formatValue(next24hMetrics.minTemp, '°', 1)}</span><span class="detail-time-layer">várhatóan ${dayText} ${formatTime(next24hMetrics.minTime)}</span>`;
             } else if (tempMin24El) {
                 tempMin24El.innerHTML = `<span class="detail-main-value">${formatValue(null, '°', 1)}</span>`;
             }
@@ -764,16 +756,41 @@
             }
         }
 
+        function updatePaginationButtons() {
+            const hourlyDataFull = forecastCache[activeDisplayStationKey]?.hourly || [];
+            if (hourlyDataFull.length === 0 || !forecastPaginationEl) return;
+
+            const nowMs = new Date().getTime();
+            let startIndex = hourlyDataFull.findIndex(hour => new Date(hour.time).getTime() > nowMs);
+            if (startIndex === -1) startIndex = 0;
+            
+            let buttonsHTML = '';
+            for(let i = 0; i < 6; i++) {
+                const chunkStartIndex = startIndex + (i * 12);
+                const chunkEndIndex = Math.min(chunkStartIndex + 11, hourlyDataFull.length - 1);
+
+                if (chunkStartIndex >= hourlyDataFull.length) break;
+
+                const startTime = hourlyDataFull[chunkStartIndex].time;
+                const endTime = hourlyDataFull[chunkEndIndex].time;
+                const label = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+
+                buttonsHTML += `<button class="pagination-btn ${i === forecastPage ? 'active' : ''}" data-page="${i}">${label}</button>`;
+            }
+            forecastPaginationEl.innerHTML = buttonsHTML;
+        }
+
         function renderHourlyForecastData() {
             const hourlyDataFull = forecastCache[activeDisplayStationKey]?.hourly || [];
-            const paginationContainer = document.getElementById('forecast-pagination');
-
-            if (hourlyDataFull.length === 0 || !hourlyForecastContainerEl || !paginationContainer) {
+            
+            if (hourlyDataFull.length === 0 || !hourlyForecastContainerEl || !forecastPaginationEl) {
                 if (hourlyForecastContainerEl) hourlyForecastContainerEl.classList.add('is-hidden');
                 if (hourlyForecastTitleEl) hourlyForecastTitleEl.classList.add('is-hidden');
-                if (paginationContainer) paginationContainer.classList.add('is-hidden');
+                if (forecastPaginationEl) forecastPaginationEl.classList.add('is-hidden');
                 return;
             }
+            
+            updatePaginationButtons();
 
             const forecastLiveTimestampEl = document.getElementById('hourly-forecast-timestamp');
             const lastFetchTime = forecastCache[activeDisplayStationKey]?.lastFetch || 0;
@@ -793,6 +810,11 @@
             let forecastHTML = '';
             let lastDate = null;
 
+            if (sliceStart > 0) {
+                 const prevHourDate = new Date(hourlyDataFull[sliceStart - 1].time);
+                 lastDate = prevHourDate.getDate();
+            }
+
             forecastsToShow.forEach(hour => {
                 const hourDate = new Date(hour.time);
                 const hourDay = hourDate.getDate();
@@ -809,26 +831,23 @@
             hourlyForecastContainerEl.innerHTML = forecastHTML;
             hourlyForecastContainerEl.classList.remove('is-hidden');
             hourlyForecastTitleEl.classList.remove('is-hidden');
-            paginationContainer.classList.remove('is-hidden');
+            forecastPaginationEl.classList.remove('is-hidden');
         }
         
-        function calculateForecastMetricsForDay(targetDate, hourlyData) {
+        function calculateNext24HourMetrics(hourlyData) {
             if (!hourlyData || hourlyData.length < 1) return { minTemp: null, minTime: null, maxTemp: null, maxTime: null };
-            const targetDayStart = new Date(targetDate);
-            targetDayStart.setHours(0, 0, 0, 0);
-            const targetDayEnd = new Date(targetDate);
-            targetDayEnd.setHours(23, 59, 59, 999);
-            const relevantForecasts = hourlyData.filter(h => {
-                const hourTime = new Date(h.time);
-                return hourTime >= targetDayStart && hourTime <= targetDayEnd;
-            });
-            if (relevantForecasts.length === 0) return { minTemp: null, minTime: null, maxTemp: null, maxTime: null };
-            let minForecast = relevantForecasts[0];
-            let maxForecast = relevantForecasts[0];
-            for (const forecast of relevantForecasts) { 
+            
+            const next24Hours = hourlyData.slice(0, 24);
+            if (next24Hours.length === 0) return { minTemp: null, minTime: null, maxTemp: null, maxTime: null };
+            
+            let minForecast = next24Hours[0];
+            let maxForecast = next24Hours[0];
+            
+            for (const forecast of next24Hours) {
                 if (forecast.temp < minForecast.temp) minForecast = forecast;
                 if (forecast.temp > maxForecast.temp) maxForecast = forecast;
             }
+            
             return { minTemp: minForecast.temp, minTime: minForecast.time, maxTemp: maxForecast.temp, maxTime: maxForecast.time };
         }
 
@@ -844,15 +863,12 @@
             try {
                 const hourlyData = await fetchHourlyForecastData(coords.lat, coords.lon);
                 if (hourlyData) {
-                    const todayMetrics = calculateForecastMetricsForDay(new Date(), hourlyData);
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    const tomorrowMetrics = calculateForecastMetricsForDay(tomorrow, hourlyData);
-
+                    const todayMetrics = calculateNext24HourMetrics(hourlyData);
+                    
                     forecastCache[stationKey] = {
                         hourly: hourlyData,
                         todayMetrics: todayMetrics,
-                        tomorrowMetrics: tomorrowMetrics,
+                        next24hMetrics: todayMetrics,
                         lastFetch: now
                     };
                 }
