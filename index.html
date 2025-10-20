@@ -17,7 +17,7 @@
             --text-secondary-night: #BCCCDC;
             
             /* --- NAPPALI TÉMA (MÓDOSÍTVA) --- */
-            --bg-widget-day: linear-gradient(160deg, rgba(55, 65, 81, 0.85) 0%, rgba(30, 41, 59, 0.8) 100%);
+            --bg-widget-day: linear-gradient(160deg, rgba(40, 50, 65, 0.85) 0%, rgba(20, 30, 45, 0.8) 100%);
             --border-widget-day: rgba(255, 255, 255, 0.15);
             --accent-interactive-day: #007AFF;
             --text-primary-day: #FFFFFF;
@@ -464,7 +464,10 @@
                 </div>
                 <div class="precip-summary-card" id="precip-summary-card"></div>
                 <div class="precipitation-forecast-section">
-                    <div class="section-header"><div style="display: flex; align-items: center; gap: 8px;"><div class="section-title" style="margin-bottom: 0;">Órás csapadék előrejelzés</div></div><span class="section-timestamp" id="precip-forecast-timestamp"></span></div>
+                    <div class="section-header">
+                        <div class="section-title" style="margin-bottom: 0;">Órás csapadék előrejelzés <span id="precip-forecast-location" style="font-weight: 500;"></span></div>
+                        <span class="section-timestamp" id="precip-forecast-timestamp"></span>
+                    </div>
                     <div class="precip-summary-text" id="precip-summary-text">--</div>
                     <div class="precip-forecast-grid" id="precip-forecast-list">
                         ${Array.from({ length: 8 }).map((_, i) => `
@@ -642,6 +645,12 @@
         }
 
         function renderPrecipitationForecast() {
+            const stationName = STATIONS[activeDisplayStationKey]?.displayName || '';
+            const locationEl = document.getElementById('precip-forecast-location');
+            if (locationEl) {
+                locationEl.textContent = `- ${stationName}`;
+            }
+
             const hourlyDataFull = forecastCache[activeDisplayStationKey]?.hourly || [];
             const summaryEl = document.getElementById('precip-summary-text'); 
             if (hourlyDataFull.length === 0 || !summaryEl) return;
