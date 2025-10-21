@@ -186,9 +186,9 @@
         .precip-forecast-item { background-color: rgba(0,0,0,0.1); border: 1px solid rgba(from var(--current-container-border-color) r g b / 0.15); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .forecast-time { font-size: 14px; font-weight: 700; color: var(--current-text-color); text-align: center; }
         .precip-item-content { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
-        .chance-visualizer { position: relative; width: 50px; height: 50px; flex-shrink: 0; }
+        .chance-visualizer { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
         .chance-visualizer svg { transform: rotate(-90deg); width: 100%; height: 100%; }
-        .chance-visualizer circle { fill: transparent; stroke-width: 6px; }
+        .chance-visualizer circle { fill: transparent; stroke-width: 5px; }
         .chance-visualizer .bg-circle { stroke: rgba(0,0,0,0.2); }
         .chance-visualizer .progress-circle { stroke: var(--current-icon-color); transition: stroke-dashoffset 0.6s ease-out; }
         .chance-percentage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 800; color: var(--current-text-color); }
@@ -422,8 +422,6 @@
         function initializeWeatherDisplayDOM() {
             const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
             const detailItems = {
-                tempMax24: { label: 'Következő 24ó Max', icon: 'fas fa-temperature-high' },
-                tempMin24: { label: 'Következő 24ó Min', icon: 'fas fa-temperature-low' },
                 humidity: { label: 'Pára', icon: 'fas fa-tint' },
                 pressure: { label: 'Légnyomás', icon: 'fas fa-tachometer-alt' },
                 dewpoint: { label: 'Harmatpont', icon: 'fas fa-droplet' },
@@ -509,7 +507,7 @@
                                 <div class="forecast-time" id="precip-time-${i}">--:--</div>
                                 <div class="precip-item-content">
                                     <div class="chance-visualizer">
-                                        <svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="16"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="16" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg>
+                                        <svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="15"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="15" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg>
                                         <div class="chance-percentage" id="precip-chance-${i}">--%</div>
                                     </div>
                                     <div class="intensity-details">
@@ -652,27 +650,6 @@
             const windChill = obs.windChill;
             const solarRadiation = obs.solarRadiation;
             const visibility = general.visibility;
-
-            const tempMax24El = document.getElementById('compact-value-tempMax24');
-            const tempMin24El = document.getElementById('compact-value-tempMin24');
-            const next24hMetrics = forecastCache[activeDisplayStationKey]?.next24hMetrics;
-            const today = new Date();
-
-            if (next24hMetrics && next24hMetrics.maxTemp !== null && tempMax24El) {
-                const maxDate = new Date(next24hMetrics.maxTime);
-                const dayText = maxDate.getDate() === today.getDate() ? 'ma' : 'holnap';
-                tempMax24El.innerHTML = `<span class="detail-main-value">${formatValue(next24hMetrics.maxTemp, '°', 1)}</span><span class="detail-time-layer">várhatóan ${dayText} ${formatTime(next24hMetrics.maxTime)}</span>`;
-            } else if (tempMax24El) {
-                tempMax24El.innerHTML = `<span class="detail-main-value">${formatValue(null, '°', 1)}</span>`;
-            }
-
-            if (next24hMetrics && next24hMetrics.minTemp !== null && tempMin24El) {
-                const minDate = new Date(next24hMetrics.minTime);
-                const dayText = minDate.getDate() === today.getDate() ? 'ma' : 'holnap';
-                tempMin24El.innerHTML = `<span class="detail-main-value">${formatValue(next24hMetrics.minTemp, '°', 1)}</span><span class="detail-time-layer">várhatóan ${dayText} ${formatTime(next24hMetrics.minTime)}</span>`;
-            } else if (tempMin24El) {
-                tempMin24El.innerHTML = `<span class="detail-main-value">${formatValue(null, '°', 1)}</span>`;
-            }
             
             document.getElementById('compact-value-humidity').textContent = formatValue(humidity, '%', 0); 
             document.getElementById('compact-value-pressure').innerHTML = `${formatValue(obs.pressure ?? general.pressureAltimeter, '', 1)} hPa ${trendSymbol}`;
@@ -795,7 +772,7 @@
                         timeEl.textContent = formatHourOnly(hourData.time); 
                         chanceEl.textContent = `${chance}%`;
                         
-                        const radius = progressCircle.r.baseVal.value; 
+                        const radius = 15;
                         const circumference = 2 * Math.PI * radius; 
                         progressCircle.style.strokeDasharray = `${circumference} ${circumference}`; 
                         progressCircle.style.strokeDashoffset = circumference - (chance / 100) * circumference;
