@@ -257,7 +257,7 @@
     <div class="forecast-pagination-container is-hidden" id="forecast-pagination"></div>
     <div class="hourly-forecast-container" id="hourly-forecast-container"></div>
     <script>
-        const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525'; const REFRESH_INTERVAL_PWS = 30 * 1000; const REFRESH_INTERVAL_FORECAST = 60 * 60 * 1000; const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
+        const weatherComApiKey = 'e1f10a1e78da46f5b10a1e78da96f525'; const REFRESH_INTERVAL_PWS = 30 * 1000; const REFRESH_INTERVAL_FORECAST = 10 * 60 * 1000; const NYIREGYHAZA_COORDS = { lat: 47.9550, lon: 21.7160 };
         
         const STATIONS = { 
             NYIREGYHAZI_UT: { id: 'INYREG26', name: 'Nyíregyházi út', displayName: 'Nyíregyházi út', coords: NYIREGYHAZA_COORDS, provides: ['temp', 'precip', 'wind', 'humidity', 'pressure'], isOnline: false, data: null, lastRainTimestamp: null }, 
