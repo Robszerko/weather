@@ -672,61 +672,86 @@
             const precipStations = Object.values(STATIONS).filter(s => s.isOnline && s.provides.includes('precip') && s.data);
             const stationsWithRainToday = precipStations.filter(s => s.data && s.data.metric.precipTotal > 0).sort((a, b) => b.data.metric.precipTotal - a.data.metric.precipTotal);
 
-            let rainingNowHTML = '';
-            let rainedTodayHTML = '';
-            let rainedTodayCount = 0;
+            let mainContentHTML = '';
 
-            stationsWithRainToday.forEach((station) => {
-                const isRainingNow = station.data.metric.precipRate > 0;
-                let rankHTML = '';
-                
-                const cardClass = isRainingNow ? 'precip-station-card is-raining-now' : 'precip-station-card';
-                const displayName = station.displayNameShort || station.displayName;
-                let footerInfoHTML = '';
+            if (stationsWithRainToday.length > 0) {
+                let rainingNowHTML = '';
+                let rainedTodayHTML = '';
+                let rainedTodayCount = 0;
 
-                if (isRainingNow) {
-                    footerInfoHTML = `<div class="station-card-footer-info live-intensity">Most: ${getPrecipIntensityDescription(station.data.metric.precipRate)}</div>`;
-                } else {
-                    if (station.lastRainTimestamp) {
-                        footerInfoHTML = `<div class="station-card-footer-info">Utoljára: ${formatTime(station.lastRainTimestamp)}</div>`;
+                stationsWithRainToday.forEach((station) => {
+                    const isRainingNow = station.data.metric.precipRate > 0;
+                    let rankHTML = '';
+                    
+                    const cardClass = isRainingNow ? 'precip-station-card is-raining-now' : 'precip-station-card';
+                    const displayName = station.displayNameShort || station.displayName;
+                    let footerInfoHTML = '';
+
+                    if (isRainingNow) {
+                        footerInfoHTML = `<div class="station-card-footer-info live-intensity">Most: ${getPrecipIntensityDescription(station.data.metric.precipRate)}</div>`;
                     } else {
-                        footerInfoHTML = `<div class="station-card-footer-info">Jelenleg nem esik</div>`;
+                        if (station.lastRainTimestamp) {
+                            footerInfoHTML = `<div class="station-card-footer-info">Utoljára: ${formatTime(station.lastRainTimestamp)}</div>`;
+                        } else {
+                            footerInfoHTML = `<div class="station-card-footer-info">Jelenleg nem esik</div>`;
+                        }
+                        rainedTodayCount++;
+                        if (rainedTodayCount === 1) rankHTML = '<div class="station-card-rank rank-1"><i class="fas fa-star"></i><span>1</span></div>';
+                        else if (rainedTodayCount === 2) rankHTML = '<div class="station-card-rank rank-2"><i class="fas fa-star"></i><span>2</span></div>';
+                        else if (rainedTodayCount === 3) rankHTML = '<div class="station-card-rank rank-3"><i class="fas fa-star"></i><span>3</span></div>';
                     }
-                    rainedTodayCount++;
-                    if (rainedTodayCount === 1) rankHTML = '<div class="station-card-rank rank-1"><i class="fas fa-star"></i><span>1</span></div>';
-                    else if (rainedTodayCount === 2) rankHTML = '<div class="station-card-rank rank-2"><i class="fas fa-star"></i><span>2</span></div>';
-                    else if (rainedTodayCount === 3) rankHTML = '<div class="station-card-rank rank-3"><i class="fas fa-star"></i><span>3</span></div>';
-                }
-                
-                const cardHTML = `
-                    <div class="${cardClass}">
-                        ${rankHTML}
-                        <div class="station-card-header">
-                            <span class="station-card-name">${displayName}</span> 
-                            ${isRainingNow ? '<div class="station-card-status-icon"></div>' : ''}
-                        </div>
-                        <div class="station-card-main">
-                            <div class="station-card-total-label">Ma eddig</div>
-                            <div class="station-card-total-value">${formatValue(station.data.metric.precipTotal, '', 1)}<span>mm</span></div>
-                        </div>
-                        ${footerInfoHTML}
-                    </div>`;
+                    
+                    const cardHTML = `
+                        <div class="${cardClass}">
+                            ${rankHTML}
+                            <div class="station-card-header">
+                                <span class="station-card-name">${displayName}</span> 
+                                ${isRainingNow ? '<div class="station-card-status-icon"></div>' : ''}
+                            </div>
+                            <div class="station-card-main">
+                                <div class="station-card-total-label">Ma eddig</div>
+                                <div class="station-card-total-value">${formatValue(station.data.metric.precipTotal, '', 1)}<span>mm</span></div>
+                            </div>
+                            ${footerInfoHTML}
+                        </div>`;
 
-                if (isRainingNow) {
-                    rainingNowHTML += cardHTML;
-                } else {
-                    rainedTodayHTML += cardHTML;
-                }
-            });
+                    if (isRainingNow) {
+                        rainingNowHTML += cardHTML;
+                    } else {
+                        rainedTodayHTML += cardHTML;
+                    }
+                });
 
-            let mainContentHTML = `
-                <h5>Ahol jelenleg esik:</h5>
-                <div id="raining-now-grid" class="precip-station-grid">${rainingNowHTML}</div>
-                <p id="not-raining-msg" class="${rainingNowHTML ? 'is-hidden' : ''}">Jelenleg nem esik a figyelt állomások egyikén sem.</p>
-                <h5 style="margin-top: 15px;">Ahol eddig esett ma:</h5>
-                <div id="rained-today-grid" class="precip-station-grid">${rainedTodayHTML}</div>
-            `;
-            
+                mainContentHTML = `
+                    ${rainingNowHTML ? `<h5>Ahol jelenleg esik:</h5><div id="raining-now-grid" class="precip-station-grid">${rainingNowHTML}</div>` : ''}
+                    ${rainedTodayHTML ? `<h5 style="margin-top: ${rainingNowHTML ? '15px' : '0'};">Ahol eddig esett ma:</h5><div id="rained-today-grid" class="precip-station-grid">${rainedTodayHTML}</div>` : ''}
+                `;
+
+                if(!rainingNowHTML && rainedTodayHTML){
+                    mainContentHTML = `<p id="not-raining-msg">Jelenleg nem esik a figyelt állomások egyikén sem.</p>` + mainContentHTML;
+                }
+            } else {
+                mainContentHTML = `
+                    <div class="precip-explanation-container">
+                        <div class="explanation-title">Hogyan működik a CsapadékRadar?</div>
+                        <p class="explanation-text">
+                            Ezen a panelen a Nyíregyháza környékén található automata meteorológiai állomások (PWS) valós idejű csapadékadatait láthatod. De mit is jelent ez pontosan?
+                        </p>
+                        <div class="explanation-subtitle">Adatok Forrása és Mérése</div>
+                        <p class="explanation-text">
+                            Az adatok privát üzemeltetésű, nagy pontosságú mérőműszerekkel felszerelt állomásokról származnak. Amint valamelyik figyelt állomáson a csapadékmérő (egy speciális, önürítő billenővödör) csapadékot észlel, az adott állomás azonnal megjelenik itt. Az érték <strong>milliméterben</strong> van megadva, és azt mutatja, hogy aznap <strong>éjféltől kezdve</strong> mennyi csapadék hullott az adott ponton.
+                        </p>
+                        <div class="explanation-subtitle">Dinamikus Frissítés és Napi Adatok</div>
+                        <p class="explanation-text">
+                            A panel <strong>30 másodpercenként</strong> frissül. Ha egy állomáson éppen esik, azt egy <strong>kiemelt kártya és egy villogó ikon</strong> is jelzi. A lista mindig a legtöbb csapadékot mérő állomással kezdődik. Fontos tudnod, hogy a kártyákon látható csapadékösszeg mindig az aktuális napra vonatkozik. <strong>Éjfélkor a számlálók nullázódnak</strong>, és a panel ismét ezt a tájékoztatót mutatja, amíg az első esőcseppek meg nem érkeznek.
+                        </p>
+                         <p class="explanation-text" style="text-align: center; font-style: italic; margin-top: 10px;">
+                            Jelenleg a figyelt állomások egyikén sem esett ma csapadék.
+                        </p>
+                    </div>
+                `;
+            }
+
             const allMonitoredNames = Object.values(STATIONS).filter(s => s.provides.includes('precip')).map(s => s.displayName).join(', ');
             const tooltipHTML = `<div class="station-tooltip-container"><span class="station-list-trigger">Figyelt állomások listája</span><div class="station-tooltip-content">${allMonitoredNames}</div></div>`;
             let footerHTML = `<div class="precip-card-footer">${tooltipHTML}</div>`;
