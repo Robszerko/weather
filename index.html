@@ -302,7 +302,30 @@
         function formatDateWithDay(date) { if (!date) return ''; return new Intl.DateTimeFormat('hu-HU', { month: 'long', day: 'numeric', weekday: 'long' }).format(date); }
         function getTimeOfDay(date) { if (!date) return ''; const hour = new Date(date).getHours(); if (hour >= 5 && hour < 10) return 'reggeli'; if (hour >= 10 && hour < 13) return 'déli'; if (hour >= 13 && hour < 18) return 'délutáni'; if (hour >= 18 && hour < 22) return 'esti'; return 'éjszakai'; }
         
-        function getPrecipIntensityDescription(rate) { if (rate == null || rate <= 0) return 'Nincs'; if (rate > 0 && rate <= 0.2) return 'Pár csepp'; if (rate > 0.2 && rate <= 0.5) return 'Szitálás'; if (rate > 0.5 && rate <= 1.0) return 'Enyhe eső'; if (rate > 1.0 && rate <= 4.0) return 'Mérsékelt eső'; if (rate > 4.0 && rate <= 10.0) return 'Intenzív eső'; if (rate > 10.0 && rate <= 25.0) return 'Zápor'; return 'Felhőszakadás'; }
+        // Módosított függvény: Külön kezeli a havazást és az esőt
+        function getPrecipIntensityDescription(rate, isSnow) {
+            if (rate == null || rate <= 0) return 'Nincs';
+
+            if (isSnow) {
+                 // Havazás skála (cm)
+                if (rate < 0.5) return 'Hószállingózás';
+                if (rate < 1.5) return 'Gyenge havazás';
+                if (rate < 3.0) return 'Mérsékelt havazás';
+                if (rate < 5.0) return 'Intenzív havazás';
+                if (rate < 8.0) return 'Sűrű, pelyhes havazás';
+                return 'Hózivatar / Szakadó hó';
+            } else {
+                // Eső skála (mm)
+                if (rate <= 0.2) return 'Pár csepp';
+                if (rate <= 0.5) return 'Szitálás';
+                if (rate <= 1.0) return 'Enyhe eső';
+                if (rate <= 4.0) return 'Mérsékelt eső';
+                if (rate <= 10.0) return 'Intenzív eső';
+                if (rate <= 25.0) return 'Zápor';
+                return 'Felhőszakadás';
+            }
+        }
+
         function degreesToCompass(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["északi", "észak-északkeleti", "északkeleti", "kelet-északkeleti", "keleti", "kelet-délkeleti", "délkeleti", "dél-délkeleti", "déli", "dél-délnyugati", "délnyugati", "nyugat-délnyugati", "nyugati", "nyugat-északnyugati", "északnyugati", "észak-északnyugati"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function degreesToCompassAbbreviated(degrees) { if (degrees === null || typeof degrees === 'undefined') return '-'; degrees = (parseFloat(degrees) % 360 + 360) % 360; const directions = ["É", "ÉÉK", "ÉK", "KÉK", "K", "KDK", "DK", "DDK", "D", "DDNY", "DNY", "NYDNY", "NY", "NYÉNY", "ÉNY", "ÉÉNY"]; return directions[Math.round(degrees / 22.5) % 16]; }
         function getBeaufort(speed) { if (speed === null || typeof speed === 'undefined') return { num: 0, desc: 'Szélcsend' }; if (speed < 1) return { num: 0, desc: 'Szélcsend' }; if (speed <= 5) return { num: 1, desc: 'Gyenge szellő' }; if (speed <= 11) return { num: 2, desc: 'Enyhe szellő' }; if (speed <= 19) return { num: 3, desc: 'Gyenge szél' }; if (speed <= 28) return { num: 4, desc: 'Mérsékelt szél' }; if (speed <= 38) return { num: 5, desc: 'Élénk szél' }; if (speed <= 49) return { num: 6, desc: 'Erős szél' }; if (speed <= 61) return { num: 7, desc: 'Viharos szél' }; if (speed <= 74) return { num: 8, desc: 'Vihar' }; if (speed <= 88) return { num: 9, desc: 'Szélvihar' }; if (speed <= 102) return { num: 10, desc: 'Heves vihar' }; if (speed <= 117) return { num: 11, desc: 'Orkán' }; return { num: 12, desc: 'Orkán' }; }
@@ -329,7 +352,7 @@
         async function fetchAdvancedSunCalcData(lat, lon) { const now = new Date(); const today = new Date(now); today.setHours(0, 0, 0, 0); const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1); const dayAfter = new Date(tomorrow); dayAfter.setDate(tomorrow.getDate() + 1); cachedData.sunTimes = SunCalc.getTimes(now, lat, lon); let moonrise = SunCalc.getMoonTimes(now, lat, lon, true).rise; if (!moonrise || moonrise < now) { moonrise = SunCalc.getMoonTimes(tomorrow, lat, lon, true).rise || SunCalc.getMoonTimes(dayAfter, lat, lon, true).rise; } let moonset = SunCalc.getMoonTimes(now, lat, lon, true).set; if (!moonset || moonset < now) { moonset = SunCalc.getMoonTimes(tomorrow, lat, lon, true).set || SunCalc.getMoonTimes(dayAfter, lat, lon, true).set; } return { sunrise: cachedData.sunTimes.sunrise, sunset: cachedData.sunTimes.sunset, moonrise: moonrise, moonset: moonset, }; }
         async function fetchPwsStationData(stationKey) { const stationConfig = STATIONS[stationKey]; const url = `https://api.weather.com/v2/pws/observations/current?apiKey=${weatherComApiKey}&stationId=${stationConfig.id}&numericPrecision=decimal&format=json&units=m`; try { const response = await fetch(url); if (!response.ok) throw new Error(`PWS API Hiba`); const data = await response.json(); if (!data.observations || data.observations.length === 0) throw new Error(`Nincs PWS adat.`); const observation = data.observations[0]; stationConfig.isOnline = true; stationConfig.data = observation; if (observation.metric.precipRate > 0) { stationConfig.lastRainTimestamp = new Date(observation.obsTimeLocal).getTime(); } } catch (error) { stationConfig.isOnline = false; } finally { if(isWeatherDisplayInitialized) updateStationStatusUI(stationKey); } }
         async function fetchGeneralConditionsData(lat, lon) { const lang = 'hu-HU'; const url = `https://api.weather.com/v3/wx/observations/current?geocode=${lat},${lon}&language=${lang}&format=json&apiKey=${weatherComApiKey}&units=m`; const response = await fetch(url); if (!response.ok) { throw new Error(`API hiba`); } const data = await response.json(); return { temperature: data.temperature, temperatureFeelsLike: data.temperatureFeelsLike ?? data.temperature, temperatureMax24Hour: data.temperatureMax24Hour, temperatureMin24Hour: data.temperatureMin24Hour, relativeHumidity: data.relativeHumidity, windSpeed: data.windSpeed, windDirection: data.windDirection, dewpoint: data.temperatureDewPoint, wxPhraseLong: data.wxPhraseLong || null, pressureAltimeter: data.pressureAltimeter ?? data.pressureMeanSeaLevel, visibility: data.visibility, dayOrNight: data.dayOrNight, pressureTendencyCode: data.pressureTendencyCode ?? (data.pressureChange !== null && typeof data.pressureChange !== 'undefined' ? (data.pressureChange > 0 ? 0 : (data.pressureChange < 0 ? 1 : 2)) : null), uvDescription: data.uvDescription || null, uvIndex: data.uvIndex, iconCode: data.iconCode }; }
-        async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 72, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
+        async function fetchHourlyForecastData(lat, lon) { const url = `https://api.weather.com/v3/wx/forecast/hourly/3day?geocode=${lat},${lon}&format=json&units=m&language=hu-HU&apiKey=${weatherComApiKey}`; try { const response = await fetch(url); if (!response.ok) throw new Error(`API hiba`); const data = await response.json(); if (!data || !data.validTimeLocal || !Array.isArray(data.validTimeLocal)) { throw new Error('Hiányos vagy érvénytelen előrejelzési adat.'); } const hourlyForecasts = []; const nowMs = new Date().getTime(); let startIndex = data.validTimeLocal.map(timeStr => new Date(timeStr).getTime()).findLastIndex(timeMs => timeMs <= nowMs); if (startIndex === -1) { startIndex = 0; } const forecastLimit = Math.min(startIndex + 72, data.validTimeLocal.length); for (let i = startIndex; i < forecastLimit; i++) { hourlyForecasts.push({ time: data.validTimeLocal[i], temp: data.temperature[i], iconCode: data.iconCode[i], precipChance: data.precipChance[i], qpf: data.qpf[i], qpfSnow: (data.qpfSnow && Array.isArray(data.qpfSnow) && data.qpfSnow[i] !== undefined) ? data.qpfSnow[i] : null, dayOrNight: data.dayOrNight[i], windSpeed: data.windSpeed[i], windDirection: data.windDirection[i], humidity: data.relativeHumidity[i], wxPhraseShort: data.wxPhraseShort[i] }); } return hourlyForecasts; } catch (error) { throw error; } }
         
         function updateTheme(isNight) {
             const root = document.documentElement;
@@ -421,141 +444,145 @@
         }
         
         function initializeWeatherDisplayDOM() {
-            const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
-            const detailItems = {
-                humidity: { label: 'Pára', icon: 'fas fa-tint' },
-                pressure: { label: 'Légnyomás', icon: 'fas fa-tachometer-alt' },
-                dewpoint: { label: 'Harmatpont', icon: 'fas fa-droplet' },
-                uv: { label: 'UV Index', icon: 'fas fa-shield-sun' },
-                sunrise: { label: 'Napkelte', icon: 'fas fa-sun' },
-                sunset: { label: 'Napnyugta', icon: 'fas fa-sun' },
-                moonrise: { label: 'Holdkelte', icon: 'fas fa-moon' },
-                moonset: { label: 'Holdnyugta', icon: 'fas fa-moon' },
-                windChill: { label: 'Szélhűtés', icon: 'fas fa-wind' },
-                solarRadiation: { label: 'Napsugárzás', icon: 'fas fa-solar-panel' },
-                visibility: { label: 'Látótáv', icon: 'fas fa-eye' }
-            };
-            
-            weatherDisplayEl.innerHTML = `
-                <div class="widget-header">
-                    <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div></div>
-                    <div class="timestamp-container">
-                        <span class="timestamp" id="main-timestamp">--:--:--</span>
-                        <div class="attribution-line">Az időjárás monitort Robi készítette © Copyright by: Robi</div>
-                    </div>
-                </div>
-                <div class="station-status-container">${displayableStations.map(key => `<div class="station-selector" id="${key.toLowerCase()}-selector-container"><input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}"><label for="station-select-${key.toLowerCase()}"><span class="station-status-indicator" id="status-indicator-${key}"></span> ${STATIONS[key].displayNameShort || STATIONS[key].displayName}</label></div>`).join('')}</div>
-                <div class="current-conditions-card">
-                    <div class="conditions-section">
-                        <div id="temp-display-card" class="temp-display-card">
-                            <h4 class="section-title">Hőmérséklet & Adatok</h4>
-                            <div class="temp-primary-display">
-                                <div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div>
-                            </div>
-                            <div class="temp-feels-like-container"><i class="fas fa-user"></i><span>Hőérzet: <strong id="feels-like-temp">--°</strong></span></div>
-                            <div class="compact-details-grid">
-                                ${Object.keys(detailItems).map(key => `
-                                    <div class="compact-detail-item" id="compact-detail-${key}">
-                                        <div class="compact-detail-header">
-                                            <i class="${detailItems[key].icon}"></i>
-                                            <span class="label">${detailItems[key].label}</span>
-                                        </div>
-                                        <div class="compact-detail-value" id="compact-value-${key}">--</div>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="conditions-section">
-                        <h4 class="section-title">Szél Adatok</h4>
-                        <div class="wind-info-card">
-                            <div class="wind-main-display">
-                                <div class="wind-compass-container">
-                                    <svg class="wind-compass-rose" viewBox="0 0 100 100"></svg>
-                                    <svg id="wind-compass-arrow" viewBox="0 0 100 100">
-                                        <path d="M50 0 L65 35 L50 25 L35 35 Z" />
-                                    </svg>
-                                </div>
-                                <div class="wind-data-container">
-                                    <div class="wind-speed-main-value"><span id="wind-speed-value-span" class="flippable-value">--</span><span>km/h</span></div>
-                                    <div class="wind-direction-text">Irány: <strong id="wind-direction-full">--</strong></div>
-                                    <div class="wind-gust-text">Lökés: <strong id="wind-gust-value">-- km/h</strong></div>
-                                </div>
-                            </div>
-                            <div class="beaufort-scale-visualizer"><div class="beaufort-title">Beaufort Skála</div><div class="beaufort-scale-container" id="beaufort-scale-container">${Array.from({ length: 12 }).map(() => `<div class="beaufort-bar"></div>`).join('')}</div></div>
-                            <div class="wind-detailed-stats"><div class="wind-stats-grid"><div class="wind-stats-item"><span class="label">Fokozat:</span><span class="value" id="beaufort-grade">--</span></div><div class="wind-stats-item"><span class="label">Besorolás:</span><span class="value" id="beaufort-desc">--</span></div></div></div>
-                            <div class="wind-legend-container">
-                                <div class="wind-legend-title">Szélerősség (km/h)</div>
-                                <div class="wind-legend-bar-container">
-                                    <div class="wind-legend-bar"></div>
-                                    <i class="fas fa-caret-down" id="wind-speed-marker"></i>
-                                </div>
-                                <div class="wind-legend-labels"><span>0</span><span>20</span><span>40</span><span>60</span><span>80+</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="precip-summary-card" id="precip-summary-card"></div>
-                <div class="precipitation-forecast-section">
-                    <div class="section-header">
-                        <div class="section-title" style="margin-bottom: 0;">Órás csapadék előrejelzés <span id="precip-forecast-location" style="font-weight: 500;"></span></div>
-                        <span class="section-timestamp" id="precip-forecast-timestamp"></span>
-                    </div>
-                    <div class="precip-summary-text" id="precip-summary-text">--</div>
-                    <div class="precip-forecast-grid" id="precip-forecast-list">
-                        ${Array.from({ length: 8 }).map((_, i) => `
-                            <div class="precip-forecast-item" id="precip-item-${i}">
-                                <div class="forecast-time" id="precip-time-${i}">--:--</div>
-                                <div class="precip-item-content">
-                                    <div class="chance-visualizer">
-                                        <svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="15"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="15" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg>
-                                        <div class="chance-percentage" id="precip-chance-${i}">--%</div>
-                                    </div>
-                                    <div class="intensity-details">
-                                        <div class="intensity-text" id="precip-intensity-${i}">--</div>
-                                        <div class="qpf-value" id="precip-qpf-${i}">- mm</div>
-                                    </div>
-                                    <div class="forecast-type-icon"><i id="precip-icon-${i}" class="fas fa-tint"></i></div>
-                                </div>
-                            </div>`).join('')}
-                    </div>
-                </div>`;
-
-            const compassRoseSvg = weatherDisplayEl.querySelector('.wind-compass-rose');
-            const center = 50;
-            const radius = 48;
-            const directions = { 'É': 0, 'ÉK': 45, 'K': 90, 'DK': 135, 'D': 180, 'DNY': 225, 'NY': 270, 'ÉNY': 315 };
-
-            for (let i = 0; i < 360; i += 10) {
-                const isMajor = i % 30 === 0;
-                const r1 = isMajor ? radius - 8 : radius - 4;
-                const r2 = radius;
-                const angle = (i - 90) * Math.PI / 180;
+            try {
+                const displayableStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY'];
+                const detailItems = {
+                    humidity: { label: 'Pára', icon: 'fas fa-tint' },
+                    pressure: { label: 'Légnyomás', icon: 'fas fa-tachometer-alt' },
+                    dewpoint: { label: 'Harmatpont', icon: 'fas fa-droplet' },
+                    uv: { label: 'UV Index', icon: 'fas fa-shield-sun' },
+                    sunrise: { label: 'Napkelte', icon: 'fas fa-sun' },
+                    sunset: { label: 'Napnyugta', icon: 'fas fa-sun' },
+                    moonrise: { label: 'Holdkelte', icon: 'fas fa-moon' },
+                    moonset: { label: 'Holdnyugta', icon: 'fas fa-moon' },
+                    windChill: { label: 'Szélhűtés', icon: 'fas fa-wind' },
+                    solarRadiation: { label: 'Napsugárzás', icon: 'fas fa-solar-panel' },
+                    visibility: { label: 'Látótáv', icon: 'fas fa-eye' }
+                };
                 
-                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute('x1', center + r1 * Math.cos(angle));
-                line.setAttribute('y1', center + r1 * Math.sin(angle));
-                line.setAttribute('x2', center + r2 * Math.cos(angle));
-                line.setAttribute('y2', center + r2 * Math.sin(angle));
-                line.setAttribute('class', `tick ${isMajor ? 'tick-major' : 'tick-minor'}`);
-                line.setAttribute('stroke-width', isMajor ? 1.5 : 1);
-                compassRoseSvg.appendChild(line);
-            }
-            
-            for (const dir in directions) {
-                const angle = (directions[dir] - 90) * Math.PI / 180;
-                const isSub = dir.length > 1;
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute('x', center + (radius - (isSub ? 17 : 15)) * Math.cos(angle));
-                text.setAttribute('y', center + (radius - (isSub ? 17 : 15)) * Math.sin(angle) + 3.5);
-                if(isSub) text.classList.add('sub');
-                text.textContent = dir;
-                compassRoseSvg.appendChild(text);
-            }
+                weatherDisplayEl.innerHTML = `
+                    <div class="widget-header">
+                        <div class="header-container"><div class="location-title" id="location-title-text">Nyíregyháza és környéke</div></div>
+                        <div class="timestamp-container">
+                            <span class="timestamp" id="main-timestamp">--:--:--</span>
+                            <div class="attribution-line">Az időjárás monitort Robi készítette © Copyright by: Robi</div>
+                        </div>
+                    </div>
+                    <div class="station-status-container">${displayableStations.map(key => `<div class="station-selector" id="${key.toLowerCase()}-selector-container"><input type="radio" name="station-select" id="station-select-${key.toLowerCase()}" value="${key}"><label for="station-select-${key.toLowerCase()}"><span class="station-status-indicator" id="status-indicator-${key}"></span> ${STATIONS[key].displayNameShort || STATIONS[key].displayName}</label></div>`).join('')}</div>
+                    <div class="current-conditions-card">
+                        <div class="conditions-section">
+                            <div id="temp-display-card" class="temp-display-card">
+                                <h4 class="section-title">Hőmérséklet & Adatok</h4>
+                                <div class="temp-primary-display">
+                                    <div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div>
+                                </div>
+                                <div class="temp-feels-like-container"><i class="fas fa-user"></i><span>Hőérzet: <strong id="feels-like-temp">--°</strong></span></div>
+                                <div class="compact-details-grid">
+                                    ${Object.keys(detailItems).map(key => `
+                                        <div class="compact-detail-item" id="compact-detail-${key}">
+                                            <div class="compact-detail-header">
+                                                <i class="${detailItems[key].icon}"></i>
+                                                <span class="label">${detailItems[key].label}</span>
+                                            </div>
+                                            <div class="compact-detail-value" id="compact-value-${key}">--</div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="conditions-section">
+                            <h4 class="section-title">Szél Adatok</h4>
+                            <div class="wind-info-card">
+                                <div class="wind-main-display">
+                                    <div class="wind-compass-container">
+                                        <svg class="wind-compass-rose" viewBox="0 0 100 100"></svg>
+                                        <svg id="wind-compass-arrow" viewBox="0 0 100 100">
+                                            <path d="M50 0 L65 35 L50 25 L35 35 Z" />
+                                        </svg>
+                                    </div>
+                                    <div class="wind-data-container">
+                                        <div class="wind-speed-main-value"><span id="wind-speed-value-span" class="flippable-value">--</span><span>km/h</span></div>
+                                        <div class="wind-direction-text">Irány: <strong id="wind-direction-full">--</strong></div>
+                                        <div class="wind-gust-text">Lökés: <strong id="wind-gust-value">-- km/h</strong></div>
+                                    </div>
+                                </div>
+                                <div class="beaufort-scale-visualizer"><div class="beaufort-title">Beaufort Skála</div><div class="beaufort-scale-container" id="beaufort-scale-container">${Array.from({ length: 12 }).map(() => `<div class="beaufort-bar"></div>`).join('')}</div></div>
+                                <div class="wind-detailed-stats"><div class="wind-stats-grid"><div class="wind-stats-item"><span class="label">Fokozat:</span><span class="value" id="beaufort-grade">--</span></div><div class="wind-stats-item"><span class="label">Besorolás:</span><span class="value" id="beaufort-desc">--</span></div></div></div>
+                                <div class="wind-legend-container">
+                                    <div class="wind-legend-title">Szélerősség (km/h)</div>
+                                    <div class="wind-legend-bar-container">
+                                        <div class="wind-legend-bar"></div>
+                                        <i class="fas fa-caret-down" id="wind-speed-marker"></i>
+                                    </div>
+                                    <div class="wind-legend-labels"><span>0</span><span>20</span><span>40</span><span>60</span><span>80+</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="precip-summary-card" id="precip-summary-card"></div>
+                    <div class="precipitation-forecast-section">
+                        <div class="section-header">
+                            <div class="section-title" style="margin-bottom: 0;">Órás csapadék előrejelzés <span id="precip-forecast-location" style="font-weight: 500;"></span></div>
+                            <span class="section-timestamp" id="precip-forecast-timestamp"></span>
+                        </div>
+                        <div class="precip-summary-text" id="precip-summary-text">--</div>
+                        <div class="precip-forecast-grid" id="precip-forecast-list">
+                            ${Array.from({ length: 8 }).map((_, i) => `
+                                <div class="precip-forecast-item" id="precip-item-${i}">
+                                    <div class="forecast-time" id="precip-time-${i}">--:--</div>
+                                    <div class="precip-item-content">
+                                        <div class="chance-visualizer">
+                                            <svg viewBox="0 0 36 36"><circle class="bg-circle" cx="18" cy="18" r="15"></circle><circle class="progress-circle" id="precip-progress-${i}" cx="18" cy="18" r="15" stroke-dasharray="100 100" stroke-dashoffset="100"></circle></svg>
+                                            <div class="chance-percentage" id="precip-chance-${i}">--%</div>
+                                        </div>
+                                        <div class="intensity-details">
+                                            <div class="intensity-text" id="precip-intensity-${i}">--</div>
+                                            <div class="qpf-value" id="precip-qpf-${i}">- mm</div>
+                                        </div>
+                                        <div class="forecast-type-icon"><i id="precip-icon-${i}" class="fas fa-tint"></i></div>
+                                    </div>
+                                </div>`).join('')}
+                        </div>
+                    </div>`;
 
-            addStationChangeListeners(); 
-            addPaginationListeners();
-            isWeatherDisplayInitialized = true;
+                const compassRoseSvg = weatherDisplayEl.querySelector('.wind-compass-rose');
+                const center = 50;
+                const radius = 48;
+                const directions = { 'É': 0, 'ÉK': 45, 'K': 90, 'DK': 135, 'D': 180, 'DNY': 225, 'NY': 270, 'ÉNY': 315 };
+
+                for (let i = 0; i < 360; i += 10) {
+                    const isMajor = i % 30 === 0;
+                    const r1 = isMajor ? radius - 8 : radius - 4;
+                    const r2 = radius;
+                    const angle = (i - 90) * Math.PI / 180;
+                    
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute('x1', center + r1 * Math.cos(angle));
+                    line.setAttribute('y1', center + r1 * Math.sin(angle));
+                    line.setAttribute('x2', center + r2 * Math.cos(angle));
+                    line.setAttribute('y2', center + r2 * Math.sin(angle));
+                    line.setAttribute('class', `tick ${isMajor ? 'tick-major' : 'tick-minor'}`);
+                    line.setAttribute('stroke-width', isMajor ? 1.5 : 1);
+                    compassRoseSvg.appendChild(line);
+                }
+                
+                for (const dir in directions) {
+                    const angle = (directions[dir] - 90) * Math.PI / 180;
+                    const isSub = dir.length > 1;
+                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    text.setAttribute('x', center + (radius - (isSub ? 17 : 15)) * Math.cos(angle));
+                    text.setAttribute('y', center + (radius - (isSub ? 17 : 15)) * Math.sin(angle) + 3.5);
+                    if(isSub) text.classList.add('sub');
+                    text.textContent = dir;
+                    compassRoseSvg.appendChild(text);
+                }
+
+                addStationChangeListeners(); 
+                addPaginationListeners();
+                isWeatherDisplayInitialized = true;
+            } catch (e) {
+                console.error("Hiba a DOM inicializálásakor:", e);
+            }
         }
         function updateStationStatusUI(stationKey) { const stationConfig = STATIONS[stationKey]; if (!stationConfig) return; const statusIndicatorEl = document.getElementById(`status-indicator-${stationKey}`); if(statusIndicatorEl) { statusIndicatorEl.classList.remove('online', 'offline'); statusIndicatorEl.classList.add(stationConfig.isOnline ? 'online' : 'offline'); } const selectorContainer = document.getElementById(`${stationKey.toLowerCase()}-selector-container`); if(selectorContainer) { selectorContainer.classList.toggle('disabled', !stationConfig.isOnline); } const radioEl = document.getElementById(`station-select-${stationKey.toLowerCase()}`); if(radioEl) { radioEl.checked = (stationKey === activeDisplayStationKey); } }
         
@@ -688,7 +715,7 @@
                     let footerInfoHTML = '';
 
                     if (isRainingNow) {
-                        footerInfoHTML = `<div class="station-card-footer-info live-intensity">Most: ${getPrecipIntensityDescription(station.data.metric.precipRate)}</div>`;
+                        footerInfoHTML = `<div class="station-card-footer-info live-intensity">Most: ${getPrecipIntensityDescription(station.data.metric.precipRate, false)}</div>`;
                     } else {
                         if (station.lastRainTimestamp) {
                             footerInfoHTML = `<div class="station-card-footer-info">Utoljára: ${formatTime(station.lastRainTimestamp)}</div>`;
@@ -761,57 +788,103 @@
         }
 
         function renderPrecipitationForecast() {
-            const stationName = STATIONS[activeDisplayStationKey]?.displayName || '';
-            const locationEl = document.getElementById('precip-forecast-location');
-            if (locationEl) {
-                locationEl.textContent = `- ${stationName}`;
-            }
+            try {
+                const stationName = STATIONS[activeDisplayStationKey]?.displayName || '';
+                const locationEl = document.getElementById('precip-forecast-location');
+                if (locationEl) {
+                    locationEl.textContent = `- ${stationName}`;
+                }
 
-            const hourlyDataFull = forecastCache[activeDisplayStationKey]?.hourly || [];
-            const summaryEl = document.getElementById('precip-summary-text'); 
-            if (hourlyDataFull.length === 0 || !summaryEl) return;
-            const firstPrecipHour = hourlyDataFull.slice(0, 12).find(h => h.precipChance >= 30);
-            if (firstPrecipHour) { summaryEl.textContent = `Csapadék leghamarabb ${formatTime(firstPrecipHour.time, {prefix: 'kb.'})} körül lehetséges.`; } 
-            else { summaryEl.textContent = "A következő órákban nem várható számottevő csapadék."; }
-            const forecastLiveTimestampEl = document.getElementById('precip-forecast-timestamp'); 
-            const lastFetchTime = forecastCache[activeDisplayStationKey]?.lastFetch || 0;
-            if (forecastLiveTimestampEl && lastFetchTime > 0) { 
-                forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastFetchTime))}`; 
-            }
-            for (let i = 0; i < 8; i++) {
-                const itemEl = document.getElementById(`precip-item-${i}`); 
-                const timeEl = document.getElementById(`precip-time-${i}`); 
-                const progressCircle = document.getElementById(`precip-progress-${i}`); 
-                const chanceEl = document.getElementById(`precip-chance-${i}`); 
-                const intensityTextEl = document.getElementById(`precip-intensity-${i}`);
-                const qpfValueEl = document.getElementById(`precip-qpf-${i}`);
-                const iconEl = document.getElementById(`precip-icon-${i}`);
+                const hourlyDataFull = forecastCache[activeDisplayStationKey]?.hourly || [];
+                const summaryEl = document.getElementById('precip-summary-text'); 
+                if (hourlyDataFull.length === 0 || !summaryEl) return;
+
+                let snowLikely = false;
+                let totalSnowQpf = 0;
+                const forecastsToCheck = hourlyDataFull.slice(0, 8);
                 
-                if (timeEl && progressCircle && chanceEl && intensityTextEl && qpfValueEl && iconEl) {
-                    const hourData = hourlyDataFull[i];
-                    if (hourData) {
-                        itemEl.classList.remove('is-hidden');
-                        const chance = hourData.precipChance || 0; 
-                        const amount = hourData.qpf || 0; 
-                        const isSnow = SNOW_ICON_CODES.includes(hourData.iconCode);
-                        
-                        timeEl.textContent = formatHourOnly(hourData.time); 
-                        chanceEl.textContent = `${chance}%`;
-                        
-                        const radius = 15;
-                        const circumference = 2 * Math.PI * radius; 
-                        progressCircle.style.strokeDasharray = `${circumference} ${circumference}`; 
-                        progressCircle.style.strokeDashoffset = circumference - (chance / 100) * circumference;
-                        
-                        intensityTextEl.textContent = getPrecipIntensityDescription(amount);
-                        qpfValueEl.textContent = (amount > 0) ? `kb. ${formatValue(amount, 'mm', 1)}` : '- mm';
-                        
-                        itemEl.classList.toggle('is-snow', isSnow); 
-                        iconEl.className = isSnow ? 'fas fa-snowflake' : 'fas fa-tint';
-                    } else {
-                        itemEl.classList.add('is-hidden');
+                forecastsToCheck.forEach(h => {
+                    const isSnow = SNOW_ICON_CODES.includes(h.iconCode);
+                    if (isSnow && h.precipChance >= 30) snowLikely = true;
+                    if (h.qpfSnow) totalSnowQpf += h.qpfSnow;
+                });
+
+                const firstPrecipHour = forecastsToCheck.find(h => h.precipChance >= 30);
+
+                if (snowLikely) {
+                     summaryEl.textContent = `❄️ Havazás várható! A következő órákban hóréteg alakulhat ki.`;
+                     summaryEl.style.backgroundColor = "rgba(59, 130, 246, 0.25)";
+                     summaryEl.style.color = "#ffffff";
+                } else if (firstPrecipHour) { 
+                    summaryEl.textContent = `Csapadék leghamarabb ${formatTime(firstPrecipHour.time, {prefix: 'kb.'})} körül lehetséges.`;
+                    summaryEl.style.backgroundColor = "rgba(0,0,0,0.15)";
+                    summaryEl.style.color = "var(--current-text-color)";
+                } else { 
+                    summaryEl.textContent = "A következő órákban nem várható számottevő csapadék.";
+                    summaryEl.style.backgroundColor = "rgba(0,0,0,0.15)";
+                    summaryEl.style.color = "var(--current-text-color)";
+                }
+                
+                const forecastLiveTimestampEl = document.getElementById('precip-forecast-timestamp'); 
+                const lastFetchTime = forecastCache[activeDisplayStationKey]?.lastFetch || 0;
+                if (forecastLiveTimestampEl && lastFetchTime > 0) { 
+                    forecastLiveTimestampEl.textContent = `Frissítve: ${formatTime(new Date(lastFetchTime))}`; 
+                }
+                for (let i = 0; i < 8; i++) {
+                    const itemEl = document.getElementById(`precip-item-${i}`); 
+                    const timeEl = document.getElementById(`precip-time-${i}`); 
+                    const progressCircle = document.getElementById(`precip-progress-${i}`); 
+                    const chanceEl = document.getElementById(`precip-chance-${i}`); 
+                    const intensityTextEl = document.getElementById(`precip-intensity-${i}`);
+                    const qpfValueEl = document.getElementById(`precip-qpf-${i}`);
+                    const iconEl = document.getElementById(`precip-icon-${i}`);
+                    
+                    if (timeEl && progressCircle && chanceEl && intensityTextEl && qpfValueEl && iconEl) {
+                        const hourData = hourlyDataFull[i];
+                        if (hourData) {
+                            itemEl.classList.remove('is-hidden');
+                            const chance = hourData.precipChance || 0; 
+                            const liquidAmount = hourData.qpf || 0; 
+                            const isSnow = SNOW_ICON_CODES.includes(hourData.iconCode);
+                            
+                            timeEl.textContent = formatHourOnly(hourData.time); 
+                            chanceEl.textContent = `${chance}%`;
+                            
+                            const radius = 15;
+                            const circumference = 2 * Math.PI * radius; 
+                            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`; 
+                            progressCircle.style.strokeDashoffset = circumference - (chance / 100) * circumference;
+                            
+                            itemEl.classList.toggle('is-snow', isSnow); 
+                            iconEl.className = isSnow ? 'fas fa-snowflake' : 'fas fa-tint';
+
+                            if (isSnow) {
+                                // HAVAZÁS ESETÉN
+                                // Ha van hóadat, azt használjuk, egyébként folyadékegyenértéket mm-ben
+                                const snowAmount = (hourData.qpfSnow !== null && hourData.qpfSnow !== undefined) ? hourData.qpfSnow : 0;
+                                
+                                if (snowAmount > 0) {
+                                    // Van precíz hóadat cm-ben
+                                    intensityTextEl.textContent = getPrecipIntensityDescription(snowAmount, true);
+                                    qpfValueEl.textContent = `kb. ${formatValue(snowAmount, 'cm', 1)}`;
+                                } else {
+                                    // Nincs hóadat, csak folyadék mm, de havazást jelez az ikon
+                                    intensityTextEl.textContent = getPrecipIntensityDescription(liquidAmount, false).replace('eső', 'havazás').replace('Eső', 'Havazás').replace('Zápor', 'Hózápor'); 
+                                    qpfValueEl.textContent = `(hóegyenérték) ${formatValue(liquidAmount, 'mm', 1)}`;
+                                }
+
+                            } else {
+                                // ESŐ ESETÉN
+                                intensityTextEl.textContent = getPrecipIntensityDescription(liquidAmount, false);
+                                qpfValueEl.textContent = (liquidAmount > 0) ? `kb. ${formatValue(liquidAmount, 'mm', 1)}` : '- mm';
+                            }
+                        } else {
+                            itemEl.classList.add('is-hidden');
+                        }
                     }
                 }
+            } catch (e) {
+                console.error("Hiba a csapadék előrejelzés renderelésekor:", e);
             }
         }
 
@@ -952,6 +1025,9 @@
             precipitationContainerEl = document.getElementById('precipitation-container'); 
             hazeContainerEl = document.getElementById('haze-container'); 
             lightningFlashEl = document.getElementById('lightning-flash');
+            
+            initializeWeatherDisplayDOM();
+
             createStars(); 
             startMasterLoop(); 
             requestAnimationFrame(animateSky);
