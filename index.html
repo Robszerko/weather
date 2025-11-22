@@ -185,17 +185,35 @@
         .precip-forecast-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 5px; }
         .precip-forecast-item { background-color: rgba(0,0,0,0.1); border: 1px solid rgba(from var(--current-container-border-color) r g b / 0.15); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .forecast-time { font-size: 14px; font-weight: 700; color: var(--current-text-color); text-align: center; }
-        .precip-item-content { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; }
+        
+        /* --- JAVÍTOTT ELRENDEZÉS AZ "Órás csapadék előrejelzés" GRAFIKAI HIBÁRA --- */
+        .precip-item-content { 
+            display: flex; 
+            align-items: center; 
+            justify-content: flex-start; /* Változás: center helyett flex-start */
+            gap: 12px; 
+            width: 100%; 
+        }
         .chance-visualizer { position: relative; width: 48px; height: 48px; flex-shrink: 0; }
         .chance-visualizer svg { transform: rotate(-90deg); width: 100%; height: 100%; }
         .chance-visualizer circle { fill: transparent; stroke-width: 5px; }
         .chance-visualizer .bg-circle { stroke: rgba(0,0,0,0.2); }
         .chance-visualizer .progress-circle { stroke: var(--current-icon-color); transition: stroke-dashoffset 0.6s ease-out; }
         .chance-percentage { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 12px; font-weight: 800; color: var(--current-text-color); }
-        .intensity-details { display: flex; flex-direction: column; gap: 2px; text-align: left; }
+        
+        /* --- JAVÍTOTT SZÖVEG DOBOZ --- */
+        .intensity-details { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 2px; 
+            text-align: left; 
+            flex-grow: 1; /* Kitölti a rendelkezésre álló teret */
+            min-width: 0; /* Megakadályozza a túlcsordulást */
+        }
         .intensity-text { font-size: 12px; font-weight: 600; color: var(--current-text-muted-color); }
         .qpf-value { font-size: 13px; font-weight: 700; color: var(--current-text-color); }
-        .forecast-type-icon { font-size: 20px; text-align: center; color: var(--precip-rain-color); margin-left: auto; }
+        
+        .forecast-type-icon { font-size: 20px; text-align: center; color: var(--precip-rain-color); margin-left: auto; /* Jobbra tolja az ikont */ }
         .precip-forecast-item.is-snow .forecast-type-icon { color: var(--precip-snow-color); }
 
         .precip-summary-card { display: flex; flex-direction: column; gap: 0; background: linear-gradient(170deg, rgba(0,0,0,0.1), rgba(0,0,0,0.18)); border: 1px solid var(--current-container-border-color); border-radius: 12px; padding: 0; margin-bottom: 20px; transition: all 0.5s ease; overflow: hidden; }
@@ -302,12 +320,10 @@
         function formatDateWithDay(date) { if (!date) return ''; return new Intl.DateTimeFormat('hu-HU', { month: 'long', day: 'numeric', weekday: 'long' }).format(date); }
         function getTimeOfDay(date) { if (!date) return ''; const hour = new Date(date).getHours(); if (hour >= 5 && hour < 10) return 'reggeli'; if (hour >= 10 && hour < 13) return 'déli'; if (hour >= 13 && hour < 18) return 'délutáni'; if (hour >= 18 && hour < 22) return 'esti'; return 'éjszakai'; }
         
-        // Módosított függvény: Külön kezeli a havazást és az esőt
         function getPrecipIntensityDescription(rate, isSnow) {
             if (rate == null || rate <= 0) return 'Nincs';
 
             if (isSnow) {
-                 // Havazás skála (cm)
                 if (rate < 0.5) return 'Hószállingózás';
                 if (rate < 1.5) return 'Gyenge havazás';
                 if (rate < 3.0) return 'Mérsékelt havazás';
@@ -315,7 +331,6 @@
                 if (rate < 8.0) return 'Sűrű, pelyhes havazás';
                 return 'Hózivatar / Szakadó hó';
             } else {
-                // Eső skála (mm)
                 if (rate <= 0.2) return 'Pár csepp';
                 if (rate <= 0.5) return 'Szitálás';
                 if (rate <= 1.0) return 'Enyhe eső';
