@@ -111,10 +111,56 @@
         .temp-primary-display { text-align: center; margin-bottom: 8px; }
         .current-temp-value { font-size: 56px; font-weight: 800; line-height: 1; color: var(--current-text-color); }
         .current-temp-value span:last-child { font-weight: 600; font-size: 0.5em; vertical-align: super; margin-left: 2px; }
-        .temp-feels-like-container { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--current-text-muted-color); background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 6px 12px; margin: 8px auto 0 auto; max-width: fit-content; }
-        .temp-feels-like-container i { color: var(--current-icon-color); }
-        .temp-feels-like-container strong { color: var(--current-text-color); font-weight: 700; }
         
+        /* ÚJ KONTÉNER A HŐÉRZETNEK ÉS CSAPADÉKNAK */
+        .info-pill-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 8px auto 0 auto;
+        }
+
+        .info-pill {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 6px 12px;
+            transition: all 0.4s ease;
+        }
+
+        /* Hőérzet stílus */
+        .info-pill.feels-like { color: var(--current-text-muted-color); }
+        .info-pill.feels-like i { color: var(--current-icon-color); }
+        .info-pill.feels-like strong { color: var(--current-text-color); font-weight: 700; }
+
+        /* Csapadék stílus */
+        .info-pill.precip { color: var(--current-text-muted-color); }
+        .info-pill.precip strong { color: var(--current-text-color); font-weight: 700; }
+        
+        /* Passzív állapot (nem esik) */
+        .info-pill.precip.is-dry { 
+            opacity: 0.6; 
+            filter: grayscale(1); 
+        }
+        
+        /* Aktív állapot (esik) */
+        .info-pill.precip.is-raining { 
+            opacity: 1; 
+            filter: grayscale(0);
+            background-color: rgba(59, 130, 246, 0.25);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+        }
+        .info-pill.precip.is-raining i { 
+            color: #60a5fa; 
+        }
+
         .compact-details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; width: 100%; }
         .compact-detail-item { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 10px; }
         .compact-detail-header { display: flex; align-items: center; margin-bottom: 4px; }
@@ -415,13 +461,58 @@
                 root.style.setProperty('--current-wind-moderate', 'var(--wind-moderate-day)');
             }
         }
+        
+        // KOMPLEX HŐÉRZET SZÁMÍTÓ ALGORITMUS
+        function calculateDetailedFeelsLike(temp, humidity, windSpeedKmh, solarRadiation) {
+            if (temp === null || typeof temp === 'undefined') return null;
+            if (humidity === null || typeof humidity === 'undefined') humidity = 50; 
+            if (windSpeedKmh === null || typeof windSpeedKmh === 'undefined') windSpeedKmh = 0;
+
+            const effectiveWindKmh = windSpeedKmh * 0.7;
+            const effectiveWindMs = effectiveWindKmh / 3.6;
+
+            let feelsLike = temp;
+
+            if (temp <= 10 && effectiveWindKmh >= 4.8) {
+                feelsLike = 13.12 + 0.6215 * temp - 11.37 * Math.pow(effectiveWindKmh, 0.16) + 0.3965 * temp * Math.pow(effectiveWindKmh, 0.16);
+            }
+            else if (temp >= 27 && humidity >= 40) {
+                const T_F = temp * 9/5 + 32;
+                const RH = humidity;
+                let HI = -42.379 + 2.04901523*T_F + 10.14333127*RH - 0.22475541*T_F*RH - 0.00683783*T_F*T_F - 0.05481717*RH*RH + 0.00122874*T_F*T_F*RH + 0.00085282*T_F*RH*RH - 0.00000199*T_F*T_F*RH*RH;
+                
+                if (RH < 13 && T_F >= 80 && T_F <= 112) {
+                    HI -= ((13-RH)/4)*Math.sqrt((17-Math.abs(T_F-95.))/17);
+                } else if (RH > 85 && T_F >= 80 && T_F <= 87) {
+                    HI += ((RH-85)/10) * ((87-T_F)/5);
+                }
+                feelsLike = (HI - 32) * 5/9;
+            }
+            else {
+                const e = (humidity / 100) * 6.105 * Math.exp((17.27 * temp) / (237.7 + temp));
+                let AT = temp + 0.33 * e - 0.70 * effectiveWindMs - 4.00;
+                
+                if (Math.abs(temp - AT) > 3 && effectiveWindMs < 1) {
+                    feelsLike = temp; 
+                } else {
+                    feelsLike = AT;
+                }
+            }
+
+            if (solarRadiation && solarRadiation > 0) {
+                const solarHeating = (solarRadiation * 0.06) / (1 + (effectiveWindKmh * 0.1));
+                feelsLike += solarHeating;
+            }
+
+            return feelsLike;
+        }
 
         async function fetchAllDataAndUpdateDisplay(isInitialLoad = false) { 
             if (!isWeatherDisplayInitialized) initializeWeatherDisplayDOM(); 
             
-            await Promise.allSettled(Object.keys(STATIONS).map(key => fetchPwsStationData(key))); 
-            
+            const activeStationPromise = fetchPwsStationData(activeDisplayStationKey);
             const stationCoords = STATIONS[activeDisplayStationKey].coords;
+            
             const generalPromise = fetchGeneralConditionsData(stationCoords.lat, stationCoords.lon).then(data => { 
                 if (data) cachedData.generalConditions = data; 
             }).catch(e => console.error("General conditions fetch failed:", e));
@@ -430,10 +521,19 @@
                 cachedData.sunCalc = data; 
             });
 
-            await fetchAndDisplayForecastsForStation(activeDisplayStationKey);
+            const forecastPromise = fetchAndDisplayForecastsForStation(activeDisplayStationKey);
 
-            await Promise.allSettled([generalPromise, sunPromise]); 
+            await Promise.allSettled([activeStationPromise, generalPromise, sunPromise, forecastPromise]); 
             
+            updateMainDisplayData();
+
+            const otherStationKeys = Object.keys(STATIONS).filter(k => k !== activeDisplayStationKey);
+            Promise.allSettled(otherStationKeys.map(key => fetchPwsStationData(key))).then(() => {
+                updateMainDisplayData();
+            });
+        }
+        
+        function updateMainDisplayData() {
             const primaryStations = ['NYIREGYHAZI_UT', 'KOSSUTH', 'KERT_UTCA', 'SOSTOHEGY', 'BORBANYA', 'OROS_DERUS', 'NAGYHALASZ', 'SZAKOLY']; 
             const activeStationIsOnline = STATIONS[activeDisplayStationKey] && STATIONS[activeDisplayStationKey].isOnline; 
             
@@ -443,10 +543,9 @@
             } else { 
                 const onlinePrimaryStations = primaryStations.filter(k => STATIONS[k].isOnline); 
                 if (onlinePrimaryStations.length > 0) { 
-                    activeDisplayStationKey = onlinePrimaryStations[0]; 
-                    const activeStation = STATIONS[activeDisplayStationKey]; 
+                    const tempKey = onlinePrimaryStations[0]; 
+                    const activeStation = STATIONS[tempKey]; 
                     cachedData.displayPws = { ...activeStation.data.metric, ...activeStation.data };
-                    await fetchAndDisplayForecastsForStation(activeDisplayStationKey);
                 } else { 
                     const general = cachedData.generalConditions; 
                     if (general && Object.keys(general).length > 0) { 
@@ -513,7 +612,18 @@
                                 <div class="temp-primary-display">
                                     <div class="current-temp-value"><span id="current-temp-span" class="flippable-value">--</span><span>°C</span></div>
                                 </div>
-                                <div class="temp-feels-like-container"><i class="fas fa-user"></i><span>Hőérzet: <strong id="feels-like-temp">--°</strong></span></div>
+                                
+                                <div class="info-pill-container">
+                                    <div class="info-pill feels-like">
+                                        <i class="fas fa-user"></i>
+                                        <span>Hőérzet: <strong id="feels-like-temp">--°</strong></span>
+                                    </div>
+                                    <div class="info-pill precip" id="precip-total-pill">
+                                        <i class="fas fa-tint"></i>
+                                        <span>Csapadék: <strong id="precip-total-value">-- mm</strong></span>
+                                    </div>
+                                </div>
+
                                 <div class="compact-details-grid">
                                     ${Object.keys(detailItems).map(key => `
                                         <div class="compact-detail-item" id="compact-detail-${key}">
@@ -678,9 +788,40 @@
             const now = new Date(); document.getElementById('main-timestamp').textContent = `Utolsó frissítés: ${formatTime(now, { includeSeconds: true })}`;
             
             const currentTemp = obs.temp; 
-            const feelsLikeTemp = general.temperatureFeelsLike;
+            
+            // --- HŐÉRZET SZÁMÍTÁS ---
+            const pwsHumidity = obs.humidity ?? general.relativeHumidity;
+            const pwsWindSpeed = obs.windSpeed ?? general.windSpeed;
+            let pwsSolarRadiation = obs.solarRadiation; 
+            if (pwsSolarRadiation === undefined && obs.metric && obs.metric.solarRadiation !== undefined) {
+                 pwsSolarRadiation = obs.metric.solarRadiation;
+            }
+            const calculatedFeelsLike = calculateDetailedFeelsLike(currentTemp, pwsHumidity, pwsWindSpeed, pwsSolarRadiation);
+
             updateAnimatedValue(document.getElementById('current-temp-span'), formatValue(currentTemp, '', 1)); 
-            document.getElementById('feels-like-temp').textContent = `${formatValue(feelsLikeTemp, '°', 1)}`; 
+            document.getElementById('feels-like-temp').textContent = `${formatValue(calculatedFeelsLike, '°', 1)}`; 
+            
+            // --- CSAPADÉK ÉS HŐÉRZET KIJELZÉS ---
+            // Lekérjük a napi csapadékot és az aktuális intenzitást
+            const precipTotal = obs.precipTotal || 0;
+            const precipRate = obs.precipRate || 0;
+            const precipPill = document.getElementById('precip-total-pill');
+            const precipValueEl = document.getElementById('precip-total-value');
+            
+            if (precipPill && precipValueEl) {
+                // Érték beállítása
+                precipValueEl.textContent = formatValue(precipTotal, ' mm', 1);
+                
+                // Stílus váltás attól függően, hogy esik-e MOST
+                if (precipRate > 0) {
+                    precipPill.classList.add('is-raining');
+                    precipPill.classList.remove('is-dry');
+                } else {
+                    precipPill.classList.remove('is-raining');
+                    precipPill.classList.add('is-dry');
+                }
+            }
+
             const tempCard = document.getElementById('temp-display-card'); 
             if (tempCard) { tempCard.style.backgroundImage = getTempGradient(currentTemp); }
             
